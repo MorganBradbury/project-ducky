@@ -38,7 +38,7 @@ export const runAutoUpdateElo = async () => {
 
       try {
         const faceitPlayer = await getFaceitLevel(faceitUsername);
-        if (!faceitPlayer || faceitPlayer.elo == previousElo) { continue };
+        if (!faceitPlayer) { continue };
 
         const member = await fetchGuildMember(discordUsername);
         if (!member) continue;
