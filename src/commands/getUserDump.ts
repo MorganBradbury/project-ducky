@@ -32,7 +32,7 @@ export const generateUsersJsonCommand = {
       const userJson = users.map((user) => ({
         discordUsername: user.discordUsername,
         faceitUsername: user.faceitUsername,
-        previousElo: user.previousElo,
+        previousElo: user.previousElo as Number
       }));
 
       // Define the file path for the generated JSON file

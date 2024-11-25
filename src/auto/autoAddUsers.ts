@@ -3,7 +3,6 @@ import { addUser } from "../db/models/userModel"; // Assuming you have this func
 
 // Function to read JSON file and add users to the DB.
 const addUsersFromJson = async (filePath: string) => {
-  return;
   try {
     // Read the JSON file and parse it into a JavaScript array
     const rawData = fs.readFileSync(filePath, "utf-8");
