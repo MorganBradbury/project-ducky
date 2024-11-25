@@ -10,7 +10,7 @@ export const BOT_UPDATES_CHANNEL_ID = process.env.BOT_UPDATES_CHANNEL_ID || "";
 export const MYSQL_HOST = process.env.MYSQLHOST || "";
 export const MYSQL_USER = process.env.MYSQLUSER || "";
 export const MYSQL_PASSWORD = process.env.MYSQLPASSWORD || "";
-export const MYSQL_DATABASE = process.env.MYSQLDATABASE || "";
+export const MYSQL_DATABASE = process.env.MYSQL_DATABASE || "";
 export const MYSQL_PORT = Number(process.env.MYSQLPORT) || 3306;
 
 if (
