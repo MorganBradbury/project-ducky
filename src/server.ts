@@ -3,7 +3,9 @@ import bodyParser from "body-parser";
 import { runAutoUpdateElo } from "./auto/autoUpdateElo";
 
 const app = express();
-const port = 3000;
+
+// Use the PORT environment variable or default to 3000 for local development
+const port = process.env.PORT || 3000;
 
 // Middleware
 app.use(bodyParser.json());
@@ -22,5 +24,5 @@ app.post("/api/autoupdateelo", async (req, res) => {
 
 // Start the server
 app.listen(port, () => {
-  console.log(`API server is running on http://localhost:${port}`);
+  console.log(`API server is running on port ${port}`);
 });
