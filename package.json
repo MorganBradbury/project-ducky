@@ -4,7 +4,7 @@
   "main": "index.js",
   "scripts": {
     "build": "tsc",
-    "start-server": "node dist/auto/autoUpdateElo.js",
+    "start-server": "node dist/server.js",
     "start": "node dist/main.js",
     "dev": "start tsc --watch && nodemon dist/main.js"
   },
