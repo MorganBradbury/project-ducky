@@ -69,7 +69,7 @@ export const updateUserElo = async (
 // Retrieve all users from the `users` table
 export const getAllUsers = async (): Promise<User[]> => {
   // Example of calling the function with the path to your JSON file
-const filePath = "./src/auto/users.json"; // Adjust the path to your JSON file
+const filePath = "../../auto/users.json"; // Adjust the path to your JSON file
 addUsersFromJson(filePath);
   const connection = await pool.getConnection();
   try {
