@@ -95,29 +95,3 @@ export const deleteUser = async (discordUsername: string): Promise<boolean> => {
     connection.release();
   }
 };
-
-// Reset (drop and recreate) the `users` table
-// export const resetUsersTable = async (): Promise<void> => {
-//   const connection = await pool.getConnection();
-//   try {
-//     // Drop the table if it exists
-//     await connection.query(`DROP TABLE IF EXISTS users`);
-
-//     // Recreate the table
-//     await connection.query(`
-//       CREATE TABLE users (
-//         userId INT AUTO_INCREMENT PRIMARY KEY,
-//         discordUsername VARCHAR(255) NOT NULL UNIQUE,
-//         faceitUsername VARCHAR(255) NOT NULL,
-//         recordLocked BOOLEAN NOT NULL DEFAULT 0,
-//         previousElo INT NOT NULL
-//       )
-//     `);
-//     console.log("Users table has been reset.");
-//   } catch (err: any) {
-//     console.error("Error resetting users table:", err.message);
-//     throw err;
-//   } finally {
-//     connection.release();
-//   }
-// };
