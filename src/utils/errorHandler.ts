@@ -23,7 +23,7 @@ export const handleDatabaseError = (error: any): string => {
   }
 
   if (error.message?.includes("already exists")) {
-    return "User already exists in the DB.";
+    return "You already have a FACEIT account linked to your profile. You cannot change this.";
   }
   // Fallback for other database errors
   return error.message;

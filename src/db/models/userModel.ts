@@ -73,3 +73,18 @@ export const getAllUsers = (): Promise<User[]> => {
     });
   });
 };
+
+export const deleteUser = (discordUsername: string): Promise<boolean> => {
+  return new Promise((resolve, reject) => {
+    const query = `DELETE FROM users WHERE discordUsername = ?`;
+    db.run(query, [discordUsername], function (err) {
+      if (err) {
+        reject(err.message);
+      } else if (this.changes === 0) {
+        reject("User not found.");
+      } else {
+        resolve(true);
+      }
+    });
+  });
+};

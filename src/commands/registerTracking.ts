@@ -3,7 +3,7 @@ import { getFaceitLevel } from "../services/FaceitService";
 import { updateNickname } from "../services/DiscordService";
 import { addDiscordUser } from "../services/UserService";
 
-export const updateLevelCommand = {
+export const registerTrackingCommand = {
   name: "ducky_track_elo",
   description:
     "Update your Faceit level in your nickname. IT IS CASE SENSITIVE",
