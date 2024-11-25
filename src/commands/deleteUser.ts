@@ -21,7 +21,6 @@ export const deleteUserCommand = {
 
     // Replace this with your Discord user ID
     const OWNER_ID = "460148152796971008";
-    console.log("yoyo", interaction.user.id);
     // Check if the command user is the owner
     if (interaction.user.id !== OWNER_ID) {
       await interaction.reply({

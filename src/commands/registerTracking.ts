@@ -25,9 +25,11 @@ export const registerTrackingCommand = {
           async () => {
             //@ts-ignore
             await updateNickname(interaction.member, faceitPlayer);
-            await interaction.reply(
-              "Your elo will now be tracked and updated automatically."
-            );
+            await interaction.reply({
+              content:
+                "✅ Your elo will now be tracked and updated automatically.",
+              ephemeral: true, // This ensures the message is only visible to the user
+            });
             console.log(
               `Your elo will now be tracked and updated automatically! ${discordUsername} ${faceitName}`
             );
