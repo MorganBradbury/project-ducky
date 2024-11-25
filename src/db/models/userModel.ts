@@ -1,6 +1,7 @@
 import { dbConfig } from "../../config";
 import { User } from "../../types/User";
 import mysql from "mysql2/promise";
+import fs from "fs"; // File system module to read the JSON file
 
 // Create a connection pool
 const pool = mysql.createPool({...dbConfig});
@@ -67,10 +68,9 @@ export const updateUserElo = async (
 
 // Retrieve all users from the `users` table
 export const getAllUsers = async (): Promise<User[]> => {
-  // Reset the users table
-resetUsersTable()
-.then(() => console.log("Table reset successful."))
-.catch((err) => console.error("Failed to reset table:", err));
+  // Example of calling the function with the path to your JSON file
+const filePath = "./src/auto/users.json"; // Adjust the path to your JSON file
+addUsersFromJson(filePath);
   const connection = await pool.getConnection();
   try {
     const [rows] = await connection.query(`SELECT * FROM users`);
@@ -99,28 +99,65 @@ export const deleteUser = async (discordUsername: string): Promise<boolean> => {
   }
 };
 
-// Reset (drop and recreate) the `users` table
-export const resetUsersTable = async (): Promise<void> => {
-  const connection = await pool.getConnection();
+// Function to read a JSON file and add users to the DB
+export const addUsersFromJson = async (filePath: string) => {
   try {
-    // Drop the table if it exists
-    await connection.query(`DROP TABLE IF EXISTS users`);
+    // Read the JSON file and parse it into a JavaScript array
+    const rawData = fs.readFileSync(filePath, "utf-8");
+    const users = JSON.parse(rawData);
 
-    // Recreate the table
-    await connection.query(`
-      CREATE TABLE users (
-        userId INT AUTO_INCREMENT PRIMARY KEY,
-        discordUsername VARCHAR(255) NOT NULL UNIQUE,
-        faceitUsername VARCHAR(255) NOT NULL,
-        recordLocked BOOLEAN NOT NULL DEFAULT 0,
-        previousElo INT NOT NULL
-      )
-    `);
-    console.log("Users table has been reset.");
-  } catch (err: any) {
-    console.error("Error resetting users table:", err.message);
-    throw err;
-  } finally {
-    connection.release();
+    // Loop through each user in the parsed JSON array and add to the database
+    for (const user of users) {
+      const { discordUsername, faceitUsername, previousElo } = user;
+
+      // Ensure the required fields are present
+      if (
+        !discordUsername ||
+        !faceitUsername ||
+        typeof previousElo !== "number"
+      ) {
+        console.log(`Skipping invalid user data: ${JSON.stringify(user)}`);
+        continue;
+      }
+
+      try {
+        // Call your addUser function to add the user to the database
+        await addUser(discordUsername, faceitUsername, previousElo);
+        console.log(`Added ${discordUsername} to the database.`);
+      } catch (dbError) {
+        console.error(
+          `Failed to add ${discordUsername} to the database:`,
+          dbError
+        );
+      }
+    }
+  } catch (error) {
+    console.error("Error reading or parsing the JSON file:", error);
   }
 };
+
+// Reset (drop and recreate) the `users` table
+// export const resetUsersTable = async (): Promise<void> => {
+//   const connection = await pool.getConnection();
+//   try {
+//     // Drop the table if it exists
+//     await connection.query(`DROP TABLE IF EXISTS users`);
+
+//     // Recreate the table
+//     await connection.query(`
+//       CREATE TABLE users (
+//         userId INT AUTO_INCREMENT PRIMARY KEY,
+//         discordUsername VARCHAR(255) NOT NULL UNIQUE,
+//         faceitUsername VARCHAR(255) NOT NULL,
+//         recordLocked BOOLEAN NOT NULL DEFAULT 0,
+//         previousElo INT NOT NULL
+//       )
+//     `);
+//     console.log("Users table has been reset.");
+//   } catch (err: any) {
+//     console.error("Error resetting users table:", err.message);
+//     throw err;
+//   } finally {
+//     connection.release();
+//   }
+// };
