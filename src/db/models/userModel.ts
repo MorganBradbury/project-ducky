@@ -1,90 +1,105 @@
 import { User } from "../../types/User";
-import db from "../database";
+import mysql from "mysql2/promise";
+
+// Create a connection pool
+const pool = mysql.createPool({
+  host: process.env.MYSQLHOST,
+  user: process.env.MYSQLUSER,
+  password: process.env.MYSQLPASSWORD,
+  database: process.env.MYSQLDATABASE,
+  port: Number(process.env.MYSQLPORT),
+  waitForConnections: true,
+  connectionLimit: 10,
+  queueLimit: 0,
+});
 
 // Add a new user to the `users` table
-export const addUser = (
+export const addUser = async (
   discordUsername: string,
   faceitName: string,
   elo: number
 ): Promise<number> => {
-  return new Promise((resolve, reject) => {
-    const checkrecordLockedQuery = `SELECT recordLocked FROM users WHERE discordUsername = ?`;
-    const insertQuery = `INSERT INTO users (discordUsername, faceitUsername, previousElo) VALUES (?, ?, ?)`;
+  const connection = await pool.getConnection();
+  try {
+    // Check if the user is recordLocked
+    const [rows] = await connection.query(
+      `SELECT recordLocked FROM users WHERE discordUsername = ?`,
+      [discordUsername]
+    );
 
-    // Cast row to the UserRow type
-    db.get(checkrecordLockedQuery, [discordUsername], (err: any, row: User) => {
-      if (err) {
-        return reject(err.message);
-      }
+    const users = rows as { recordLocked: boolean }[]; // Explicitly cast `rows` to the expected array of objects
 
-      if (row && row.recordLocked) {
-        return reject(
-          new Error(`Cannot edit: User "${discordUsername}" is recordLocked.`)
-        );
-      }
+    if (users.length > 0 && users[0].recordLocked) {
+      throw new Error(`Cannot edit: User "${discordUsername}" is recordLocked.`);
+    }
 
-      db.run(
-        insertQuery,
-        [discordUsername, faceitName, elo],
-        function (err: any) {
-          if (err) {
-            if (err.code === "SQLITE_CONSTRAINT") {
-              reject(new Error(`User "${discordUsername}" already exists.`));
-            } else {
-              reject(err.message);
-            }
-          } else {
-            resolve(this.lastID); // Return the auto-incremented userId of the new user
-          }
-        }
-      );
-    });
-  });
+    // Insert the new user
+    const [result] = await connection.query(
+      `INSERT INTO users (discordUsername, faceitUsername, previousElo) VALUES (?, ?, ?)`,
+      [discordUsername, faceitName, elo]
+    );
+
+    // Return the auto-incremented userId
+    return (result as any).insertId;
+  } catch (err: any) {
+    if (err.code === "ER_DUP_ENTRY") {
+      throw new Error(`User "${discordUsername}" already exists.`);
+    }
+    throw err;
+  } finally {
+    connection.release();
+  }
 };
 
-export const updateUserElo = (
+
+// Update the Elo of a user
+export const updateUserElo = async (
   userId: number,
   newElo: number
 ): Promise<boolean> => {
-  return new Promise((resolve, reject) => {
-    const query = `UPDATE users SET previousElo = ? WHERE userId = ?`;
-    db.run(query, [newElo, userId], function (err) {
-      if (err) {
-        reject(err.message); // Reject the promise if there's an error
-      } else if (this.changes === 0) {
-        reject("No rows updated. Check if the userId exists.");
-      } else {
-        resolve(true); // Resolve the promise if the update succeeds
-      }
-    });
-  });
+  const connection = await pool.getConnection();
+  try {
+    const [result] = await connection.query(
+      `UPDATE users SET previousElo = ? WHERE userId = ?`,
+      [newElo, userId]
+    );
+
+    if ((result as any).affectedRows === 0) {
+      throw new Error("No rows updated. Check if the userId exists.");
+    }
+
+    return true;
+  } finally {
+    connection.release();
+  }
 };
 
 // Retrieve all users from the `users` table
-export const getAllUsers = (): Promise<User[]> => {
-  return new Promise((resolve, reject) => {
-    const query = `SELECT * FROM users`;
-    db.all(query, [], (err, rows: User[]) => {
-      if (err) {
-        reject(err.message);
-      } else {
-        resolve(rows);
-      }
-    });
-  });
+export const getAllUsers = async (): Promise<User[]> => {
+  const connection = await pool.getConnection();
+  try {
+    const [rows] = await connection.query(`SELECT * FROM users`);
+    return rows as User[];
+  } finally {
+    connection.release();
+  }
 };
 
-export const deleteUser = (discordUsername: string): Promise<boolean> => {
-  return new Promise((resolve, reject) => {
-    const query = `DELETE FROM users WHERE discordUsername = ?`;
-    db.run(query, [discordUsername], function (err) {
-      if (err) {
-        reject(err.message);
-      } else if (this.changes === 0) {
-        reject("User not found.");
-      } else {
-        resolve(true);
-      }
-    });
-  });
+// Delete a user from the `users` table
+export const deleteUser = async (discordUsername: string): Promise<boolean> => {
+  const connection = await pool.getConnection();
+  try {
+    const [result] = await connection.query(
+      `DELETE FROM users WHERE discordUsername = ?`,
+      [discordUsername]
+    );
+
+    if ((result as any).affectedRows === 0) {
+      throw new Error("User not found.");
+    }
+
+    return true;
+  } finally {
+    connection.release();
+  }
 };
