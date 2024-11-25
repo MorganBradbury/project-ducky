@@ -1,16 +1,7 @@
+import { dbConfig } from "../../config";
 import { User } from "../../types/User";
 import mysql from "mysql2/promise";
 
-const dbConfig = {
-  host: process.env.MYSQLHOST,
-  user: process.env.MYSQLUSER,
-  password: process.env.MYSQLPASSWORD,
-  database: process.env.MYSQLDATABASE,
-  port: Number(process.env.MYSQLPORT),
-  waitForConnections: true,
-  connectionLimit: 10,
-  queueLimit: 0,
-}
 
 // Create a connection pool
 const pool = mysql.createPool({...dbConfig});
