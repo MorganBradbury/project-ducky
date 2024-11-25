@@ -4,7 +4,7 @@
   "main": "index.js",
   "scripts": {
     "build": "tsc",
-    "start": "ts-node src/server.ts && node dist/main.js",
+    "start": "ts-node src/server.ts & node dist/main.js",
     "dev": "start tsc --watch && nodemon dist/main.js"
   },
   "keywords": [],
