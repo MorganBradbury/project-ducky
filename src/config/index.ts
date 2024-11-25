@@ -25,7 +25,7 @@ if (
   !MYSQL_DATABASE ||
   !MYSQL_PORT
 ) {
-  throw new Error("Missing required environment variables!");
+  throw new Error("Missing required environment variables");
 }
 
 export const dbConfig = {
