@@ -45,6 +45,7 @@ export const generateUsersJsonCommand = {
       await interaction.reply({
         content: "Here is the JSON file of all tracked users:",
         files: [filePath],
+        ephemeral: true, // This ensures the message is only visible to the user
       });
 
       // Optionally, delete the file after sending it to clean up
