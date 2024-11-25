@@ -55,7 +55,7 @@ export const runAutoUpdateElo = async () => {
         if(faceitPlayer.elo != previousElo){
           embedFields.push({
             name: `${discordUsername}`,
-            value: `**Faceit Username:** ${faceitUsername}\n**Previous Elo:** ${previousElo}\n**New Elo:** ${faceitPlayer.elo}\n**Change:** ${eloChange}`,
+            value: `**Faceit Username:** ${faceitUsername}\n**Previous Elo:** ${previousElo}\n**New Elo:** ${faceitPlayer.elo}\n**Change:** ${eloChange}\n\n`,
           });
         }
       } catch (error) {
