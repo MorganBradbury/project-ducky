@@ -1,17 +1,19 @@
 import { addUser, getAllUsers } from "../db/models/userModel";
+import { handleDatabaseError } from "../utils/errorHandler";
 
-// Add a new user
 export const addDiscordUser = async (
   discordUsername: string,
-  faceitName: string
+  faceitName: string,
+  elo: number
 ): Promise<number> => {
   try {
-    const userId = await addUser(discordUsername, faceitName);
-    console.log(`User added with ID: ${userId}`);
+    const userId = await addUser(discordUsername, faceitName, elo);
+    console.log(`User added with userId: ${userId}`);
     return userId;
-  } catch (err) {
-    console.error("Error adding user:", err);
-    throw err;
+  } catch (error) {
+    const friendlyMessage = handleDatabaseError(error);
+    console.error("Error adding user:", friendlyMessage);
+    throw new Error(friendlyMessage);
   }
 };
 
@@ -21,7 +23,8 @@ export const fetchAllUsers = async (): Promise<void> => {
     const users = await getAllUsers();
     console.log("All users:", users);
   } catch (err) {
-    console.error("Error fetching users:", err);
-    throw err;
+    const friendlyMessage = handleDatabaseError(err);
+    console.error("Error fetching users:", friendlyMessage);
+    throw new Error(friendlyMessage);
   }
 };

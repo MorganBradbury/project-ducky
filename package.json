@@ -5,7 +5,7 @@
   "scripts": {
     "build": "tsc",
     "start": "node dist/main.js",
-    "dev": "tsc && node dist/main.js"
+    "dev": "start tsc --watch && nodemon dist/main.js"
   },
   "keywords": [],
   "author": "m0rgnN",
@@ -21,6 +21,8 @@
     "@types/node": "^22.9.3",
     "@types/sqlite3": "^3.1.11",
     "@types/ws": "^8.5.13",
+    "nodemon": "^3.1.7",
+    "ts-node-dev": "^2.0.0",
     "typescript": "^5.7.2"
   }
 }
