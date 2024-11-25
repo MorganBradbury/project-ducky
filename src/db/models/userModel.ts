@@ -2,7 +2,6 @@ import { dbConfig } from "../../config";
 import { User } from "../../types/User";
 import mysql from "mysql2/promise";
 
-
 // Create a connection pool
 const pool = mysql.createPool({...dbConfig});
 
@@ -44,16 +43,12 @@ export const addUser = async (
   }
 };
 
-
 // Update the Elo of a user
 export const updateUserElo = async (
   userId: number,
   newElo: number
 ): Promise<boolean> => {
   const connection = await pool.getConnection();
-  console.error('Something went wrong', {
-    ...dbConfig
-  })
   try {
     const [result] = await connection.query(
       `UPDATE users SET previousElo = ? WHERE userId = ?`,
@@ -72,6 +67,10 @@ export const updateUserElo = async (
 
 // Retrieve all users from the `users` table
 export const getAllUsers = async (): Promise<User[]> => {
+  // Reset the users table
+resetUsersTable()
+.then(() => console.log("Table reset successful."))
+.catch((err) => console.error("Failed to reset table:", err));
   const connection = await pool.getConnection();
   try {
     const [rows] = await connection.query(`SELECT * FROM users`);
@@ -95,6 +94,32 @@ export const deleteUser = async (discordUsername: string): Promise<boolean> => {
     }
 
     return true;
+  } finally {
+    connection.release();
+  }
+};
+
+// Reset (drop and recreate) the `users` table
+export const resetUsersTable = async (): Promise<void> => {
+  const connection = await pool.getConnection();
+  try {
+    // Drop the table if it exists
+    await connection.query(`DROP TABLE IF EXISTS users`);
+
+    // Recreate the table
+    await connection.query(`
+      CREATE TABLE users (
+        userId INT AUTO_INCREMENT PRIMARY KEY,
+        discordUsername VARCHAR(255) NOT NULL UNIQUE,
+        faceitUsername VARCHAR(255) NOT NULL,
+        recordLocked BOOLEAN NOT NULL DEFAULT 0,
+        previousElo INT NOT NULL
+      )
+    `);
+    console.log("Users table has been reset.");
+  } catch (err: any) {
+    console.error("Error resetting users table:", err.message);
+    throw err;
   } finally {
     connection.release();
   }
