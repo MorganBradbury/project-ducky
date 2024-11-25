@@ -1,7 +1,7 @@
 import fs from "fs"; // File system module to read the JSON file
 import { addUser } from "../db/models/userModel"; // Assuming you have this function in the userModel
 
-// Function to read JSON file and add users to the DB
+// Function to read JSON file and add users to the DB.
 const addUsersFromJson = async (filePath: string) => {
   return;
   try {
