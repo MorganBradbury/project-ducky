@@ -1,8 +1,7 @@
 import { User } from "../../types/User";
 import mysql from "mysql2/promise";
 
-// Create a connection pool
-const pool = mysql.createPool({
+const dbConfig = {
   host: process.env.MYSQLHOST,
   user: process.env.MYSQLUSER,
   password: process.env.MYSQLPASSWORD,
@@ -11,7 +10,10 @@ const pool = mysql.createPool({
   waitForConnections: true,
   connectionLimit: 10,
   queueLimit: 0,
-});
+}
+
+// Create a connection pool
+const pool = mysql.createPool({...dbConfig});
 
 // Add a new user to the `users` table
 export const addUser = async (
@@ -58,6 +60,9 @@ export const updateUserElo = async (
   newElo: number
 ): Promise<boolean> => {
   const connection = await pool.getConnection();
+  console.error('Something went wrong', {
+    ...dbConfig
+  })
   try {
     const [result] = await connection.query(
       `UPDATE users SET previousElo = ? WHERE userId = ?`,
