@@ -6,7 +6,8 @@
     "build": "tsc",
     "start-server": "node dist/server.js",
     "start": "node dist/main.js",
-    "dev": "start tsc --watch && nodemon dist/main.js"
+    "dev": "start tsc --watch && nodemon dist/main.js",
+    "cron-elo-update": "node dist/auto/autoUpdateElo.js"
   },
   "keywords": [],
   "author": "m0rgnN",
