@@ -1,7 +1,7 @@
 import { ChatInputCommandInteraction } from "discord.js"; // Use specific interaction type
 import { getFaceitLevel } from "../services/FaceitService";
-import { updateNickname } from "../services/DiscordService";
 import { addUser } from "../db/models/userModel";
+import { updateNickname } from "../utils/nicknameUtils";
 
 export const registerTrackingCommand = {
   name: "ducky_track_elo",

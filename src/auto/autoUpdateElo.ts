@@ -8,8 +8,8 @@ import {
 } from "discord.js";
 import { getAllUsers, updateUserElo } from "../db/models/userModel";
 import { getFaceitLevel } from "../services/FaceitService";
-import { updateNickname } from "../services/DiscordService";
 import { DISCORD_BOT_TOKEN, GUILD_ID, BOT_UPDATES_CHANNEL_ID } from "../config";
+import { updateNickname } from "../utils/nicknameUtils";
 
 const client = new Client({
   intents: [
