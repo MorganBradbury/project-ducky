@@ -61,8 +61,7 @@ client.once("ready", async () => {
   const updateMessages: string[] = [];
 
   for (const user of users) {
-    const { discordUsername, faceitUsername } = user;
-    const previousElo = "2600";
+    const { discordUsername, faceitUsername, previousElo } = user;
 
     try {
       console.log(
