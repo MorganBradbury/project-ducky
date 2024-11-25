@@ -52,10 +52,12 @@ export const runAutoUpdateElo = async () => {
             ? `🟢 **\`+${eloDifference}\`**`
             : `🔴 **\`-${Math.abs(eloDifference)}\`**`;
 
-        embedFields.push({
-          name: `${discordUsername}`,
-          value: `**Faceit Username:** ${faceitUsername}\n**Previous Elo:** ${previousElo}\n**New Elo:** ${faceitPlayer.elo}\n**Change:** ${eloChange}`,
-        });
+        if(faceitPlayer.elo != previousElo){
+          embedFields.push({
+            name: `${discordUsername}`,
+            value: `**Faceit Username:** ${faceitUsername}\n**Previous Elo:** ${previousElo}\n**New Elo:** ${faceitPlayer.elo}\n**Change:** ${eloChange}`,
+          });
+        }
       } catch (error) {
         logError(`Error processing user ${discordUsername}:`, error);
       }
