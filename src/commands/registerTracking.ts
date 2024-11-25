@@ -1,7 +1,7 @@
 import { ChatInputCommandInteraction } from "discord.js"; // Use specific interaction type
 import { getFaceitLevel } from "../services/FaceitService";
 import { updateNickname } from "../services/DiscordService";
-import { addDiscordUser } from "../services/UserService";
+import { addUser } from "../db/models/userModel";
 
 export const registerTrackingCommand = {
   name: "ducky_track_elo",
@@ -21,20 +21,18 @@ export const registerTrackingCommand = {
     try {
       const faceitPlayer = await getFaceitLevel(faceitName);
       if (faceitPlayer) {
-        await addDiscordUser(
-          discordUsername,
-          faceitName,
-          faceitPlayer.elo
-        ).then(async () => {
-          //@ts-ignore
-          await updateNickname(interaction.member, faceitPlayer);
-          await interaction.reply(
-            "Your elo will now be tracked and updated automatically."
-          );
-          console.log(
-            `Your elo will now be tracked and updated automatically! ${discordUsername} ${faceitName}`
-          );
-        });
+        await addUser(discordUsername, faceitName, faceitPlayer.elo).then(
+          async () => {
+            //@ts-ignore
+            await updateNickname(interaction.member, faceitPlayer);
+            await interaction.reply(
+              "Your elo will now be tracked and updated automatically."
+            );
+            console.log(
+              `Your elo will now be tracked and updated automatically! ${discordUsername} ${faceitName}`
+            );
+          }
+        );
       } else {
         await interaction.reply(
           "Invalid Faceit nickname. Please make sure you are entering your name correctly. It is CASE SENSITIVE"
