@@ -1,6 +1,7 @@
 import { ChatInputCommandInteraction } from "discord.js"; // Use specific interaction type
 import { getFaceitLevel } from "../services/FaceitService";
 import { updateNickname } from "../services/DiscordService";
+import { addDiscordUser } from "../services/UserService";
 
 export const updateLevelCommand = {
   name: "ducky_update_level",
@@ -15,11 +16,11 @@ export const updateLevelCommand = {
   ],
   execute: async (interaction: ChatInputCommandInteraction) => {
     const faceitName = interaction.options.getString("faceit_name", true); // Now correctly typed
-
+    const discordUsername = interaction.user.tag;
     try {
       const faceitPlayer = await getFaceitLevel(faceitName);
       if (faceitPlayer) {
-        //@ts-ignore
+        await addDiscordUser(discordUsername, faceitName); //@ts-ignore
         await updateNickname(interaction.member, faceitPlayer);
         await interaction.reply("Your nickname has been updated!");
       } else {

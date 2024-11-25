@@ -1,9 +1,6 @@
 import { GuildMember } from "discord.js";
 import { FaceitPlayer } from "../types/FaceitPlayer";
-import {
-  removeExistingLevel,
-  getFaceitLevelEmoji,
-} from "../utils/nicknameUtils";
+import { removeExistingLevel } from "../utils/nicknameUtils";
 
 export async function updateNickname(
   member: GuildMember,
@@ -13,7 +10,6 @@ export async function updateNickname(
     return;
   }
 
-  const emoji = getFaceitLevelEmoji(player.level);
   const cleanName = removeExistingLevel(
     member.nickname || member.user.username
   );
