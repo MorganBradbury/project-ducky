@@ -28,9 +28,9 @@ export const leaderboardCommand = {
               : index === 2
               ? "🥉"
               : `${index + 1}.`;
-          return `${rankEmoji} **${user.discordUsername}** - ${user.previousElo} ELO`;
+          return `${rankEmoji} **${user.faceitUsername}** > ${user.previousElo} ELO`;
         })
-        .join("\n");
+        .join("\n\u200B\n"); // Add spacing between lines
 
       // Create embed
       const embed = new EmbedBuilder()
