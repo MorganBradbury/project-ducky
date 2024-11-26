@@ -66,7 +66,7 @@ export const runAutoUpdateElo = async () => {
             : `🔴 **\`-${Math.abs(eloDifference)}\`**`;
 
         return {
-          name: `$${discordUsername}} (${faceitUsername})`,
+          name: `${discordUsername} (${faceitUsername})`,
           value: `**Elo change:** ${previousElo} > ${player.faceit_elo}\n${eloChange}\n\n`,
         };
       } catch (error) {
@@ -84,7 +84,7 @@ export const runAutoUpdateElo = async () => {
         BOT_UPDATES_CHANNEL_ID
       )) as TextChannel;
       const embed = new EmbedBuilder()
-        .setTitle("🎉 Automated elo summary")
+        .setTitle("🔔 Automated elo summary")
         .setColor("#00FF00")
         .addFields(embedFields)
         .setTimestamp();
