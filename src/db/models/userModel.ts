@@ -4,7 +4,7 @@ import mysql from "mysql2/promise";
 import fs from "fs"; // File system module to read the JSON file
 
 // Create a connection pool
-const pool = mysql.createPool({...dbConfig});
+const pool = mysql.createPool({ ...dbConfig });
 
 // Add a new user to the `users` table
 export const addUser = async (
@@ -23,7 +23,9 @@ export const addUser = async (
     const users = rows as { recordLocked: boolean }[]; // Explicitly cast `rows` to the expected array of objects
 
     if (users.length > 0 && users[0].recordLocked) {
-      throw new Error(`Cannot edit: User "${discordUsername}" is recordLocked.`);
+      throw new Error(
+        `Cannot edit: User "${discordUsername}" is recordLocked.`
+      );
     }
 
     // Insert the new user
@@ -36,7 +38,7 @@ export const addUser = async (
     return (result as any).insertId;
   } catch (err: any) {
     if (err.code === "ER_DUP_ENTRY") {
-      throw new Error(`User "${discordUsername}" already exists.`);
+      throw new Error(`You are already on the tracker 😅`);
     }
     throw err;
   } finally {
