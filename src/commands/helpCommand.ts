@@ -10,36 +10,35 @@ export const helpCommand = {
       // Start building the embed
       const embed = new EmbedBuilder()
         .setTitle("Available Commands")
-        .setColor("#00FF00")
+        .setColor("#03D7FC")
         .setDescription("Here are all the commands you can use:");
 
       // Loop through all commands and add them to the embed
       commandsMap.forEach((cmd) => {
         // Command and description in the desired format
-        const commandInfo = `\`/${cmd.name}\``;
+        let commandInfo = `\`/${cmd.name}\``;
 
-        // If the command has options (parameters), list them
+        // Add parameters if they exist
         if (cmd.options && cmd.options.length > 0) {
           const optionsDescription = cmd.options
             .map((option) => {
               // Each option's name in angle brackets and description in normal text
-              return `\`<${option.name}>\` - ${
-                option.description || "No description"
-              }`;
+              return `\`<${option.name}>\``;
             })
-            .join("\n");
+            .join(" "); // Join them on the same line with space
 
-          embed.addFields({
-            name: commandInfo,
-            value: optionsDescription,
-          });
+          // Append the options to the command
+          commandInfo += ` ${optionsDescription} - ${cmd.description}`;
         } else {
-          // If no options, just display the command with its description
-          embed.addFields({
-            name: commandInfo,
-            value: "No parameters required.",
-          });
+          // No options, just the command with description
+          commandInfo += ` - ${cmd.description}`;
         }
+
+        // Add to the embed as a single line
+        embed.addFields({
+          name: "\u200b", // Invisible space to keep the field structure valid
+          value: commandInfo,
+        });
       });
 
       // Send the help embed
