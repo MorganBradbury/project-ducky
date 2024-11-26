@@ -7,7 +7,7 @@ import { FaceitPlayer } from "../types/FaceitPlayer";
 export const registerTrackingCommand = {
   name: "ducky_track_elo",
   description:
-    "Update your Faceit level in your nickname. This command is case sensitive. You only need to do this command once and you will be added to the tracking list.",
+    "Add yourself to the tracker. You only need to do this once. It is case sensitive.",
   options: [
     {
       name: "faceit_username",
