@@ -1,7 +1,8 @@
 import { ChatInputCommandInteraction } from "discord.js"; // Use specific interaction type
-import { getFaceitLevel } from "../services/FaceitService";
 import { addUser } from "../db/models/userModel";
 import { updateNickname } from "../utils/nicknameUtils";
+import { faceitApiClient } from "../services/FaceitService";
+import { FaceitPlayer } from "../types/FaceitPlayer";
 
 export const registerTrackingCommand = {
   name: "ducky_track_elo",
@@ -19,9 +20,12 @@ export const registerTrackingCommand = {
     const faceitName = interaction.options.getString("faceit_username", true); // Now correctly typed
     const discordUsername = interaction.user.tag;
     try {
-      const faceitPlayer = await getFaceitLevel(faceitName);
-      if (faceitPlayer) {
-        await addUser(discordUsername, faceitName, faceitPlayer.elo).then(
+      const player: FaceitPlayer | null = await faceitApiClient?.getPlayerData(
+        faceitName
+      );
+
+      if (player) {
+        await addUser(discordUsername, faceitName, player.faceit_elo).then(
           async () => {
             //@ts-ignore
             await updateNickname(interaction.member, faceitPlayer);

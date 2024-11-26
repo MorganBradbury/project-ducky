@@ -1,29 +1,34 @@
-
 import { GuildMember } from "discord.js";
 import { FaceitPlayer } from "../types/FaceitPlayer";
 
 /**
- * Removes existing Faceit level or ELO tag from the nickname.
- * @param nickname The user's current nickname.
- * @returns Cleaned nickname without the level or ELO tag.
+ * Removes any existing Faceit level or ELO tag (e.g., "[...]" patterns) from a nickname.
+ * @param nickname - The current nickname of the user.
+ * @returns The cleaned nickname without any Faceit level or ELO tags.
  */
-export function removeExistingLevel(nickname: string): string {
-  return nickname.replace(/\s?\[.*?\]/, ""); // Matches and removes any "[...]"
+function removeExistingTag(nickname: string): string {
+  return nickname.replace(/\s?\[.*?\]/, "").trim();
 }
 
-
+/**
+ * Updates the nickname of a guild member with their Faceit ELO.
+ * @param member - The guild member whose nickname will be updated.
+ * @param player - The Faceit player data containing the ELO.
+ */
 export async function updateNickname(
   member: GuildMember,
   player: FaceitPlayer | null
-) {
-  if (!player) {
-    return;
+): Promise<void> {
+  if (!player) return;
+
+  const currentName = member.nickname || member.user.username;
+  const cleanName = removeExistingTag(currentName);
+  const updatedNickname = `${cleanName} [${player.faceit_elo}]`;
+
+  try {
+    await member.setNickname(updatedNickname);
+    console.log(`Updated nickname for ${currentName} to "${updatedNickname}"`);
+  } catch (error) {
+    console.error(`Failed to update nickname for ${currentName}:`, error);
   }
-
-  const cleanName = removeExistingLevel(
-    member.nickname || member.user.username
-  );
-  const newNickname = `${cleanName} [${player.elo}]`;
-
-  await member.setNickname(newNickname);
 }

@@ -7,9 +7,10 @@ import {
   EmbedBuilder,
 } from "discord.js";
 import { getAllUsers, updateUserElo } from "../db/models/userModel";
-import { getFaceitLevel } from "../services/FaceitService";
 import { updateNickname } from "../utils/nicknameUtils";
 import { DISCORD_BOT_TOKEN, GUILD_ID, BOT_UPDATES_CHANNEL_ID } from "../config";
+import { FaceitPlayer } from "../types/FaceitPlayer";
+import { faceitApiClient } from "../services/FaceitService";
 
 // Initialize the Discord client
 const client = new Client({
@@ -39,8 +40,11 @@ export const runAutoUpdateElo = async () => {
       const { discordUsername, faceitUsername, previousElo } = user;
 
       try {
-        const faceitPlayer = await getFaceitLevel(faceitUsername);
-        if (!faceitPlayer || faceitPlayer.elo === previousElo) return null; // Skip unchanged users
+        const player: FaceitPlayer | null = await faceitApiClient.getPlayerData(
+          faceitUsername
+        );
+
+        if (!player || player.faceit_elo === previousElo) return null; // Skip unchanged users
 
         const member =
           guild.members.cache.find((m) => m.user.tag === discordUsername) ??
@@ -51,11 +55,11 @@ export const runAutoUpdateElo = async () => {
         if (!member) return null; // Skip if member not found
 
         await Promise.all([
-          updateNickname(member, faceitPlayer),
-          updateUserElo(user.userId, faceitPlayer.elo),
+          updateNickname(member, player),
+          updateUserElo(user.userId, player.faceit_elo),
         ]);
 
-        const eloDifference = faceitPlayer.elo - previousElo;
+        const eloDifference = player.faceit_elo - previousElo;
         const eloChange =
           eloDifference > 0
             ? `🟢 **\`+${eloDifference}\`**`
@@ -63,7 +67,7 @@ export const runAutoUpdateElo = async () => {
 
         return {
           name: discordUsername,
-          value: `**Faceit Username:** ${faceitUsername}\n**Previous Elo:** ${previousElo}\n**New Elo:** ${faceitPlayer.elo}\n**Change:** ${eloChange}\n\n`,
+          value: `**Faceit Username:** ${faceitUsername}\n**Previous Elo:** ${previousElo}\n**New Elo:** ${player.faceit_elo}\n**Change:** ${eloChange}\n\n`,
         };
       } catch (error) {
         logError(`Error processing user ${discordUsername}:`, error);
