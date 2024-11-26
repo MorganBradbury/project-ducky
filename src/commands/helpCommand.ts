@@ -7,30 +7,41 @@ export const helpCommand = {
   options: [],
   execute: async (interaction: ChatInputCommandInteraction) => {
     try {
-      // Generate the command list in a single string
-      const commandList = Array.from(commandsMap.values())
-        .map((cmd) => {
-          const params = cmd.options?.length
-            ? cmd.options
-                .map(
-                  (opt: { name: string; description: string }) =>
-                    `<${opt.name}>`
-                )
-                .join(" ")
-            : "";
-          return `/${cmd.name} ${params} - ${cmd.description}`;
-        })
-        .join("\n"); // Join commands with no extra blank lines
-
-      // Create the embed
+      // Start building the embed
       const embed = new EmbedBuilder()
         .setTitle("Available Commands")
-        .setColor("#00FF00")
-        .setDescription(
-          `Here are all the commands you can use:\n\n${commandList}`
-        );
+        .setColor("#03D7FC")
+        .setDescription("Here are all the commands you can use:");
 
-      // Send the embed
+      // Loop through all commands and add them to the embed
+      commandsMap.forEach((cmd) => {
+        // Command and description in the desired format
+        let commandInfo = `\`/${cmd.name}\``;
+
+        // Add parameters if they exist
+        if (cmd.options && cmd.options.length > 0) {
+          const optionsDescription = cmd.options
+            .map((option) => {
+              // Each option's name in angle brackets and description in normal text
+              return `\`<${option.name}>\``;
+            })
+            .join(" "); // Join them on the same line with space
+
+          // Append the options to the command
+          commandInfo += ` ${optionsDescription} - ${cmd.description}`;
+        } else {
+          // No options, just the command with description
+          commandInfo += ` - ${cmd.description}`;
+        }
+
+        // Add to the embed as a single line
+        embed.addFields({
+          name: "\u200b", // Invisible space to keep the field structure valid
+          value: commandInfo,
+        });
+      });
+
+      // Send the help embed
       await interaction.reply({ embeds: [embed] });
     } catch (error) {
       console.error("Error generating help command:", error);
