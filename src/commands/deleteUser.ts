@@ -4,7 +4,7 @@ import { SERVER_OWNER_ID } from "../config";
 
 export const deleteUserCommand = {
   name: "delete_user",
-  description: "Delete a user from the tracking list.",
+  description: "[ADMIN ONLY] Delete a user from the tracking list.",
   options: [
     {
       name: "discord_username",
