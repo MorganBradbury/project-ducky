@@ -6,6 +6,7 @@ export const DISCORD_BOT_TOKEN = process.env.DISCORD_BOT_TOKEN || "";
 export const CLIENT_ID = process.env.CLIENT_ID || "";
 export const GUILD_ID = process.env.GUILD_ID || "";
 export const BOT_UPDATES_CHANNEL_ID = process.env.BOT_UPDATES_CHANNEL_ID || "";
+export const SERVER_OWNER_ID = process.env.SERVER_OWNER_ID || "";
 
 export const MYSQL_HOST = process.env.MYSQLHOST || "";
 export const MYSQL_USER = process.env.MYSQLUSER || "";
@@ -23,7 +24,8 @@ if (
   !MYSQL_USER ||
   !MYSQL_PASSWORD ||
   !MYSQL_DATABASE ||
-  !MYSQL_PORT
+  !MYSQL_PORT ||
+  !SERVER_OWNER_ID
 ) {
   throw new Error("Missing required environment variables");
 }

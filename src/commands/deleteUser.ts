@@ -1,5 +1,6 @@
 import { ChatInputCommandInteraction } from "discord.js";
 import { deleteUser } from "../db/models/commands";
+import { SERVER_OWNER_ID } from "../config";
 
 export const deleteUserCommand = {
   name: "delete_user",
@@ -8,7 +9,7 @@ export const deleteUserCommand = {
     {
       name: "discord_username",
       description:
-        "The Discord username of the user to delete (e.g., user#1234).",
+        "This is only available to the Server owner. The Discord username of the user to delete (e.g., user#1234).",
       type: 3, // STRING type
       required: true,
     },
@@ -19,10 +20,8 @@ export const deleteUserCommand = {
       true
     );
 
-    // Replace this with your Discord user ID
-    const OWNER_ID = "460148152796971008";
     // Check if the command user is the owner
-    if (interaction.user.id !== OWNER_ID) {
+    if (interaction.user.id !== SERVER_OWNER_ID) {
       await interaction.reply({
         content: "❌ You do not have permission to use this command.",
         ephemeral: true, // This ensures the message is only visible to the user
