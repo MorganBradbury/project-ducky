@@ -42,7 +42,7 @@ export const helpCommand = {
       });
 
       // Send the help embed
-      await interaction.reply({ embeds: [embed] });
+      await interaction.reply({ embeds: [embed], ephemeral: true });
     } catch (error) {
       console.error("Error generating help command:", error);
       await interaction.reply("Failed to show the help menu.");
