@@ -35,7 +35,7 @@ export const registerTrackingCommand = {
           await updateNickname(interaction.member, player);
           await interaction.reply({
             content:
-              "✅ Your elo will now be tracked and updated automatically.",
+              "☑️ Your elo will now be tracked and updated automatically.",
             ephemeral: true, // This ensures the message is only visible to the user
           });
           console.log(
