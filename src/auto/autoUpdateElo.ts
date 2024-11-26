@@ -8,9 +8,10 @@ import {
 } from "discord.js";
 import { getAllUsers, updateUserElo } from "../db/models/userModel";
 import { getFaceitLevel } from "../services/FaceitService";
-import { DISCORD_BOT_TOKEN, GUILD_ID, BOT_UPDATES_CHANNEL_ID } from "../config";
 import { updateNickname } from "../utils/nicknameUtils";
+import { DISCORD_BOT_TOKEN, GUILD_ID, BOT_UPDATES_CHANNEL_ID } from "../config";
 
+// Initialize the Discord client
 const client = new Client({
   intents: [
     GatewayIntentBits.Guilds,
@@ -22,7 +23,7 @@ const client = new Client({
   partials: [Partials.Message, Partials.Channel],
 });
 
-// Helper function for error logging
+// Helper function for logging errors
 const logError = (message: string, error: any) => {
   console.error(message, error);
 };
@@ -31,20 +32,28 @@ const logError = (message: string, error: any) => {
 export const runAutoUpdateElo = async () => {
   try {
     const users = await getAllUsers();
-    const embedFields: any[] = [];
+    if (!users.length) return console.log("No users found for update.");
 
-    for (const user of users) {
+    const guild = await client.guilds.fetch(GUILD_ID); // Cache the guild object
+    const memberPromises = users.map(async (user) => {
       const { discordUsername, faceitUsername, previousElo } = user;
 
       try {
         const faceitPlayer = await getFaceitLevel(faceitUsername);
-        if (!faceitPlayer) { continue };
+        if (!faceitPlayer || faceitPlayer.elo === previousElo) return null; // Skip unchanged users
 
-        const member = await fetchGuildMember(discordUsername);
-        if (!member) continue;
+        const member =
+          guild.members.cache.find((m) => m.user.tag === discordUsername) ??
+          (await guild.members
+            .fetch({ query: discordUsername, limit: 1 })
+            .then((m) => m.first()));
 
-        await updateUserNickname(member, faceitPlayer);
-        await updateUserElo(user.userId, faceitPlayer.elo);
+        if (!member) return null; // Skip if member not found
+
+        await Promise.all([
+          updateNickname(member, faceitPlayer),
+          updateUserElo(user.userId, faceitPlayer.elo),
+        ]);
 
         const eloDifference = faceitPlayer.elo - previousElo;
         const eloChange =
@@ -52,19 +61,24 @@ export const runAutoUpdateElo = async () => {
             ? `🟢 **\`+${eloDifference}\`**`
             : `🔴 **\`-${Math.abs(eloDifference)}\`**`;
 
-        if(faceitPlayer.elo != previousElo){
-          embedFields.push({
-            name: `${discordUsername}`,
-            value: `**Faceit Username:** ${faceitUsername}\n**Previous Elo:** ${previousElo}\n**New Elo:** ${faceitPlayer.elo}\n**Change:** ${eloChange}\n\n`,
-          });
-        }
+        return {
+          name: discordUsername,
+          value: `**Faceit Username:** ${faceitUsername}\n**Previous Elo:** ${previousElo}\n**New Elo:** ${faceitPlayer.elo}\n**Change:** ${eloChange}\n\n`,
+        };
       } catch (error) {
         logError(`Error processing user ${discordUsername}:`, error);
+        return null; // Skip user on error
       }
-    }
+    });
+
+    const embedFields = (await Promise.all(memberPromises)).filter(
+      (field): field is { name: string; value: string } => field !== null
+    ); // Type guard for non-null values
 
     if (embedFields.length > 0) {
-      const channel = (await client.channels.fetch(BOT_UPDATES_CHANNEL_ID)) as TextChannel;
+      const channel = (await client.channels.fetch(
+        BOT_UPDATES_CHANNEL_ID
+      )) as TextChannel;
       const embed = new EmbedBuilder()
         .setTitle("⚠️ Nickname Auto-Update Summary")
         .setColor("#00FF00")
@@ -80,32 +94,7 @@ export const runAutoUpdateElo = async () => {
   }
 };
 
-// Log in to Discord client
+// Log in to the Discord client
 if (!client.isReady()) {
   client.login(DISCORD_BOT_TOKEN).catch(console.error);
 }
-
-const fetchGuildMember = async (discordUsername: string): Promise<GuildMember | null> => {
-  try {
-    const guild = await client.guilds.fetch(GUILD_ID);
-    const members = await guild.members.fetch({
-      query: discordUsername,
-      limit: 1,
-    });
-
-    // Check if `members.first()` is undefined, and return null in that case
-    const member = members.first();
-    return member ?? null;
-  } catch (error) {
-    logError(`Error fetching member ${discordUsername}:`, error);
-    return null;
-  }
-};
-
-const updateUserNickname = async (member: GuildMember, faceitPlayer: any) => {
-  try {
-    await updateNickname(member, faceitPlayer);
-  } catch (error) {
-    logError(`Error updating nickname for ${member.user.username}:`, error);
-  }
-};
