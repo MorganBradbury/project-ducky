@@ -1,7 +1,7 @@
 import axios, { AxiosInstance } from "axios";
 import { FACEIT_API_KEY } from "../config";
 import { FaceitPlayer } from "../types/FaceitPlayer";
-import { validateAndExtract } from "../utils/faceitUtil";
+import { validateAndExtract } from "../utils/generalUtils";
 
 class FaceitApiClient {
   private client: AxiosInstance;
