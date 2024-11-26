@@ -15,21 +15,34 @@ export const helpCommand = {
 
       // Loop through all commands and add them to the embed
       commandsMap.forEach((cmd) => {
-        // Ensure the description is valid (between 1 and 100 characters)
-        if (
-          cmd.description &&
-          cmd.description.length > 0 &&
-          cmd.description.length <= 100
-        ) {
+        // Command and description in the desired format
+        const commandInfo = `\`/${cmd.name}\``;
+
+        // If the command has options (parameters), list them
+        if (cmd.options && cmd.options.length > 0) {
+          const optionsDescription = cmd.options
+            .map((option) => {
+              // Each option's name in angle brackets and description in normal text
+              return `\`<${option.name}>\` - ${
+                option.description || "No description"
+              }`;
+            })
+            .join("\n");
+
           embed.addFields({
-            name: `/${cmd.name}`,
-            value: cmd.description,
+            name: commandInfo,
+            value: optionsDescription,
           });
         } else {
-          console.warn(`Command /${cmd.name} has an invalid description.`);
+          // If no options, just display the command with its description
+          embed.addFields({
+            name: commandInfo,
+            value: "No parameters required.",
+          });
         }
       });
 
+      // Send the help embed
       await interaction.reply({ embeds: [embed] });
     } catch (error) {
       console.error("Error generating help command:", error);
