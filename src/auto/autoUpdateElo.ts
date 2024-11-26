@@ -80,7 +80,7 @@ export const runAutoUpdateElo = async () => {
         BOT_UPDATES_CHANNEL_ID
       )) as TextChannel;
       const embed = new EmbedBuilder()
-        .setTitle("⚠️ Nickname Auto-Update Summary")
+        .setTitle("⚠️ Auto elo update")
         .setColor("#00FF00")
         .addFields(embedFields)
         .setTimestamp();
