@@ -28,9 +28,13 @@ export const leaderboardCommand = {
               : index === 2
               ? "🥉"
               : `${index + 1}.`;
-          return `${rankEmoji} **${user.faceitUsername}** > ${user.previousElo} ELO`;
+
+          const line = `${rankEmoji} **${user.faceitUsername}** > ${user.previousElo} ELO`;
+
+          // Add spacing for the top 3 only
+          return index < 3 ? `${line}\n\u200B` : line;
         })
-        .join("\n\u200B\n"); // Add spacing between lines
+        .join("\n"); // Regular spacing for lines beyond the top 3
 
       // Create embed
       const embed = new EmbedBuilder()
