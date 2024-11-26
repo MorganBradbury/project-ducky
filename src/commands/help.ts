@@ -1,5 +1,5 @@
 import { ChatInputCommandInteraction, EmbedBuilder } from "discord.js";
-import { commandsMap } from "../commands"; // Import the commands map
+import { commandsMap } from "."; // Import the commands map
 
 export const helpCommand = {
   name: "help",

@@ -1,13 +1,15 @@
 import { registerTrackingCommand } from "./registerTracking";
-import { deleteUserCommand } from "./deleteUser";
-import { listUsersCommand } from "./listUsers";
-import { helpCommand } from "./helpCommand";
+import { deleteUserCommand } from "./delete";
+import { listUsersCommand } from "./users";
+import { helpCommand } from "./help";
+import { leaderboardCommand } from "./leaderboard";
 
 export const commands = [
   registerTrackingCommand,
   deleteUserCommand,
   listUsersCommand,
   helpCommand,
+  leaderboardCommand,
 ];
 
 export const commandsMap = new Map(commands.map((cmd) => [cmd.name, cmd]));
