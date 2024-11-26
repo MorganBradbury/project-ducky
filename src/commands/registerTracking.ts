@@ -1,5 +1,5 @@
 import { ChatInputCommandInteraction } from "discord.js"; // Use specific interaction type
-import { addUser } from "../db/models/userModel";
+import { addUser } from "../db/models/commands";
 import { updateNickname } from "../utils/nicknameUtils";
 import { faceitApiClient } from "../services/FaceitService";
 import { FaceitPlayer } from "../types/FaceitPlayer";

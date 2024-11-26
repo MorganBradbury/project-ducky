@@ -13,6 +13,11 @@ class FaceitApiClient {
     });
   }
 
+  /**
+   * Fetch player data by nickname (default method).
+   * @param faceitNickname - The Faceit player's nickname.
+   * @returns Player data (FaceitPlayer) or null if invalid data.
+   */
   async getPlayerData(faceitNickname: string): Promise<FaceitPlayer | null> {
     try {
       const response = await this.client.get(
@@ -20,7 +25,7 @@ class FaceitApiClient {
       );
       const cs2Data = validateAndExtract<FaceitPlayer>(
         response.data?.games?.cs2,
-        ["skill_level", "faceit_elo"]
+        ["skill_level", "faceit_elo", "game_player_id"]
       );
 
       if (!cs2Data) {
@@ -31,6 +36,44 @@ class FaceitApiClient {
       return cs2Data;
     } catch (error) {
       console.error(`Error fetching Faceit data for ${faceitNickname}:`, error);
+      return null;
+    }
+  }
+
+  /**
+   * Fetch player data by game player ID.
+   * @param game - The name of the game (e.g., 'cs2', 'csgo').
+   * @param gamePlayerId - The unique game player ID.
+   * @returns Player data (FaceitPlayer) or null if invalid data.
+   */
+  async getPlayerDataById(gamePlayerId: string): Promise<FaceitPlayer | null> {
+    try {
+      const response = await this.client.get(`/players`, {
+        params: {
+          game: "cs2",
+          game_player_id: gamePlayerId,
+        },
+      });
+
+      // Validate and extract the player data from the response.
+      const gameData = validateAndExtract<FaceitPlayer>(
+        response.data?.games?.["cs2"],
+        ["skill_level", "faceit_elo"]
+      );
+
+      if (!gameData) {
+        console.warn(
+          `Invalid or incomplete data for game player ID: ${gamePlayerId}`
+        );
+        return null;
+      }
+
+      return gameData;
+    } catch (error) {
+      console.error(
+        `Error fetching Faceit data for game player ID ${gamePlayerId}:`,
+        error
+      );
       return null;
     }
   }

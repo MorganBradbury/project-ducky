@@ -97,3 +97,25 @@ export const deleteUser = async (discordUsername: string): Promise<boolean> => {
     connection.release();
   }
 };
+
+// Update the Faceit game player ID for a user
+export const updateUserFaceitId = async (
+  userId: number,
+  gamePlayerId: string
+): Promise<boolean> => {
+  const connection = await pool.getConnection();
+  try {
+    const [result] = await connection.query(
+      `UPDATE users SET gamePlayerId = ? WHERE userId = ?`,
+      [gamePlayerId, userId]
+    );
+
+    if ((result as any).affectedRows === 0) {
+      throw new Error("No rows updated. Check if the userId exists.");
+    }
+
+    return true;
+  } finally {
+    connection.release();
+  }
+};

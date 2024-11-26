@@ -6,7 +6,7 @@ import {
   GuildMember,
   EmbedBuilder,
 } from "discord.js";
-import { getAllUsers, updateUserElo } from "../db/models/userModel";
+import { getAllUsers, updateUserElo } from "../db/models/commands";
 import { updateNickname } from "../utils/nicknameUtils";
 import { DISCORD_BOT_TOKEN, GUILD_ID, BOT_UPDATES_CHANNEL_ID } from "../config";
 import { FaceitPlayer } from "../types/FaceitPlayer";

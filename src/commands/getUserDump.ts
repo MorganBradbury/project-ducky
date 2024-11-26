@@ -1,5 +1,5 @@
 import { ChatInputCommandInteraction } from "discord.js";
-import { getAllUsers } from "../db/models/userModel";
+import { getAllUsers } from "../db/models/commands";
 import fs from "fs";
 import path from "path";
 
@@ -32,7 +32,7 @@ export const generateUsersJsonCommand = {
       const userJson = users.map((user) => ({
         discordUsername: user.discordUsername,
         faceitUsername: user.faceitUsername,
-        previousElo: user.previousElo as Number
+        previousElo: user.previousElo as Number,
       }));
 
       // Define the file path for the generated JSON file
