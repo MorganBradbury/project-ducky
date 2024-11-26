@@ -9,7 +9,7 @@ export const deleteUserCommand = {
     {
       name: "discord_username",
       description:
-        "This is only available to the Server owner. The Discord username of the user to delete (e.g., user#1234).",
+        "This is only available to the Server owner. The Discord username of the user to delete",
       type: 3, // STRING type
       required: true,
     },
