@@ -38,7 +38,7 @@ export const leaderboardCommand = {
 
       // Create embed
       const embed = new EmbedBuilder()
-        .setTitle("Faceit Leaderboard standings")
+        .setTitle("FACEIT Leaderboard standings")
         .setColor("#FFD700")
         .setDescription(leaderboard);
 

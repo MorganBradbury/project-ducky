@@ -11,7 +11,7 @@ export const registerTrackingCommand = {
   options: [
     {
       name: "faceit_username",
-      description: "Your Faceit nickname",
+      description: "Your FACEIT nickname",
       type: 3, // STRING type
       required: true,
     },
@@ -44,11 +44,11 @@ export const registerTrackingCommand = {
         });
       } else {
         await interaction.reply(
-          "Invalid Faceit nickname. Please make sure you are entering your name correctly. It is CASE SENSITIVE"
+          "Invalid FACEIT nickname. Please make sure you are entering your name correctly. It is CASE SENSITIVE"
         );
       }
     } catch (error) {
-      console.error("Error updating Faceit level:", error);
+      console.error("Error updating FACEIT level:", error);
       await interaction.reply(`Failed. ${error}`);
     }
   },

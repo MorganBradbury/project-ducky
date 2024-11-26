@@ -99,7 +99,7 @@ export const deleteUser = async (discordUsername: string): Promise<boolean> => {
   }
 };
 
-// Update the Faceit game player ID for a user
+// Update the FACEIT game player ID for a user
 export const updateUserFaceitId = async (
   userId: number,
   gamePlayerId: string

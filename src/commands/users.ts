@@ -16,7 +16,7 @@ export const listUsersCommand = {
       const userList = users
         .map(
           (user) =>
-            `**${user.discordUsername}** (Faceit: ${user.faceitUsername})`
+            `**${user.discordUsername}** (FACEIT: ${user.faceitUsername})`
         )
         .join("\n");
 

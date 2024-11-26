@@ -2,18 +2,18 @@ import { GuildMember } from "discord.js";
 import { FaceitPlayer } from "../types/FaceitPlayer";
 
 /**
- * Removes any existing Faceit level or ELO tag (e.g., "[...]" patterns) from a nickname.
+ * Removes any existing FACEIT level or ELO tag (e.g., "[...]" patterns) from a nickname.
  * @param nickname - The current nickname of the user.
- * @returns The cleaned nickname without any Faceit level or ELO tags.
+ * @returns The cleaned nickname without any FACEIT level or ELO tags.
  */
 function removeExistingTag(nickname: string): string {
   return nickname.replace(/\s?\[.*?\]/, "").trim();
 }
 
 /**
- * Updates the nickname of a guild member with their Faceit ELO.
+ * Updates the nickname of a guild member with their FACEIT ELO.
  * @param member - The guild member whose nickname will be updated.
- * @param player - The Faceit player data containing the ELO.
+ * @param player - The FACEIT player data containing the ELO.
  */
 export async function updateNickname(
   member: GuildMember,

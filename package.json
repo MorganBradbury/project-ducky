@@ -11,7 +11,7 @@
   "keywords": [],
   "author": "m0rgnN",
   "license": "ISC",
-  "description": "Faceit bot for personal use.",
+  "description": "FACEIT bot for personal use.",
   "dependencies": {
     "axios": "^1.7.7",
     "body-parser": "^1.20.3",
