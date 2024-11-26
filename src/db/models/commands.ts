@@ -10,7 +10,8 @@ const pool = mysql.createPool({ ...dbConfig });
 export const addUser = async (
   discordUsername: string,
   faceitName: string,
-  elo: number
+  elo: number,
+  gamePlayerId: string
 ): Promise<number> => {
   const connection = await pool.getConnection();
   try {
@@ -30,8 +31,8 @@ export const addUser = async (
 
     // Insert the new user
     const [result] = await connection.query(
-      `INSERT INTO users (discordUsername, faceitUsername, previousElo) VALUES (?, ?, ?)`,
-      [discordUsername, faceitName, elo]
+      `INSERT INTO users (discordUsername, faceitUsername, previousElo, gamePlayerId) VALUES (?, ?, ?, ?)`,
+      [discordUsername, faceitName, elo, gamePlayerId]
     );
 
     // Return the auto-incremented userId

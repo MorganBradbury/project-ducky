@@ -5,4 +5,5 @@ export type User = {
   faceitUsername: string;
   recordLocked: boolean;
   previousElo: number;
+  gamePlayerId: string;
 };

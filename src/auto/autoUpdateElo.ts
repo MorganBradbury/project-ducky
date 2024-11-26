@@ -37,12 +37,12 @@ export const runAutoUpdateElo = async () => {
 
     const guild = await client.guilds.fetch(GUILD_ID); // Cache the guild object
     const memberPromises = users.map(async (user) => {
-      const { discordUsername, faceitUsername, previousElo } = user;
+      const { discordUsername, faceitUsername, previousElo, gamePlayerId } =
+        user;
 
       try {
-        const player: FaceitPlayer | null = await faceitApiClient.getPlayerData(
-          faceitUsername
-        );
+        const player: FaceitPlayer | null =
+          await faceitApiClient.getPlayerDataById(gamePlayerId);
 
         if (!player || player.faceit_elo === previousElo) return null; // Skip unchanged users
 

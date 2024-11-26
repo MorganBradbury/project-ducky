@@ -25,20 +25,23 @@ export const registerTrackingCommand = {
       );
 
       if (player) {
-        await addUser(discordUsername, faceitName, player.faceit_elo).then(
-          async () => {
-            //@ts-ignore
-            await updateNickname(interaction.member, faceitPlayer);
-            await interaction.reply({
-              content:
-                "✅ Your elo will now be tracked and updated automatically.",
-              ephemeral: true, // This ensures the message is only visible to the user
-            });
-            console.log(
-              `Your elo will now be tracked and updated automatically! ${discordUsername} ${faceitName}`
-            );
-          }
-        );
+        await addUser(
+          discordUsername,
+          faceitName,
+          player.faceit_elo,
+          player.game_player_id
+        ).then(async () => {
+          //@ts-ignore
+          await updateNickname(interaction.member, player);
+          await interaction.reply({
+            content:
+              "✅ Your elo will now be tracked and updated automatically.",
+            ephemeral: true, // This ensures the message is only visible to the user
+          });
+          console.log(
+            `☑️ Your elo will now be tracked and updated automatically! ${discordUsername} ${faceitName}`
+          );
+        });
       } else {
         await interaction.reply(
           "Invalid Faceit nickname. Please make sure you are entering your name correctly. It is CASE SENSITIVE"
