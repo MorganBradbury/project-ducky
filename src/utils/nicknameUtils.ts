@@ -24,10 +24,15 @@ export async function updateNickname(
   const currentName = member.nickname || member.user.username;
   const cleanName = removeExistingTag(currentName);
 
-  // If the member has no nickname (empty or null), use the Discord username
-  const updatedNickname = `${cleanName || member.user.username} [${
-    player.faceit_elo
-  }]`;
+  // Calculate the length of the clean name and the ELO to check if the total exceeds 32 characters
+  const eloTag = `[${player.faceit_elo}]`;
+  const potentialNickname = `${cleanName} ${eloTag}`;
+
+  // If the nickname exceeds 32 characters, use the Discord username instead of the nickname
+  let updatedNickname = potentialNickname;
+  if (potentialNickname.length > 32) {
+    updatedNickname = `${member.user.username} ${eloTag}`;
+  }
 
   try {
     await member.setNickname(updatedNickname);
