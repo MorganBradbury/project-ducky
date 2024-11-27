@@ -23,7 +23,11 @@ export async function updateNickname(
 
   const currentName = member.nickname || member.user.username;
   const cleanName = removeExistingTag(currentName);
-  const updatedNickname = `${cleanName} [${player.faceit_elo}]`;
+
+  // If the member has no nickname (empty or null), use the Discord username
+  const updatedNickname = `${cleanName || member.user.username} [${
+    player.faceit_elo
+  }]`;
 
   try {
     await member.setNickname(updatedNickname);
