@@ -25,7 +25,7 @@ export const listUsersCommand = {
         .setColor("#00FF00")
         .setDescription(userList);
 
-      await interaction.reply({ embeds: [embed] });
+      await interaction.reply({ embeds: [embed], ephemeral: true });
     } catch (error) {
       console.error("Error fetching users:", error);
       await interaction.reply(`Failed to list users: ${error}`);
