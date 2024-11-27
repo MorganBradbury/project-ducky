@@ -38,11 +38,11 @@ export const leaderboardCommand = {
 
       // Create embed
       const embed = new EmbedBuilder()
-        .setTitle("FACEIT Leaderboard standings")
+        .setTitle("FACEIT Leaderboard standings for Duckclub")
         .setColor("#FFD700")
         .setDescription(leaderboard);
 
-      await interaction.reply({ embeds: [embed] , ephemeral: true});
+      await interaction.reply({ embeds: [embed], ephemeral: true });
     } catch (error) {
       console.error("Error generating leaderboard:", error);
       await interaction.reply("Failed to display the leaderboard.");
