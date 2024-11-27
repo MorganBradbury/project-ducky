@@ -1,4 +1,4 @@
-import { registerTrackingCommand } from "./registerTracking";
+import { registerTrackingCommand } from "./register";
 import { deleteUserCommand } from "./delete";
 import { listUsersCommand } from "./users";
 import { helpCommand } from "./help";

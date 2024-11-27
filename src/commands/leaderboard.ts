@@ -42,7 +42,7 @@ export const leaderboardCommand = {
         .setColor("#FFD700")
         .setDescription(leaderboard);
 
-      await interaction.reply({ embeds: [embed] });
+      await interaction.reply({ embeds: [embed] , ephemeral: true});
     } catch (error) {
       console.error("Error generating leaderboard:", error);
       await interaction.reply("Failed to display the leaderboard.");
