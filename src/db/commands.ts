@@ -1,5 +1,5 @@
-import { dbConfig } from "../../config";
-import { SystemUser } from "../../types/SystemUser";
+import { dbConfig } from "../config/index";
+import { SystemUser } from "../types/SystemUser";
 import mysql from "mysql2/promise";
 import { SQL_QUERIES } from "./queries";
 

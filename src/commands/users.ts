@@ -1,5 +1,5 @@
 import { ChatInputCommandInteraction, EmbedBuilder } from "discord.js";
-import { getAllUsers } from "../db/models/commands";
+import { getAllUsers } from "../db/commands";
 
 export const listUsersCommand = {
   name: "list_users",
