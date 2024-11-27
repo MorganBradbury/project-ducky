@@ -1,5 +1,5 @@
 // Define the User type
-export type User = {
+export type SystemUser = {
   userId: number;
   discordUsername: string;
   faceitUsername: string;

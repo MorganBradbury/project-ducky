@@ -1,9 +1,6 @@
 import express from "express";
 import bodyParser from "body-parser";
 import { runAutoUpdateElo } from "./auto/autoUpdateElo";
-import { User } from "./types/User";
-import { getAllUsers, updateUserFaceitId } from "./db/models/commands";
-import { faceitApiClient } from "./services/FaceitService";
 
 const app = express();
 

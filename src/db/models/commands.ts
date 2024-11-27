@@ -1,5 +1,5 @@
 import { dbConfig } from "../../config";
-import { User } from "../../types/User";
+import { SystemUser } from "../../types/SystemUser";
 import mysql from "mysql2/promise";
 import { SQL_QUERIES } from "./queries";
 
@@ -61,10 +61,10 @@ export const updateUserElo = async (
 };
 
 // Retrieve all users
-export const getAllUsers = async (): Promise<User[]> => {
+export const getAllUsers = async (): Promise<SystemUser[]> => {
   return useConnection(async (connection) => {
     const [rows] = await connection.query(SQL_QUERIES.SELECT_ALL_USERS);
-    return rows as User[];
+    return rows as SystemUser[];
   });
 };
 
