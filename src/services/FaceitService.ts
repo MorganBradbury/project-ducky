@@ -23,17 +23,17 @@ class FaceitApiClient {
       const response = await this.client.get(
         `/players?nickname=${faceitNickname}`
       );
-      const cs2Data = validateAndExtract<FaceitPlayer>(
+      const playerData = validateAndExtract<FaceitPlayer>(
         response.data?.games?.cs2,
-        ["skill_level", "faceit_elo", "game_player_id"]
+        ["faceit_elo", "game_player_id"]
       );
 
-      if (!cs2Data) {
+      if (!playerData) {
         console.warn(`Invalid or incomplete data for ${faceitNickname}`);
         return null;
       }
 
-      return cs2Data;
+      return playerData;
     } catch (error) {
       console.error(`Error fetching FACEIT data for ${faceitNickname}:`, error);
       return null;
@@ -56,19 +56,19 @@ class FaceitApiClient {
       });
 
       // Validate and extract the player data from the response.
-      const gameData = validateAndExtract<FaceitPlayer>(
+      const playerData = validateAndExtract<FaceitPlayer>(
         response.data?.games?.["cs2"],
-        ["skill_level", "faceit_elo"]
+        ["faceit_elo"]
       );
 
-      if (!gameData) {
+      if (!playerData) {
         console.warn(
           `Invalid or incomplete data for game player ID: ${gamePlayerId}`
         );
         return null;
       }
 
-      return gameData;
+      return playerData;
     } catch (error) {
       console.error(
         `Error fetching FACEIT data for game player ID ${gamePlayerId}:`,
