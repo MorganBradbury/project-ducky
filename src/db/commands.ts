@@ -1,10 +1,10 @@
-import { dbConfig } from "../config/index";
+import { config } from "../config/index";
 import { SystemUser } from "../types/SystemUser";
 import mysql from "mysql2/promise";
 import { SQL_QUERIES } from "./queries";
 
 // Create a connection pool
-const pool = mysql.createPool({ ...dbConfig });
+const pool = mysql.createPool({ ...config.MYSQL });
 
 // Helper function for connection handling
 const useConnection = async <T>(

@@ -1,6 +1,6 @@
 import { ChatInputCommandInteraction } from "discord.js";
 import { deleteUser } from "../db/commands";
-import { SERVER_OWNER_ID } from "../config";
+import { config } from "../config";
 
 export const deleteUserCommand = {
   name: "delete_user",
@@ -21,7 +21,7 @@ export const deleteUserCommand = {
     );
 
     // Check if the command user is the owner
-    if (interaction.user.id !== SERVER_OWNER_ID) {
+    if (interaction.user.id !== config.SERVER_OWNER_ID) {
       await interaction.reply({
         content: "❌ You do not have permission to use this command.",
         ephemeral: true, // This ensures the message is only visible to the user

@@ -8,7 +8,7 @@ import {
 } from "discord.js";
 import { getAllUsers, updateUserElo } from "../db/commands";
 import { updateNickname } from "../utils/nicknameUtils";
-import { DISCORD_BOT_TOKEN, GUILD_ID, BOT_UPDATES_CHANNEL_ID } from "../config";
+import { config } from "../config";
 import { FaceitPlayer } from "../types/FaceitPlayer";
 import { faceitApiClient } from "../services/FaceitService";
 
@@ -35,7 +35,7 @@ export const runAutoUpdateElo = async () => {
     const users = await getAllUsers();
     if (!users.length) return console.log("No users found for update.");
 
-    const guild = await client.guilds.fetch(GUILD_ID); // Cache the guild object
+    const guild = await client.guilds.fetch(config.GUILD_ID); // Cache the guild object
     const memberPromises = users.map(async (user) => {
       const { discordUsername, faceitUsername, previousElo, gamePlayerId } =
         user;
@@ -81,7 +81,7 @@ export const runAutoUpdateElo = async () => {
 
     if (embedFields.length > 0) {
       const channel = (await client.channels.fetch(
-        BOT_UPDATES_CHANNEL_ID
+        config.BOT_UPDATES_CHANNEL_ID
       )) as TextChannel;
       const embed = new EmbedBuilder()
         .setTitle("🔔 Automated elo summary")
@@ -100,5 +100,5 @@ export const runAutoUpdateElo = async () => {
 
 // Log in to the Discord client
 if (!client.isReady()) {
-  client.login(DISCORD_BOT_TOKEN).catch(console.error);
+  client.login(config.DISCORD_BOT_TOKEN).catch(console.error);
 }

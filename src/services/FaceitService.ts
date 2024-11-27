@@ -1,5 +1,5 @@
 import axios, { AxiosInstance } from "axios";
-import { FACEIT_API_KEY } from "../config";
+import { config } from "../config";
 import { FaceitPlayer } from "../types/FaceitPlayer";
 import { validateAndExtract } from "../utils/generalUtils";
 
@@ -9,7 +9,7 @@ class FaceitApiClient {
   constructor() {
     this.client = axios.create({
       baseURL: "https://open.FACEIT.com/data/v4",
-      headers: { Authorization: `Bearer ${FACEIT_API_KEY}` },
+      headers: { Authorization: `Bearer ${config.FACEIT_API_KEY}` },
     });
   }
 
