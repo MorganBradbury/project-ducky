@@ -31,9 +31,10 @@ export const deleteUserCommand = {
 
     try {
       await deleteUser(discordUsername);
-      await interaction.reply(
-        `✅ User \`${discordUsername}\` has been deleted.`
-      );
+      await interaction.reply({
+        content: `✅ User \`${discordUsername}\` has been deleted.`,
+        ephemeral: true,
+      });
     } catch (error) {
       console.error("Error deleting user:", error);
       await interaction.reply(`❌ Failed to delete user: ${error}`);
