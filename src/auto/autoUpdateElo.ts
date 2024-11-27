@@ -11,8 +11,6 @@ import { updateNickname } from "../utils/nicknameUtils";
 import { DISCORD_BOT_TOKEN, GUILD_ID, BOT_UPDATES_CHANNEL_ID } from "../config";
 import { FaceitPlayer } from "../types/FaceitPlayer";
 import { faceitApiClient } from "../services/FaceitService";
-import mysql from "mysql2/promise";
-import { dbConfig } from "../config"; // Assuming dbConfig is exported for database connection setup
 
 // Initialize the Discord client
 const client = new Client({
@@ -31,40 +29,9 @@ const logError = (message: string, error: any) => {
   console.error(message, error);
 };
 
-// Helper function to drop the `recordLocked` column if it exists
-const dropRecordLockedColumn = async () => {
-  const pool = mysql.createPool({ ...dbConfig });
-
-  try {
-    const connection = await pool.getConnection();
-    try {
-      const [columns] = await connection.query(
-        `SHOW COLUMNS FROM users LIKE 'recordLocked'`
-      );
-
-      if ((columns as any[]).length > 0) {
-        console.log("Dropping 'recordLocked' column...");
-        await connection.query(`ALTER TABLE users DROP COLUMN recordLocked`);
-        console.log("'recordLocked' column successfully removed.");
-      } else {
-        console.log("'recordLocked' column does not exist. No changes made.");
-      }
-    } finally {
-      connection.release();
-    }
-  } catch (error) {
-    logError("Error dropping 'recordLocked' column:", error);
-  } finally {
-    pool.end();
-  }
-};
-
 // Main function to update Elo
 export const runAutoUpdateElo = async () => {
   try {
-    // Ensure `recordLocked` column is removed
-    await dropRecordLockedColumn();
-
     const users = await getAllUsers();
     if (!users.length) return console.log("No users found for update.");
 
