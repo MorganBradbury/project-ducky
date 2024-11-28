@@ -1,8 +1,5 @@
 import express, { Request, Response } from "express";
 import { runAutoUpdateElo } from "./auto/autoUpdateElo";
-import { sendMatchStartNotification } from "./services/discordHandler";
-import { insertMatch } from "./db/commands";
-import { MatchDetails } from "./types/MatchDetails";
 import { faceitApiClient } from "./services/FaceitService";
 
 const app = express();
@@ -30,42 +27,14 @@ app.post(
   }
 );
 
-// Function to handle the match processing
-export const processMatch = async (webhookData: any) => {
-  try {
-    const matchId = webhookData.match_id;
-
-    if (!matchId) {
-      return "Match ID is required";
-    }
-
-    const matchDetails: MatchDetails | null =
-      await faceitApiClient.getMatchDetails(matchId);
-
-    if (!matchDetails) {
-      return console.log("Match details not found");
-    }
-
-    // Insert match details into the database
-    await insertMatch(matchDetails);
-
-    // Send a "Match Started" notification to Discord
-    await sendMatchStartNotification(matchDetails);
-
-    return null; // No error, everything went fine
-  } catch (error) {
-    console.error("Error processing match:", error);
-    return "Internal Server Error";
-  }
-};
-
 // Webhook callback endpoint
 app.post("/api/webhook", async (req: Request, res: Response): Promise<void> => {
   try {
     const webhookData = req.body;
     console.log("Received webhook data:", webhookData);
 
-    await processMatch(webhookData);
+    const matchData = await faceitApiClient.getMatchDetails(webhookData);
+    console.log("match data retrieved: ", matchData);
 
     res.status(200).json({ message: "Webhook processed successfully!" });
   } catch (error) {
