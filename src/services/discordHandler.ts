@@ -3,7 +3,6 @@ import {
   GatewayIntentBits,
   Partials,
   TextChannel,
-  GuildMember,
   EmbedBuilder,
 } from "discord.js";
 import { MatchDetails } from "../types/MatchDetails";
@@ -24,9 +23,16 @@ const client = new Client({
 // Helper function to send an embed message to a specific channel
 const sendEmbedMessage = async (embed: EmbedBuilder) => {
   try {
+    // Ensure the client is logged in before accessing channels
+    if (!client.isReady()) {
+      console.error("Discord client is not ready!");
+      return;
+    }
+
     const channel = (await client.channels.fetch(
       config.BOT_UPDATES_CHANNEL_ID
     )) as TextChannel;
+
     if (!channel) {
       console.log(
         `Channel with ID ${config.BOT_UPDATES_CHANNEL_ID} not found.`
@@ -43,39 +49,73 @@ const sendEmbedMessage = async (embed: EmbedBuilder) => {
 export const sendMatchStartNotification = async (
   matchDetails: MatchDetails
 ) => {
-  const embed = new EmbedBuilder()
-    .setTitle("New Match Started!")
-    .setColor("#00A2FF")
-    .addFields({ name: "Map", value: matchDetails.mapName, inline: true })
-    .setTimestamp();
+  try {
+    const embed = new EmbedBuilder()
+      .setTitle("New Match Started!")
+      .setColor("#00A2FF")
+      .addFields(
+        { name: "Map", value: matchDetails.mapName, inline: true },
+        { name: "Match Link", value: matchDetails.matchLink, inline: true },
+        {
+          name: "Stack",
+          value: matchDetails.matchingPlayers
+            .map((p: string) => p) // Explicitly type as string
+            .join("\n"), // Join players with newline
+        }
+      )
+      .setTimestamp();
 
-  await sendEmbedMessage(embed);
+    await sendEmbedMessage(embed);
+  } catch (error) {
+    console.error("Error sending match start notification:", error);
+  }
 };
 
 // Notify about a match finish
 export const sendMatchFinishNotification = async (
-  channelId: string,
   matchDetails: MatchDetails,
   score: [number, number],
   isWin: boolean
 ) => {
-  const embed = new EmbedBuilder()
-    .setTitle("Match Finished!")
-    .setColor(isWin ? "#00FF00" : "#FF0000")
-    .addFields(
-      { name: "Map", value: matchDetails.mapName, inline: true },
-      { name: "Match Link", value: matchDetails.matchLink, inline: true },
-      {
-        name: "Match Result",
-        value: `${score[0]}:${score[1]} (Your Team: ${isWin ? "Win" : "Loss"})`,
-        inline: true,
-      },
-      {
-        name: "Stack",
-        value: matchDetails.matchingPlayers.map((p) => `${p}`).join("\n"),
-      }
-    )
-    .setTimestamp();
+  try {
+    const embed = new EmbedBuilder()
+      .setTitle("Match Finished!")
+      .setColor(isWin ? "#00FF00" : "#FF0000")
+      .addFields(
+        { name: "Map", value: matchDetails.mapName, inline: true },
+        { name: "Match Link", value: matchDetails.matchLink, inline: true },
+        {
+          name: "Match Result",
+          value: `${score[0]}:${score[1]} (Your Team: ${
+            isWin ? "Win" : "Loss"
+          })`,
+          inline: true,
+        },
+        {
+          name: "Stack",
+          value: matchDetails.matchingPlayers
+            .map((p: string) => p) // Explicitly type as string
+            .join("\n"),
+        }
+      )
+      .setTimestamp();
 
-  await sendEmbedMessage(embed);
+    await sendEmbedMessage(embed);
+  } catch (error) {
+    console.error("Error sending match finish notification:", error);
+  }
 };
+
+// Ensure client is logged in before using it
+const loginBot = async () => {
+  try {
+    if (!client.isReady()) {
+      await client.login(config.DISCORD_BOT_TOKEN);
+    }
+  } catch (error) {
+    console.error("Error logging in to Discord:", error);
+  }
+};
+
+// Log in to the Discord client
+loginBot();
