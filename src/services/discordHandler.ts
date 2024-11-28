@@ -55,7 +55,7 @@ export const sendMatchStartNotification = async (
       .setTitle("New Match Started!")
       .setColor("#00A2FF")
       .addFields(
-        { name: "Map", value: matchDetails.mapName, inline: true },
+        { name: "Map", value: matchDetails.mapName[0], inline: true },
         { name: "Match Link", value: matchDetails.matchLink, inline: true },
         {
           name: "Stack",
