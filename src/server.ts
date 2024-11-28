@@ -33,10 +33,10 @@ app.post("/api/webhook", async (req: Request, res: Response): Promise<void> => {
     const webhookData = req.body;
     console.log("Received webhook data:", webhookData?.payload?.teams);
 
-    const matchData = await faceitApiClient.getMatchDetails(
-      webhookData.payload?.teams
-    );
-    console.log("match data retrieved: ", matchData);
+    // const matchData = await faceitApiClient.getMatchDetails(
+    //   webhookData.payload?.teams
+    // );
+    // console.log("match data retrieved: ", matchData);
 
     res.status(200).json({ message: "Webhook processed successfully!" });
   } catch (error) {
