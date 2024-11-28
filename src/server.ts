@@ -1,9 +1,12 @@
 import express, { Request, Response } from "express";
 import { runAutoUpdateElo } from "./auto/autoUpdateElo";
 import { faceitApiClient } from "./services/FaceitService";
-import { getAllUsers, insertMatch } from "./db/commands";
+import { getAllUsers, insertMatch, markMatchComplete } from "./db/commands";
 import { config } from "./config";
-import { sendMatchStartNotification } from "./services/discordHandler";
+import {
+  sendMatchFinishNotification,
+  sendMatchStartNotification,
+} from "./services/discordHandler";
 
 const app = express();
 
@@ -40,11 +43,17 @@ app.post("/api/webhook", async (req: Request, res: Response): Promise<void> => {
       const matchData = await faceitApiClient.getMatchDetails(
         receivedData.payload?.id
       );
+
       console.log("match data retrieved: ", matchData);
 
       if (matchData) {
-        insertMatch(matchData);
-        sendMatchStartNotification(matchData);
+        if (!matchData?.results) {
+          insertMatch(matchData);
+          sendMatchStartNotification(matchData);
+        } else {
+          markMatchComplete(matchData?.matchId);
+          sendMatchFinishNotification(matchData);
+        }
       }
     }
 

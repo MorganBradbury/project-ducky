@@ -76,23 +76,23 @@ export const sendMatchStartNotification = async (
 
 // Notify about a match finish
 export const sendMatchFinishNotification = async (
-  matchDetails: MatchDetails,
-  score: [number, number],
-  isWin: boolean
+  matchDetails: MatchDetails
 ) => {
   try {
     const embed = new EmbedBuilder()
       .setTitle("Match Finished!")
-      .setColor(isWin ? "#00FF00" : "#FF0000")
+      .setColor(matchDetails.results?.win ? "#00FF00" : "#FF0000")
       .addFields(
-        { name: "Map", value: matchDetails.mapName, inline: true },
-        { name: "Match Link", value: matchDetails.matchLink, inline: true },
+        { name: "Map", value: matchDetails.mapName[0] },
+        {
+          name: "Match Link",
+          value: `[Click here](${matchDetails.matchLink})`, // Use markdown for clickable link
+        },
         {
           name: "Match Result",
-          value: `${score[0]}:${score[1]} (Your Team: ${
-            isWin ? "Win" : "Loss"
+          value: `${matchDetails.results?.finalScore} (${
+            matchDetails.results?.win ? "WIN" : "LOSS"
           })`,
-          inline: true,
         },
         {
           name: "Stack",

@@ -9,6 +9,5 @@ export type MatchDetails = {
 
 export type MatchFinishedDetails = {
   finalScore: string;
-  winningTeam: string;
   win: boolean;
 };
