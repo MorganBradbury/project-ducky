@@ -73,23 +73,33 @@ class FaceitApiClient {
       console.log("teams1", teams.faction1.roster);
       console.log("teams2", teams.faction2.roster);
 
-      // Combine player IDs from both factions
-      const faction1Players = teams.faction1?.roster || [];
-      const faction2Players = teams.faction2?.roster || [];
-      const gamePlayerIds = [
-        ...faction1Players.map((p: any) => p.player_id),
-        ...faction2Players.map((p: any) => p.player_id),
+      const allUsers = await getAllUsers();
+      const combinedRoster = [
+        ...teams?.faction1?.roster,
+        ...teams?.faction2?.roster,
       ];
 
-      // Fetch user data and filter matching players
-      const allUsers = await getAllUsers();
-      console.log("allUsers", allUsers);
-      const matchingPlayers = gamePlayerIds.filter((playerId) =>
-        allUsers.some((user) => user.gamePlayerId === playerId)
+      console.log("combinedRoster", combinedRoster);
+
+      // Get all game_player_ids from the combinedRoster
+      const gamePlayerIds = combinedRoster.map(
+        (player: any) => player.game_player_id
+      );
+      console.log("gamePlayerIds", gamePlayerIds);
+      // Filter allUsers based on whether their game_player_id matches any in the combinedRoster
+      const filteredUsers = allUsers.filter((user) =>
+        gamePlayerIds.includes(user?.gamePlayerId)
       );
 
+      console.log("filtereduSERS", filteredUsers);
+      const filteredGamePlayerIds = filteredUsers.map(
+        (user) => user.gamePlayerId
+      );
+      console.log("filteredUsers", filteredUsers);
+      console.log("filteredGamePlayerIds", filteredGamePlayerIds);
+
       // Determine the faction (either faction1 or faction2)
-      const faction = faction1Players.length > 0 ? "Faction1" : "Faction2"; // Assuming players are always part of the same faction
+      const faction = "Faction2"; // Assuming players are always part of the same faction
 
       const mapName = voting?.map?.pick || "Unknown";
       const matchLink = `https://www.faceit.com/en/cs2/room/${matchId}`;
@@ -98,7 +108,7 @@ class FaceitApiClient {
         matchId: match_id,
         mapName,
         matchLink,
-        matchingPlayers,
+        matchingPlayers: filteredGamePlayerIds,
         faction,
       };
     } catch (error) {
