@@ -51,7 +51,7 @@ export const sendMatchStartNotification = async (
   try {
     console.log("matchdetails", matchDetails);
     const embed = new EmbedBuilder()
-      .setTitle("🚨 New Match Started!")
+      .setTitle("🚨  New Match Started!")
       .setColor("#00A2FF")
       .addFields(
         { name: "Map", value: matchDetails.mapName[0] },
