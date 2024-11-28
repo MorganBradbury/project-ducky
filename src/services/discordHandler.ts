@@ -80,7 +80,11 @@ export const sendMatchFinishNotification = async (
 ) => {
   try {
     const embed = new EmbedBuilder()
-      .setTitle("Match Finished!")
+      .setTitle(
+        `🚨  Match finished update (${
+          matchDetails.results?.win ? "WIN" : "LOSS"
+        })`
+      )
       .setColor(matchDetails.results?.win ? "#00FF00" : "#FF0000")
       .addFields(
         { name: "Map", value: matchDetails.mapName[0] },
