@@ -1,6 +1,6 @@
 export const SQL_QUERIES = {
   INSERT_USER: `
-    INSERT INTO users (discordUsername, faceitUsername, previousElo, gamePlayerId, playerId)
+    INSERT INTO users (discordUsername, faceitUsername, previousElo, gamePlayerId, faceitId)
     VALUES (?, ?, ?, ?, ?)
   `,
   UPDATE_USER_ELO: `
