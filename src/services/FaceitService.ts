@@ -20,10 +20,11 @@ class FaceitApiClient {
       const response = await this.client.get(
         `/players?nickname=${faceitNickname}`
       );
-      return validateAndExtract<FaceitPlayer>(response.data?.games?.cs2, [
-        "faceit_elo",
-        "game_player_id",
-      ]);
+      return {
+        faceit_elo: response.data?.games?.cs2?.faceit_elo,
+        game_player_id: response.data?.games?.cs2?.game_player_id,
+        player_id: response.data?.player_id,
+      };
     } catch (error) {
       console.error(`Error fetching FACEIT data for ${faceitNickname}:`, error);
       return null;

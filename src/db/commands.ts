@@ -85,11 +85,13 @@ export const deleteUser = async (discordUsername: string): Promise<boolean> => {
 // Update user's FACEIT game player ID
 export const updateUserFaceitId = async (
   userId: number,
-  gamePlayerId: string
+  gamePlayerId: string,
+  playerId?: string
 ): Promise<boolean> => {
   return useConnection(async (connection) => {
     const [result] = await connection.query(SQL_QUERIES.UPDATE_USER_FACEIT_ID, [
       gamePlayerId,
+      playerId,
       userId,
     ]);
     if ((result as any).affectedRows === 0) {
