@@ -1,7 +1,7 @@
 import express, { Request, Response } from "express";
 import { runAutoUpdateElo } from "./auto/autoUpdateElo";
 import { faceitApiClient } from "./services/FaceitService";
-import { insertMatch } from "./db/commands";
+import { getAllUsers, insertMatch } from "./db/commands";
 import { config } from "./config";
 
 const app = express();
@@ -39,33 +39,7 @@ app.post("/api/webhook", async (req: Request, res: Response): Promise<void> => {
       webhookData.payload?.id
     );
 
-    const createMatchesTable = async (dbConnection: any) => {
-      const dropTableQuery = "DROP TABLE IF EXISTS matches_played;";
-      const createTableQuery = `
-        CREATE TABLE matches_played (
-          match_id VARCHAR(255) PRIMARY KEY,
-          game_player_ids JSON,
-          is_complete BOOLEAN,
-          map_name VARCHAR(255),
-          match_link VARCHAR(255),
-          faction VARCHAR(255)
-        );
-      `;
-
-      try {
-        // Drop the table if it exists
-        await dbConnection.query(dropTableQuery);
-        console.log("Existing matches_played table dropped (if it existed)");
-
-        // Create the new table
-        await dbConnection.query(createTableQuery);
-        console.log("matches_played table created successfully");
-      } catch (error) {
-        console.error("Error creating matches_played table:", error);
-      }
-    };
-
-    createMatchesTable(config.MYSQL);
+    const x = getAllUsers();
     if (matchData) {
       insertMatch(matchData);
     }
