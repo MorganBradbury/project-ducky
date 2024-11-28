@@ -43,20 +43,24 @@ const sendEmbedMessage = async (embed: EmbedBuilder) => {
 export const sendMatchStartNotification = async (
   matchDetails: MatchDetails
 ) => {
-  const embed = new EmbedBuilder()
-    .setTitle("New Match Started!")
-    .setColor("#00A2FF")
-    .addFields(
-      { name: "Map", value: matchDetails.mapName, inline: true },
-      { name: "Match Link", value: matchDetails.matchLink, inline: true },
-      {
-        name: "Stack",
-        value: matchDetails.matchingPlayers.join("\n"), // Join players with newline
-      }
-    )
-    .setTimestamp();
+  try {
+    const embed = new EmbedBuilder()
+      .setTitle("New Match Started!")
+      .setColor("#00A2FF")
+      .addFields(
+        { name: "Map", value: matchDetails.mapName, inline: true },
+        { name: "Match Link", value: matchDetails.matchLink, inline: true },
+        {
+          name: "Stack",
+          value: matchDetails.matchingPlayers.join("\n"), // Join players with newline
+        }
+      )
+      .setTimestamp();
 
-  await sendEmbedMessage(embed);
+    await sendEmbedMessage(embed);
+  } catch (error) {
+    console.log("errrr: ", error);
+  }
 };
 
 // Notify about a match finish
