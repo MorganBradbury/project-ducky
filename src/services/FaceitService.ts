@@ -50,10 +50,13 @@ class FaceitApiClient {
 
   // New method to fetch match details
   async getMatchDetails(matchId: string): Promise<MatchDetails | null> {
+    console.log(`received matchId, ${matchId}`);
     try {
       // Fetch match details from the API
       const response = await this.client.get(`/matches/${matchId}`);
       const matchData = response.data;
+
+      console.log(`received response`, matchData);
 
       if (
         !matchData ||
@@ -67,6 +70,8 @@ class FaceitApiClient {
 
       const { match_id, voting, teams } = matchData;
 
+      console.log("teams123", teams);
+
       // Combine player IDs from both factions
       const faction1Players = teams.faction1?.players || [];
       const faction2Players = teams.faction2?.players || [];
@@ -77,6 +82,7 @@ class FaceitApiClient {
 
       // Fetch user data and filter matching players
       const allUsers = await getAllUsers();
+      console.log("allUsers", allUsers);
       const matchingPlayers = gamePlayerIds.filter((playerId) =>
         allUsers.some((user) => user.gamePlayerId === playerId)
       );
