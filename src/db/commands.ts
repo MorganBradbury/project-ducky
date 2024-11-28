@@ -2,6 +2,7 @@ import { config } from "../config/index";
 import { SystemUser } from "../types/SystemUser";
 import mysql from "mysql2/promise";
 import { SQL_QUERIES } from "./queries";
+import { MatchDetails } from "../types/MatchDetails";
 
 // Create a connection pool
 const pool = mysql.createPool({ ...config.MYSQL });
@@ -96,4 +97,31 @@ export const updateUserFaceitId = async (
     }
     return true;
   });
+};
+
+export const insertMatch = async (
+  matchDetails: MatchDetails
+): Promise<void> => {
+  // Extract values from the matchDetails object
+  const { matchId, matchingPlayers, mapName, matchLink, faction } =
+    matchDetails;
+
+  try {
+    // Perform the database insert
+    await pool.query(SQL_QUERIES.INSERT_MATCH, [
+      matchId,
+      JSON.stringify(matchingPlayers), // Store gamePlayerIds as JSON string
+      false, // Assuming this is a placeholder for whether the match was finished or not
+      mapName, // Map selected for the match
+      matchLink, // Match URL
+      faction, // Store factionPlayers as JSON string
+    ]);
+    console.log(`Match ${matchId} inserted successfully.`);
+  } catch (error) {
+    console.error(`Error inserting match ${matchId}:`, error);
+  }
+};
+
+export const markMatchComplete = async (matchId: string): Promise<void> => {
+  await pool.query(SQL_QUERIES.UPDATE_MATCH_COMPLETE, [matchId]);
 };
