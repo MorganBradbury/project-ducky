@@ -25,7 +25,7 @@ app.post("/api/autoupdateelo", async (req, res) => {
 });
 
 // Webhook callback endpoint
-app.post("/webhook", (req, res) => {
+app.post("/api/webhook", (req, res) => {
   try {
     const webhookData = req.body;
     console.log("Received webhook data:", webhookData);
