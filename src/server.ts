@@ -33,7 +33,9 @@ app.post("/api/webhook", async (req: Request, res: Response): Promise<void> => {
     const webhookData = req.body;
     console.log("Received webhook data:", webhookData?.payload?.id);
 
-    const matchData = await faceitApiClient.getMatchDetails(webhookData);
+    const matchData = await faceitApiClient.getMatchDetails(
+      webhookData.payload?.id
+    );
     console.log("match data retrieved: ", matchData);
 
     res.status(200).json({ message: "Webhook processed successfully!" });
