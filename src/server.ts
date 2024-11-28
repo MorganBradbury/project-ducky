@@ -1,6 +1,7 @@
 import express from "express";
 import bodyParser from "body-parser";
 import { runAutoUpdateElo } from "./auto/autoUpdateElo";
+import { updateVoiceChannelNames } from "./auto/voiceChannelScoreUpdater";
 
 const app = express();
 
@@ -21,6 +22,18 @@ app.post("/api/autoupdateelo", async (req, res) => {
   } catch (error) {
     console.error("Error during auto-update Elo:", error);
     res.status(500).send({ error: "Failed to run auto-update Elo." });
+  }
+});
+
+app.post("/api/updateVoiceChats", async (req, res) => {
+  try {
+    await updateVoiceChannelNames();
+    res
+      .status(200)
+      .send({ message: "Voice channel names updated successfully." });
+  } catch (error) {
+    console.error("Error updating voice channels:", error);
+    res.status(500).send({ error: "Failed to update voice channel names." });
   }
 });
 

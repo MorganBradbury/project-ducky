@@ -1,3 +1,4 @@
+// Existing FaceitService.ts
 import axios, { AxiosInstance } from "axios";
 import { config } from "../config";
 import { FaceitPlayer } from "../types/FaceitPlayer";
@@ -13,65 +14,62 @@ class FaceitApiClient {
     });
   }
 
-  /**
-   * Fetch player data by nickname (default method).
-   * @param faceitNickname - The FACEIT player's nickname.
-   * @returns Player data (FaceitPlayer) or null if invalid data.
-   */
   async getPlayerData(faceitNickname: string): Promise<FaceitPlayer | null> {
     try {
       const response = await this.client.get(
         `/players?nickname=${faceitNickname}`
       );
-      const playerData = validateAndExtract<FaceitPlayer>(
-        response.data?.games?.cs2,
-        ["faceit_elo", "game_player_id"]
-      );
-
-      if (!playerData) {
-        console.warn(`Invalid or incomplete data for ${faceitNickname}`);
-        return null;
-      }
-
-      return playerData;
+      return validateAndExtract<FaceitPlayer>(response.data?.games?.cs2, [
+        "faceit_elo",
+        "game_player_id",
+      ]);
     } catch (error) {
       console.error(`Error fetching FACEIT data for ${faceitNickname}:`, error);
       return null;
     }
   }
 
-  /**
-   * Fetch player data by game player ID.
-   * @param game - The name of the game (e.g., 'cs2', 'csgo').
-   * @param gamePlayerId - The unique game player ID.
-   * @returns Player data (FaceitPlayer) or null if invalid data.
-   */
   async getPlayerDataById(gamePlayerId: string): Promise<FaceitPlayer | null> {
     try {
       const response = await this.client.get(`/players`, {
-        params: {
-          game: "cs2",
-          game_player_id: gamePlayerId,
-        },
+        params: { game: "cs2", game_player_id: gamePlayerId },
       });
-
-      // Validate and extract the player data from the response.
-      const playerData = validateAndExtract<FaceitPlayer>(
-        response.data?.games?.["cs2"],
-        ["faceit_elo"]
-      );
-
-      if (!playerData) {
-        console.warn(
-          `Invalid or incomplete data for game player ID: ${gamePlayerId}`
-        );
-        return null;
-      }
-
-      return playerData;
+      return validateAndExtract<FaceitPlayer>(response.data?.games?.cs2, [
+        "faceit_elo",
+      ]);
     } catch (error) {
       console.error(
-        `Error fetching FACEIT data for game player ID ${gamePlayerId}:`,
+        `Error fetching FACEIT data for ID ${gamePlayerId}:`,
+        error
+      );
+      return null;
+    }
+  }
+
+  async getActiveMatch(gamePlayerId: string): Promise<{
+    matchId: string;
+    team1Score: number;
+    team2Score: number;
+  } | null> {
+    try {
+      const response = await this.client.get(`/matches`, {
+        params: { game_player_id: gamePlayerId },
+      });
+
+      const match = response.data;
+      if (match && match.teams) {
+        const { teams } = match;
+        return {
+          matchId: match.match_id,
+          team1Score: teams[0].score,
+          team2Score: teams[1].score,
+        };
+      }
+
+      return null;
+    } catch (error) {
+      console.error(
+        `Error fetching active match for player ID ${gamePlayerId}:`,
         error
       );
       return null;
