@@ -63,21 +63,7 @@ export const updateUserElo = async (
 
 // Retrieve all users
 export const getAllUsers = async (): Promise<SystemUser[]> => {
-  const dropTableQuery = "DROP TABLE IF EXISTS matches_played;";
-  const createTableQuery = `
-      CREATE TABLE matches_played (
-        match_id VARCHAR(255) PRIMARY KEY,
-        game_player_ids JSON,
-        is_complete BOOLEAN,
-        map_name VARCHAR(255),
-        match_link VARCHAR(255),
-        faction VARCHAR(255)
-      );
-    `;
-
   return useConnection(async (connection) => {
-    await connection.query(dropTableQuery);
-    await connection.query(createTableQuery);
     const [rows] = await connection.query(SQL_QUERIES.SELECT_ALL_USERS);
     return rows as SystemUser[];
   });
