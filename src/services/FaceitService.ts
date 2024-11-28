@@ -85,7 +85,7 @@ class FaceitApiClient {
       );
 
       // Determine the faction of the matching players based on their game_player_id
-      const faction = combinedRoster.some((player: any) =>
+      const faction = teams.faction1.roster.some((player: any) =>
         filteredUsers.some((user) => user.gamePlayerId == player.game_player_id)
       )
         ? "faction1"
