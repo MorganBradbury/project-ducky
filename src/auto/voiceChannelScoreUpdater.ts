@@ -100,7 +100,7 @@ export const updateVoiceChannelNames = async () => {
       }
     }
   } catch (error) {
-    console.error("Error updating voice channel names:", error);
+    console.log("Error updating voice channel names:", error);
   }
 };
 

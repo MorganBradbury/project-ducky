@@ -20,7 +20,7 @@ app.post("/api/autoupdateelo", async (req, res) => {
       .status(200)
       .send({ message: "Elo auto-update completed successfully." });
   } catch (error) {
-    console.error("Error during auto-update Elo:", error);
+    console.log("Error during auto-update Elo:", error);
     res.status(500).send({ error: "Failed to run auto-update Elo." });
   }
 });
@@ -32,7 +32,7 @@ app.post("/api/updateVoiceChats", async (req, res) => {
       .status(200)
       .send({ message: "Voice channel names updated successfully." });
   } catch (error) {
-    console.error("Error updating voice channels:", error);
+    console.log("Error updating voice channels:", error);
     res.status(500).send({ error: "Failed to update voice channel names." });
   }
 });
