@@ -51,20 +51,19 @@ app.post("/api/webhook", async (req: Request, res: Response): Promise<void> => {
       );
       if (matchData) {
         const matchExists = await checkMatchExists(matchData?.matchId);
-        if (!matchExists) {
-          console.log("match data retrieved: ", matchData);
 
-          if (matchData) {
-            if (!matchData?.results) {
+        console.log("match data retrieved: ", matchData);
+
+        if (matchData) {
+          if (!matchData?.results) {
+            if (!matchExists) {
               insertMatch(matchData);
               sendMatchStartNotification(matchData);
-            } else {
-              markMatchComplete(matchData?.matchId);
-              sendMatchFinishNotification(matchData);
             }
+          } else {
+            markMatchComplete(matchData?.matchId);
+            sendMatchFinishNotification(matchData);
           }
-        } else {
-          console.log("match already exists");
         }
       }
     }
