@@ -51,7 +51,7 @@ export const sendMatchStartNotification = async (
       { name: "Match Link", value: matchDetails.matchLink, inline: true },
       {
         name: "Stack",
-        value: matchDetails.matchingPlayers.map((p) => `${p}`).join("\n"),
+        value: matchDetails.matchingPlayers.join("\n"), // Join players with newline
       }
     )
     .setTimestamp();
