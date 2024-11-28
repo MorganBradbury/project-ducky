@@ -1,7 +1,11 @@
 import express, { Request, Response } from "express";
 import { runAutoUpdateElo } from "./auto/autoUpdateElo";
 import { faceitApiClient } from "./services/FaceitService";
-import { insertMatch, markMatchComplete } from "./db/commands";
+import {
+  checkMatchExists,
+  insertMatch,
+  markMatchComplete,
+} from "./db/commands";
 import {
   sendMatchFinishNotification,
   sendMatchStartNotification,
@@ -38,25 +42,31 @@ app.post("/api/webhook", async (req: Request, res: Response): Promise<void> => {
     const receivedData = req.body;
     console.log("Received webhook data:", receivedData);
 
-    if (receivedData?.event == "match_status_ready") {
+    if (
+      receivedData?.event == "match_status_ready" ||
+      receivedData?.event == "match_status_finished"
+    ) {
       const matchData = await faceitApiClient.getMatchDetails(
         receivedData.payload?.id
       );
-
-      console.log("match data retrieved: ", matchData);
-
       if (matchData) {
-        if (!matchData?.results) {
-          insertMatch(matchData);
-          sendMatchStartNotification(matchData);
+        const matchExists = await checkMatchExists(matchData?.matchId);
+        if (!matchExists) {
+          console.log("match data retrieved: ", matchData);
+
+          if (matchData) {
+            if (!matchData?.results) {
+              insertMatch(matchData);
+              sendMatchStartNotification(matchData);
+            } else {
+              markMatchComplete(matchData?.matchId);
+              sendMatchFinishNotification(matchData);
+            }
+          }
         } else {
-          markMatchComplete(matchData?.matchId);
-          sendMatchFinishNotification(matchData);
+          console.log("match already exists");
         }
       }
-    }
-
-    if (receivedData?.event == "match_status_finished") {
     }
     res.status(200).json({ message: "Webhook processed successfully!" });
   } catch (error) {
