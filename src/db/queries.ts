@@ -19,7 +19,7 @@ export const SQL_QUERIES = {
   UPDATE_USER_FACEIT_ID: `
     UPDATE users
     SET gamePlayerId = ?,
-    SET faceitId = ?
+    faceitId = ?
     WHERE userId = ?
   `,
   INSERT_MATCH: `
