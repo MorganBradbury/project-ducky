@@ -26,6 +26,7 @@ app.post("/api/autoupdateelo", async (req, res) => {
 });
 
 app.post("/api/updateVoiceChats", async (req, res) => {
+  console.log("Received request to run update VC names for scoreline.");
   try {
     await updateVoiceChannelNames();
     res
