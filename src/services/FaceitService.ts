@@ -64,30 +64,32 @@ class FaceitApiClient {
       }
 
       const { match_id, voting, teams } = matchData;
+      const allUsers = await getAllUsers();
+
+      // Combine the rosters of both factions
       const combinedRoster = [
         ...teams.faction1.roster,
         ...teams.faction2.roster,
       ];
 
-      const allUsers = await getAllUsers();
+      // Filter users whose game_player_id matches any in the combinedRoster
       const filteredUsers = allUsers.filter((user) =>
         combinedRoster.some(
           (player: any) => player.game_player_id === user.gamePlayerId
         )
       );
 
+      // Collect the Faceit usernames of the filtered users
       const filteredGamePlayerIds = filteredUsers.map(
         (user) => `${user.faceitUsername} (${user.discordUsername})`
       );
 
-      // Determine the faction the players belong to (faction1 or faction2)
-      const faction = teams.faction1.roster.some((player: any) =>
-        filteredGamePlayerIds.includes(
-          `${player.faceit_nickname} (${player.discord_username})`
-        )
+      // Determine the faction of the matching players based on their game_player_id
+      const faction = combinedRoster.some((player: any) =>
+        filteredUsers.some((user) => user.gamePlayerId == player.game_player_id)
       )
         ? "Faction1"
-        : "Faction2";
+        : "Faction2"; // If the player is in faction1, we assign Faction1, otherwise Faction2
 
       const mapName = voting?.map?.pick || "Unknown";
       const matchLink = `https://www.faceit.com/en/cs2/room/${matchId}`;
