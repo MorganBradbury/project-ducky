@@ -3,6 +3,7 @@ import { runAutoUpdateElo } from "./auto/autoUpdateElo";
 import { faceitApiClient } from "./services/FaceitService";
 import { getAllUsers, insertMatch } from "./db/commands";
 import { config } from "./config";
+import { sendMatchStartNotification } from "./services/discordHandler";
 
 const app = express();
 
@@ -42,6 +43,7 @@ app.post("/api/webhook", async (req: Request, res: Response): Promise<void> => {
 
     if (matchData) {
       insertMatch(matchData);
+      sendMatchStartNotification(matchData);
     }
 
     res.status(200).json({ message: "Webhook processed successfully!" });
