@@ -106,7 +106,7 @@ class FaceitApiClient {
         const matchStats = await this.getMatchStats(matchId);
 
         if (matchStats) {
-          console.log({ faction, matchData });
+          console.log({ ff: matchData["detailed_results"] });
           const finalResultInfo: MatchFinishedDetails = {
             win:
               faction.toLowerCase() ===
