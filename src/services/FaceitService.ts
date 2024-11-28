@@ -45,36 +45,6 @@ class FaceitApiClient {
       return null;
     }
   }
-
-  async getActiveMatch(gamePlayerId: string): Promise<{
-    matchId: string;
-    team1Score: number;
-    team2Score: number;
-  } | null> {
-    try {
-      const response = await this.client.get(`/matches`, {
-        params: { game_player_id: gamePlayerId },
-      });
-
-      const match = response.data;
-      if (match && match.teams) {
-        const { teams } = match;
-        return {
-          matchId: match.match_id,
-          team1Score: teams[0].score,
-          team2Score: teams[1].score,
-        };
-      }
-
-      return null;
-    } catch (error) {
-      console.error(
-        `Error fetching active match for player ID ${gamePlayerId}:`,
-        error
-      );
-      return null;
-    }
-  }
 }
 
 export const faceitApiClient = new FaceitApiClient();
