@@ -93,7 +93,7 @@ class FaceitApiClient {
 
       console.log("filtereduSERS", filteredUsers);
       const filteredGamePlayerIds = filteredUsers.map(
-        (user) => user.gamePlayerId
+        (user) => `${user.faceitUsername} (${user.discordUsername})`
       );
       console.log("filteredUsers", filteredUsers);
       console.log("filteredGamePlayerIds", filteredGamePlayerIds);
