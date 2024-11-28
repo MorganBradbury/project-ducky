@@ -74,8 +74,8 @@ class FaceitApiClient {
       console.log("teams2", teams.faction2.roster);
 
       // Combine player IDs from both factions
-      const faction1Players = teams.faction1?.players || [];
-      const faction2Players = teams.faction2?.players || [];
+      const faction1Players = teams.faction1?.roster || [];
+      const faction2Players = teams.faction2?.roster || [];
       const gamePlayerIds = [
         ...faction1Players.map((p: any) => p.player_id),
         ...faction2Players.map((p: any) => p.player_id),
