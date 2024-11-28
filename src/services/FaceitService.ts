@@ -70,7 +70,8 @@ class FaceitApiClient {
 
       const { match_id, voting, teams } = matchData;
 
-      console.log("teams123", teams);
+      console.log("teams1", teams.faction1.roster);
+      console.log("teams2", teams.faction2.roster);
 
       // Combine player IDs from both factions
       const faction1Players = teams.faction1?.players || [];
