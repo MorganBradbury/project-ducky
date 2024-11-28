@@ -31,7 +31,7 @@ app.post(
 app.post("/api/webhook", async (req: Request, res: Response): Promise<void> => {
   try {
     const webhookData = req.body;
-    console.log("Received webhook data:", webhookData?.payload?.id);
+    console.log("Received webhook data:", webhookData?.payload?.teams);
 
     const matchData = await faceitApiClient.getMatchDetails(
       webhookData.payload?.teams
