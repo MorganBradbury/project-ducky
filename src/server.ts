@@ -31,12 +31,12 @@ app.post(
 app.post("/api/webhook", async (req: Request, res: Response): Promise<void> => {
   try {
     const webhookData = req.body;
-    console.log("Received webhook data:", webhookData?.payload);
+    console.log("Received webhook data:", webhookData);
 
-    // const matchData = await faceitApiClient.getMatchDetails(
-    //   webhookData.payload?.teams
-    // );
-    // console.log("match data retrieved: ", matchData);
+    const matchData = await faceitApiClient.getMatchDetails(
+      webhookData.payload?.teams
+    );
+    console.log("match data retrieved: ", matchData);
 
     res.status(200).json({ message: "Webhook processed successfully!" });
   } catch (error) {
