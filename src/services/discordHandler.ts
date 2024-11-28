@@ -45,7 +45,6 @@ const sendEmbedMessage = async (embed: EmbedBuilder) => {
   }
 };
 
-// Notify about a match start
 export const sendMatchStartNotification = async (
   matchDetails: MatchDetails
 ) => {
@@ -55,10 +54,13 @@ export const sendMatchStartNotification = async (
       .setTitle("New Match Started!")
       .setColor("#00A2FF")
       .addFields(
-        { name: "Map", value: matchDetails.mapName[0], inline: true },
-        { name: "Match Link", value: matchDetails.matchLink, inline: true },
+        { name: "Map", value: matchDetails.mapName[0] },
         {
-          name: "Stack",
+          name: "Match Link",
+          value: `[Click here](${matchDetails.matchLink})`, // Use markdown for clickable link
+        },
+        {
+          name: "Players",
           value: matchDetails.matchingPlayers
             .map((p: string) => p) // Explicitly type as string
             .join("\n"), // Join players with newline
