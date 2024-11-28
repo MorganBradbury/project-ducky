@@ -24,7 +24,8 @@ export const addUser = async (
   discordUsername: string,
   faceitName: string,
   elo: number,
-  gamePlayerId: string
+  gamePlayerId: string,
+  playerId: string
 ): Promise<number> => {
   return useConnection(async (connection) => {
     try {
@@ -33,6 +34,7 @@ export const addUser = async (
         faceitName,
         elo,
         gamePlayerId,
+        playerId,
       ]);
       return (result as any).insertId;
     } catch (err: any) {
@@ -77,25 +79,6 @@ export const deleteUser = async (discordUsername: string): Promise<boolean> => {
     ]);
     if ((result as any).affectedRows === 0) {
       throw new Error("User not found.");
-    }
-    return true;
-  });
-};
-
-// Update user's FACEIT game player ID
-export const updateUserFaceitId = async (
-  userId: number,
-  gamePlayerId: string,
-  playerId?: string
-): Promise<boolean> => {
-  return useConnection(async (connection) => {
-    const [result] = await connection.query(SQL_QUERIES.UPDATE_USER_FACEIT_ID, [
-      gamePlayerId,
-      playerId,
-      userId,
-    ]);
-    if ((result as any).affectedRows === 0) {
-      throw new Error("No rows updated. Check if the userId exists.");
     }
     return true;
   });

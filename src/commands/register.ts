@@ -29,7 +29,8 @@ export const registerTrackingCommand = {
           discordUsername,
           faceitName,
           player.faceit_elo,
-          player.game_player_id
+          player.game_player_id,
+          player.player_id
         ).then(async () => {
           //@ts-ignore
           await updateNickname(interaction.member, player);

@@ -1,7 +1,7 @@
 export const SQL_QUERIES = {
   INSERT_USER: `
-    INSERT INTO users (discordUsername, faceitUsername, previousElo, gamePlayerId)
-    VALUES (?, ?, ?, ?)
+    INSERT INTO users (discordUsername, faceitUsername, previousElo, gamePlayerId, playerId)
+    VALUES (?, ?, ?, ?, ?)
   `,
   UPDATE_USER_ELO: `
     UPDATE users
@@ -15,12 +15,6 @@ export const SQL_QUERIES = {
   DELETE_USER: `
     DELETE FROM users
     WHERE discordUsername = ?
-  `,
-  UPDATE_USER_FACEIT_ID: `
-    UPDATE users
-    SET gamePlayerId = ?,
-    faceitId = ?
-    WHERE userId = ?
   `,
   INSERT_MATCH: `
   INSERT INTO matches_played (match_id, game_player_ids, is_complete, map_name, match_link, faction)
