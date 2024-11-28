@@ -33,19 +33,23 @@ app.post(
 // Webhook callback endpoint
 app.post("/api/webhook", async (req: Request, res: Response): Promise<void> => {
   try {
-    const webhookData = req.body;
-    console.log("Received webhook data:", webhookData);
+    const receivedData = req.body;
+    console.log("Received webhook data:", receivedData);
 
-    const matchData = await faceitApiClient.getMatchDetails(
-      webhookData.payload?.id
-    );
-    console.log("match data retrieved: ", matchData);
+    if (receivedData?.event == "match_status_ready") {
+      const matchData = await faceitApiClient.getMatchDetails(
+        receivedData.payload?.id
+      );
+      console.log("match data retrieved: ", matchData);
 
-    if (matchData) {
-      insertMatch(matchData);
-      sendMatchStartNotification(matchData);
+      if (matchData) {
+        insertMatch(matchData);
+        sendMatchStartNotification(matchData);
+      }
     }
 
+    if (receivedData?.event == "match_status_finished") {
+    }
     res.status(200).json({ message: "Webhook processed successfully!" });
   } catch (error) {
     console.error("Error handling webhook:", error);
