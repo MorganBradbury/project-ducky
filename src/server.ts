@@ -1,6 +1,7 @@
 import express, { Request, Response } from "express";
 import { runAutoUpdateElo } from "./auto/autoUpdateElo";
 import { faceitApiClient } from "./services/FaceitService";
+import { insertMatch } from "./db/commands";
 
 const app = express();
 
@@ -36,6 +37,10 @@ app.post("/api/webhook", async (req: Request, res: Response): Promise<void> => {
     const matchData = await faceitApiClient.getMatchDetails(
       webhookData.payload?.id
     );
+
+    if (matchData) {
+      insertMatch(matchData);
+    }
     console.log("match data retrieved: ", matchData);
 
     res.status(200).json({ message: "Webhook processed successfully!" });
