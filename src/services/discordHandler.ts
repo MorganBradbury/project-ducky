@@ -11,6 +11,7 @@ import { config } from "../config/index";
 import { SystemUser } from "../types/SystemUser";
 import { faceitApiClient } from "./FaceitService";
 import { FaceitPlayer } from "../types/FaceitPlayer";
+import axios from "axios";
 
 // Initialize the Discord client
 const client = new Client({
@@ -50,7 +51,7 @@ const sendEmbedMessage = async (embed: EmbedBuilder) => {
   }
 };
 
-// Function to update voice channel name
+// Function to update voice channel name with rate-limit checking
 export const updateVoiceChannelName = async (
   voiceChannelId: string,
   matchOngoing: boolean
@@ -64,11 +65,34 @@ export const updateVoiceChannelName = async (
 
     // Check if the channel is a VoiceChannel
     if (channel instanceof VoiceChannel) {
-      // Set the channel name based on the matchOngoing flag
       const newName =
         matchOngoing && channel.members.size > 0 ? "CS [🟢 LIVE]" : "CS";
-      await channel.setName(newName);
-      console.log(`Updated voice channel name to: ${newName}`);
+
+      // Discord API endpoint for updating channel names
+      const url = `https://discord.com/api/v10/channels/${voiceChannelId}`;
+      const payload = { name: newName };
+
+      // Make the API call with axios
+      const response = await axios.patch(url, payload, {
+        headers: {
+          Authorization: `Bot ${config.DISCORD_BOT_TOKEN}`, // Your bot token
+          "Content-Type": "application/json",
+        },
+      });
+
+      // Check rate limit headers
+      const remaining = response.headers["x-ratelimit-remaining"];
+      const reset = response.headers["x-ratelimit-reset"];
+
+      if (remaining === "0") {
+        console.log(
+          `Rate limit hit! Next request possible at ${new Date(
+            parseInt(reset) * 1000
+          ).toISOString()}`
+        );
+      } else {
+        console.log(`Updated voice channel name to: ${newName}`);
+      }
     } else {
       console.log("The specified channel is not a VoiceChannel.");
     }
