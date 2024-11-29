@@ -36,7 +36,6 @@ app.post("/api/webhook", async (req: Request, res: Response): Promise<void> => {
       if (matchData) {
         const matchExists = await checkMatchExists(matchData?.matchId);
         const isComplete = await isMatchComplete(matchData?.matchId);
-        console.log("isComplete", isComplete);
 
         if (!isComplete) {
           console.log("match data retrieved: ", matchData);
