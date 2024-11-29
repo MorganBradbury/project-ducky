@@ -27,8 +27,6 @@ app.post("/api/webhook", async (req: Request, res: Response): Promise<void> => {
   try {
     const receivedData = req.body;
     console.log("Received webhook data:", receivedData);
-    console.log("teams obj", receivedData?.payload?.teams[0]?.roster);
-    console.log("teams obj", receivedData?.payload?.teams[1]?.roster);
 
     if (
       receivedData?.event == "match_status_ready" ||
