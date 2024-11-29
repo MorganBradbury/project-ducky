@@ -4,7 +4,6 @@ import { faceitApiClient } from "./services/FaceitService";
 import {
   checkMatchExists,
   insertMatch,
-  isMatchComplete,
   markMatchComplete,
 } from "./db/commands";
 import {
@@ -20,35 +19,9 @@ const port = process.env.PORT || 3000;
 // Middleware
 app.use(express.json());
 
-// Helper function to handle match start/finish logic
-// const handleMatchStatus = async (matchData: MatchDetails) => {
-//   console.log("matchData", matchData);
-//   const matchExists = await checkMatchExists(matchData.matchId);
-//   console.log("matchExists", matchExists);
-
-//   // Explicit check for undefined or null results
-//   if (matchData?.results == null) {
-//     console.log("Match has started, no results yet");
-//     // Match has started
-//     console.log(matchExists);
-//     if (!matchExists) {
-//       await insertMatch(matchData);
-//       await sendMatchStartNotification(matchData);
-//       await updateVoiceChannelName("1309222763994808374", true); // Update voice channel on match start
-//     }
-//   } else {
-//     console.log("Match has finished");
-//     // Match has finished
-//     await runAutoUpdateElo(matchData.matchingPlayers);
-//     await markMatchComplete(matchData.matchId);
-//     await sendMatchFinishNotification(matchData);
-//     await updateVoiceChannelName("1309222763994808374", false); // Update voice channel on match end
-//   }
-// };
-
+// Helper to handle match start logic
 const runMatchStartFlow = async (matchId: string) => {
   console.log("runMatchStartFlow", matchId);
-
   const matchData = await faceitApiClient.getMatchDetails(matchId);
 
   if (matchData) {
@@ -57,13 +30,13 @@ const runMatchStartFlow = async (matchId: string) => {
     await sendMatchStartNotification(matchData);
     await updateVoiceChannelName("1309222763994808374", true);
   } else {
-    console.log(`runMatchStartFlow: No match data found by ID ${matchId}`);
+    console.log(`runMatchStartFlow: No match data found for ID ${matchId}`);
   }
 };
 
+// Helper to handle match end logic
 const runMatchEndFlow = async (matchId: string) => {
   console.log("runMatchEndFlow", matchId);
-
   const matchData = await faceitApiClient.getMatchDetails(matchId);
 
   if (matchData) {
@@ -73,7 +46,7 @@ const runMatchEndFlow = async (matchId: string) => {
     await sendMatchFinishNotification(matchData);
     await updateVoiceChannelName("1309222763994808374", false);
   } else {
-    console.log(`runMatchEndFlow: No match data found by ID ${matchId}`);
+    console.log(`runMatchEndFlow: No match data found for ID ${matchId}`);
   }
 };
 
@@ -84,32 +57,40 @@ app.post("/api/webhook", async (req: Request, res: Response): Promise<void> => {
     const matchId = payload?.id;
 
     if (!matchId) {
-      res.status(500).json({ message: "No match ID provided in webhook" });
+      res.status(400).json({ message: "No match ID provided in webhook" });
+      return; // Prevent further execution
     }
 
     const isMatchInDb = await checkMatchExists(matchId);
+
     if (event === "match_status_ready") {
       if (isMatchInDb) {
-        res.status(500).json({ message: "This match already exists." });
+        res.status(409).json({ message: "This match already exists." });
+        return; // Prevent further execution
       }
       await runMatchStartFlow(matchId);
       res.status(200).json({ message: "Match workflow started" });
+      return; // Prevent further execution
     }
 
-    if (event === "match_status_finished" && isMatchInDb) {
+    if (event === "match_status_finished") {
+      if (!isMatchInDb) {
+        res.status(404).json({ message: "Match not found in database." });
+        return; // Prevent further execution
+      }
       await runMatchEndFlow(matchId);
+      res.status(200).json({ message: "Match end workflow completed" });
+      return; // Prevent further execution
     }
 
-    // if (event === "match_status_ready" || event === "match_status_finished") {
-    //   const matchData = await faceitApiClient.getMatchDetails(payload?.id);
-    //   if (matchData) {
-    //     await handleMatchStatus(matchData);
-    //   }
-    // }
-    res.status(200).json({ message: "Webhook processed successfully!" });
+    // If no valid event is matched, respond with 400
+    res.status(400).json({ message: "Unsupported event type" });
   } catch (error) {
     console.error("Error handling webhook:", error);
-    res.status(500).json({ error: "Internal Server Error" });
+
+    if (!res.headersSent) {
+      res.status(500).json({ error: "Internal Server Error" });
+    }
   }
 });
 
