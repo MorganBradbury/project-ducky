@@ -160,7 +160,7 @@ export const getMatchFromDatabase = async (
     return {
       matchId: matchData.match_id,
       mapName: matchData.map_name,
-      matchingPlayers: JSON.parse(matchData.game_player_ids),
+      matchingPlayers: JSON.parse(matchData.matchingPlayers),
       faction: JSON.parse(matchData.faction),
       voiceChannelId: matchData.voiceChannelId,
     } as MatchDetails;
