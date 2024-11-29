@@ -89,10 +89,10 @@ const getEloDifference = async (previousElo: number, gamePlayerId: string) => {
 
   if (faceitPlayer.faceit_elo > previousElo) {
     const eloChange = faceitPlayer.faceit_elo - previousElo;
-    return `${`(${faceitPlayer.faceit_elo}) **\+${eloChange}\**`}`;
+    return `${`(${faceitPlayer.faceit_elo})  **\+${eloChange}\**`}`;
   } else {
     const eloChange = previousElo - faceitPlayer?.faceit_elo;
-    return `${`(${faceitPlayer.faceit_elo}) **\+${eloChange}\**`}`;
+    return `${`(${faceitPlayer.faceit_elo})  **\-${eloChange}\**`}`;
   }
 };
 
