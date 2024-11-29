@@ -79,12 +79,6 @@ class FaceitApiClient {
           (player: any) => player.game_player_id === user.gamePlayerId
         )
       );
-
-      // Collect the Faceit usernames of the filtered users
-      // const filteredGamePlayerIds = filteredUsers.map(
-      //   (user) => `${user.faceitUsername} (${user.discordUsername})`
-      // );
-
       // Determine the faction of the matching players based on their game_player_id
       const faction = teams.faction1.roster.some((player: any) =>
         matchingPlayers.some(
@@ -95,12 +89,10 @@ class FaceitApiClient {
         : "faction2"; // If the player is in faction1, we assign Faction1, otherwise Faction2
 
       const mapName = voting?.map?.pick || "Unknown";
-      const matchLink = `https://www.faceit.com/en/cs2/room/${matchId}`;
 
       let matchDetails: MatchDetails = {
         matchId: match_id,
         mapName,
-        matchLink,
         matchingPlayers,
         faction,
       };

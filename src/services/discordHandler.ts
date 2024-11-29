@@ -97,7 +97,9 @@ export const sendMatchStartNotification = async (
         { name: "Map", value: matchDetails.mapName[0] },
         {
           name: "Match Link",
-          value: `[Click here](${matchDetails.matchLink})`, // Use markdown for clickable link
+          value: `[Click here](${`https://www.faceit.com/en/cs2/room/`}${
+            matchDetails?.matchId
+          })`, // Use markdown for clickable link
         },
         {
           name: "Players",
@@ -161,7 +163,9 @@ export const sendMatchFinishNotification = async (
         { name: "Map", value: matchDetails.mapName[0] },
         {
           name: "Match Link",
-          value: `[Click here](${matchDetails.matchLink})`, // Use markdown for clickable link
+          value: `[Click here](${`https://www.faceit.com/en/cs2/room/`}${
+            matchDetails?.matchId
+          })`, // Use markdown for clickable link
         },
         {
           name: "Match Result",
