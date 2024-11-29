@@ -99,6 +99,17 @@ export const sendMatchFinishNotification = async (
   matchDetails: MatchDetails
 ) => {
   try {
+    // Resolve all player ELO differences before creating the embed
+    const playerDetails = await Promise.all(
+      matchDetails.matchingPlayers.map(async (player) => {
+        const eloDifference = await getEloDifference(
+          player.previousElo,
+          player.gamePlayerId
+        );
+        return `${player.faceitUsername} ${eloDifference || ""}`;
+      })
+    );
+
     const embed = new EmbedBuilder()
       .setTitle(
         `🚨  Match finished update (${
@@ -120,15 +131,7 @@ export const sendMatchFinishNotification = async (
         },
         {
           name: "Players",
-          value: matchDetails.matchingPlayers
-            .map(
-              async (player) =>
-                `${player.faceitUsername} ${await getEloDifference(
-                  player.previousElo,
-                  player.gamePlayerId
-                )}`
-            ) // Explicitly type as string
-            .join("\n"),
+          value: playerDetails.join("\n"), // Join resolved player details
         }
       )
       .setTimestamp();
