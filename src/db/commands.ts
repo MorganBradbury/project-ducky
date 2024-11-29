@@ -117,6 +117,7 @@ export const isMatchComplete = async (matchId: string): Promise<boolean> => {
       SQL_QUERIES.GET_MATCH_COMPLETE_STATUS,
       [matchId]
     );
+    console.log("rows", rows);
     return rows.length > 0; // Returns true if a record is found
   });
 };
