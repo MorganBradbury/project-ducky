@@ -63,7 +63,6 @@ export const updateVoiceChannelName = async (
     // Fetch the channel by ID
     const channel = await guild.channels.fetch(voiceChannelId);
 
-    // Check if the channel is a VoiceChannel
     if (channel instanceof VoiceChannel) {
       const newName =
         matchOngoing && channel.members.size > 0 ? "CS [🟢 LIVE]" : "CS";
@@ -72,26 +71,22 @@ export const updateVoiceChannelName = async (
       const url = `https://discord.com/api/v10/channels/${voiceChannelId}`;
       const payload = { name: newName };
 
-      // Make the API call with axios
-      const response = await axios.patch(url, payload, {
-        headers: {
-          Authorization: `Bot ${config.DISCORD_BOT_TOKEN}`, // Your bot token
-          "Content-Type": "application/json",
-        },
-      });
-
-      // Check rate limit headers
-      const remaining = response.headers["x-ratelimit-remaining"];
-      const reset = response.headers["x-ratelimit-reset"];
-
-      if (remaining === "0") {
-        console.log(
-          `Rate limit hit! Next request possible at ${new Date(
-            parseInt(reset) * 1000
-          ).toISOString()}`
-        );
-      } else {
+      try {
+        // Make the API call
+        const response = await axios.patch(url, payload, {
+          headers: {
+            Authorization: `Bot ${config.DISCORD_BOT_TOKEN}`,
+            "Content-Type": "application/json",
+          },
+        });
         console.log(`Updated voice channel name to: ${newName}`);
+      } catch (error: any) {
+        if (error.response?.status === 429) {
+          const retryAfter = error.response.headers["retry-after"];
+          console.error(`Rate limit hit! Retry after ${retryAfter} seconds.`);
+        } else {
+          throw error; // Re-throw if not a rate-limit error
+        }
       }
     } else {
       console.log("The specified channel is not a VoiceChannel.");
