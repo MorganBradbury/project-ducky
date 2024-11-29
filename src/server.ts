@@ -19,23 +19,6 @@ const port = process.env.PORT || 3000;
 // Middleware
 app.use(express.json()); // No need for body-parser anymore
 
-// Endpoint to trigger Elo update
-app.post(
-  "/api/autoupdateelo",
-  async (req: Request, res: Response): Promise<void> => {
-    try {
-      console.log("Received request to run auto-update Elo.");
-      await runAutoUpdateElo(); // Run the function and wait for its completion
-      res
-        .status(200)
-        .json({ message: "Elo auto-update completed successfully." });
-    } catch (error) {
-      console.error("Error during auto-update Elo:", error);
-      res.status(500).json({ error: "Failed to run auto-update Elo." });
-    }
-  }
-);
-
 // Webhook callback endpoint
 app.post("/api/webhook", async (req: Request, res: Response): Promise<void> => {
   try {
