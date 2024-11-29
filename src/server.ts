@@ -35,6 +35,8 @@ app.post("/api/webhook", async (req: Request, res: Response): Promise<void> => {
       const matchData = await faceitApiClient.getMatchDetails(
         receivedData.payload?.id
       );
+
+      console.log(matchData);
       if (matchData) {
         const matchExists = await checkMatchExists(matchData?.matchId);
 
