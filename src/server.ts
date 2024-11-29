@@ -26,8 +26,9 @@ const handleMatchStatus = async (matchData: MatchDetails) => {
   const matchExists = await checkMatchExists(matchData.matchId);
   console.log("matchExists", matchExists);
 
-  if (!matchData?.results) {
-    console.log("resres", matchData?.results);
+  // Explicit check for undefined or null results
+  if (matchData?.results == null) {
+    console.log("Match has started, no results yet");
     // Match has started
     if (!matchExists) {
       await insertMatch(matchData);
@@ -35,6 +36,7 @@ const handleMatchStatus = async (matchData: MatchDetails) => {
       await updateVoiceChannelName("1309222763994808374", true); // Update voice channel on match start
     }
   } else {
+    console.log("Match has finished");
     // Match has finished
     await runAutoUpdateElo(matchData.matchingPlayers);
     await markMatchComplete(matchData.matchId);
