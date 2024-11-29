@@ -37,4 +37,9 @@ export const SQL_QUERIES = {
   WHERE match_id = ?
   LIMIT 1
 `,
+  GET_MATCH_BY_ID: `
+  SELECT match_id, map_name, game_player_ids, faction, voiceChannelId
+  FROM matches_played
+  WHERE match_id = ?
+`,
 };

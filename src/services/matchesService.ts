@@ -1,5 +1,10 @@
 import { runAutoUpdateElo } from "../auto/autoUpdateElo";
-import { insertMatch, markMatchComplete } from "../db/commands";
+import {
+  getMatchFromDatabase,
+  insertMatch,
+  markMatchComplete,
+} from "../db/commands";
+import { MatchDetails } from "../types/MatchDetails";
 import {
   sendMatchFinishNotification,
   updateVoiceChannelName,
@@ -28,10 +33,22 @@ const processMatchData = async (matchData: any, isMatchStart: boolean) => {
 // Main workflow function
 export const runMatchFlow = async (matchId: string, event: string) => {
   try {
-    const matchData = await faceitApiClient.getMatchDetails(matchId);
-    if (!matchData) {
-      console.log(`No match data found for ID ${matchId}`);
-      return;
+    let matchData: MatchDetails | null = null;
+
+    if (event === "match_status_finished") {
+      // Fetch match data from the database if match is finished
+      matchData = await getMatchFromDatabase(matchId);
+      if (!matchData) {
+        console.log(`No match data found for finished match ID ${matchId}`);
+        return;
+      }
+    } else {
+      // Otherwise, use Faceit API to get match data
+      matchData = await faceitApiClient.getMatchDetails(matchId);
+      if (!matchData) {
+        console.log(`No match data found for ID ${matchId}`);
+        return;
+      }
     }
 
     if (event === "match_status_ready") {

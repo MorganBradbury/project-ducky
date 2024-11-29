@@ -141,3 +141,28 @@ export const checkMatchExists = async (matchId: string): Promise<boolean> => {
     return rows.length > 0; // Returns true if a record is found
   });
 };
+
+// Fetch match details from the database
+export const getMatchFromDatabase = async (
+  matchId: string
+): Promise<MatchDetails | null> => {
+  return useConnection(async (connection) => {
+    const [rows] = await connection.query<RowDataPacket[]>(
+      SQL_QUERIES.GET_MATCH_BY_ID,
+      [matchId]
+    );
+    if (rows.length === 0) {
+      return null; // No match found
+    }
+
+    // Assuming the columns returned are as expected, format the result
+    const matchData = rows[0];
+    return {
+      matchId: matchData.match_id,
+      mapName: matchData.map_name,
+      matchingPlayers: JSON.parse(matchData.game_player_ids),
+      faction: JSON.parse(matchData.faction),
+      voiceChannelId: matchData.voiceChannelId,
+    } as MatchDetails;
+  });
+};
