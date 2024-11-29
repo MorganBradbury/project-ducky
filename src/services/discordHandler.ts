@@ -64,16 +64,10 @@ export const updateVoiceChannelName = async (
 
     // Check if the channel is a VoiceChannel
     if (channel instanceof VoiceChannel) {
-      // If there are no members in the voice channel, set the name to "CS"
-      if (channel.members.size === 0) {
-        await channel.setName("CS");
-        console.log("No members in the channel, renamed to: CS");
-      } else {
-        // Set the channel name based on the matchOngoing flag
-        const newName = matchOngoing ? "CS [🟢 LIVE]" : "CS";
-        await channel.setName(newName);
-        console.log(`Updated voice channel name to: ${newName}`);
-      }
+      // Set the channel name based on the matchOngoing flag
+      const newName = matchOngoing ? "CS [🟢 LIVE]" : "CS";
+      await channel.setName(newName);
+      console.log(`Updated voice channel name to: ${newName}`);
     } else {
       console.log("The specified channel is not a VoiceChannel.");
     }
