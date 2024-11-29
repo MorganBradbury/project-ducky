@@ -30,6 +30,7 @@ const handleMatchStatus = async (matchData: MatchDetails) => {
   if (matchData?.results == null) {
     console.log("Match has started, no results yet");
     // Match has started
+    console.log(matchExists);
     if (!matchExists) {
       await insertMatch(matchData);
       await sendMatchStartNotification(matchData);
