@@ -11,6 +11,15 @@ function removeExistingTag(nickname: string): string {
 }
 
 /**
+ * Helper function to check if the identifier is a nickname.
+ * @param identifier - The player identifier to check.
+ * @returns True if the identifier is a nickname.
+ */
+export function isNickname(identifier: string | number): identifier is string {
+  return typeof identifier === "string";
+}
+
+/**
  * Updates the nickname of a guild member with their FACEIT ELO.
  * @param member - The guild member whose nickname will be updated.
  * @param player - The FACEIT player data containing the ELO.

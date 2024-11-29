@@ -180,8 +180,9 @@ export const updateVoiceChannelName = async (
 
 // Function to get Elo difference
 const getEloDifference = async (previousElo: number, gamePlayerId: string) => {
-  const faceitPlayer: FaceitPlayer | null =
-    await faceitApiClient.getPlayerDataById(gamePlayerId);
+  const faceitPlayer: FaceitPlayer | null = await faceitApiClient.getPlayerData(
+    gamePlayerId
+  );
   console.log("faceit api returns", faceitPlayer);
   console.log(previousElo);
 

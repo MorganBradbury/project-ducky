@@ -1,10 +1,17 @@
 import axios, { AxiosInstance } from "axios";
 import { config } from "../config";
 import { FaceitPlayer } from "../types/FaceitPlayer";
-import { validateAndExtract } from "../utils/generalUtils";
 import { getAllUsers } from "../db/commands";
 import { MatchDetails, MatchFinishedDetails } from "../types/MatchDetails";
 import { getApplicableVoiceChannel } from "./discordService";
+import { isNickname } from "../utils/nicknameUtils";
+import { fetchData } from "../utils/apiRequestUtil";
+
+// Enum to store API endpoints
+enum FaceitApiEndpoints {
+  PLAYERS = "/players",
+  MATCHES = "/matches",
+}
 
 class FaceitApiClient {
   private client: AxiosInstance;
@@ -16,43 +23,50 @@ class FaceitApiClient {
     });
   }
 
-  async getPlayerData(faceitNickname: string): Promise<FaceitPlayer | null> {
-    try {
-      const response = await this.client.get(
-        `/players?nickname=${faceitNickname}`
-      );
-      return {
-        faceit_elo: response.data?.games?.cs2?.faceit_elo,
-        game_player_id: response.data?.games?.cs2?.game_player_id,
-        player_id: response.data?.player_id,
-      };
-    } catch (error) {
-      console.error(`Error fetching FACEIT data for ${faceitNickname}:`, error);
-      return null;
-    }
-  }
+  /**
+   * Fetches player data by either nickname or player ID.
+   * @param faceitIdentifier - Can be either a Faceit nickname (string) or a game player ID (string or number).
+   * @returns Player data or null if not found.
+   */
+  async getPlayerData(
+    faceitIdentifier: string | number
+  ): Promise<FaceitPlayer | null> {
+    // Base URL
+    const baseUrl = FaceitApiEndpoints.PLAYERS;
+    let url: string;
+    let params: any = {};
 
-  async getPlayerDataById(gamePlayerId: string): Promise<FaceitPlayer | null> {
-    try {
-      const response = await this.client.get(`/players`, {
-        params: { game: "cs2", game_player_id: gamePlayerId },
-      });
-      return validateAndExtract<FaceitPlayer>(response.data?.games?.cs2, [
-        "faceit_elo",
-      ]);
-    } catch (error) {
-      console.error(
-        `Error fetching FACEIT data for ID ${gamePlayerId}:`,
-        error
-      );
-      return null;
+    // Convert game_player_id to string if it's a number
+    const identifier =
+      typeof faceitIdentifier === "number"
+        ? faceitIdentifier.toString()
+        : faceitIdentifier;
+
+    if (isNickname(identifier)) {
+      // If it's a nickname, append as query parameter
+      url = `${baseUrl}?nickname=${identifier}`;
+    } else {
+      // If it's a game player ID, append as query parameter
+      params = { game: "cs2", game_player_id: identifier };
+      url = baseUrl; // No change needed, still /players for ID
     }
+
+    const data = await fetchData(this.client, url, params);
+    if (!data) return null;
+
+    return {
+      faceit_elo: data?.games?.cs2?.faceit_elo,
+      game_player_id: data?.games?.cs2?.game_player_id,
+      player_id: data?.player_id,
+    };
   }
 
   // New method to fetch match details
   async getMatchDetails(matchId: string): Promise<MatchDetails | null> {
     try {
-      const response = await this.client.get(`/matches/${matchId}`);
+      const response = await this.client.get(
+        `${FaceitApiEndpoints.MATCHES}/${matchId}`
+      );
       const matchData = response.data;
 
       if (
@@ -80,6 +94,7 @@ class FaceitApiClient {
           (player: any) => player.game_player_id === user.gamePlayerId
         )
       );
+
       // Determine the faction of the matching players based on their game_player_id
       const faction = teams.faction1.roster.some((player: any) =>
         matchingPlayers.some(
@@ -128,7 +143,9 @@ class FaceitApiClient {
 
   async getMatchStats(matchId: string): Promise<{ score: string } | null> {
     try {
-      const response = await this.client.get(`/matches/${matchId}/stats`);
+      const response = await this.client.get(
+        `${FaceitApiEndpoints.MATCHES}/${matchId}/stats`
+      );
       const statsData = response.data;
 
       if (!statsData || !statsData.rounds) {

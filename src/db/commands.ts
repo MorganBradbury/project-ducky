@@ -135,7 +135,7 @@ export const isMatchComplete = async (matchId: string): Promise<boolean> => {
 export const checkMatchExists = async (matchId: string): Promise<boolean> => {
   return useConnection(async (connection) => {
     const [rows] = await connection.query<any[]>(
-      "SELECT 1 FROM matches_played WHERE match_id = ? LIMIT 1",
+      SQL_QUERIES.CHECK_MATCH_EXISTS, // Use the query from SQL_QUERIES
       [matchId]
     );
     return rows.length > 0; // Returns true if a record is found

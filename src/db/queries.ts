@@ -31,4 +31,10 @@ export const SQL_QUERIES = {
   FROM matches_played
   WHERE match_id = ?;
 `,
+  CHECK_MATCH_EXISTS: `
+  SELECT 1
+  FROM matches_played
+  WHERE match_id = ?
+  LIMIT 1
+`,
 };

@@ -33,7 +33,7 @@ export const runAutoUpdateElo = async (users: SystemUser[]) => {
 
         try {
           const player: FaceitPlayer | null =
-            await faceitApiClient.getPlayerDataById(gamePlayerId);
+            await faceitApiClient.getPlayerData(gamePlayerId);
 
           if (!player || player.faceit_elo === previousElo) return; // Skip unchanged users
 
