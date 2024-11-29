@@ -107,9 +107,7 @@ export const updateVoiceChannelName = async (
 
       if (channel instanceof VoiceChannel) {
         const newName =
-          matchOngoing && channel.members.size > 0
-            ? "CS [🟢 LIVE - IN GAME]"
-            : "CS";
+          matchOngoing && channel.members.size > 0 ? "CS [🟢 LIVE]" : "CS";
 
         // Discord API endpoint for updating channel names
         const url = `https://discord.com/api/v10/channels/${voiceChannelId}`;
