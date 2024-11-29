@@ -61,6 +61,7 @@ app.post("/api/webhook", async (req: Request, res: Response): Promise<void> => {
               sendMatchStartNotification(matchData);
             }
           } else {
+            runAutoUpdateElo(matchData?.matchingPlayers);
             markMatchComplete(matchData?.matchId);
             sendMatchFinishNotification(matchData);
           }

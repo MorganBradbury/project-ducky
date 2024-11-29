@@ -1,26 +1,14 @@
-import {
-  Client,
-  GatewayIntentBits,
-  Partials,
-  TextChannel,
-  GuildMember,
-  EmbedBuilder,
-} from "discord.js";
-import { getAllUsers, updateUserElo } from "../db/commands";
+import { Client, GatewayIntentBits, Partials, GuildMember } from "discord.js";
+import { updateUserElo } from "../db/commands";
 import { updateNickname } from "../utils/nicknameUtils";
 import { config } from "../config";
 import { FaceitPlayer } from "../types/FaceitPlayer";
 import { faceitApiClient } from "../services/FaceitService";
+import { SystemUser } from "../types/SystemUser"; // Assuming SystemUser is defined in your types
 
 // Initialize the Discord client
 const client = new Client({
-  intents: [
-    GatewayIntentBits.Guilds,
-    GatewayIntentBits.GuildMembers,
-    GatewayIntentBits.GuildMessages,
-    GatewayIntentBits.MessageContent,
-    GatewayIntentBits.DirectMessages,
-  ],
+  intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildMembers],
   partials: [Partials.Message, Partials.Channel],
 });
 
@@ -30,67 +18,42 @@ const logError = (message: string, error: any) => {
 };
 
 // Main function to update Elo
-export const runAutoUpdateElo = async () => {
+export const runAutoUpdateElo = async (users: SystemUser[]) => {
   try {
-    const users = await getAllUsers();
-    if (!users.length) return console.log("No users found for update.");
+    if (!users.length) {
+      console.log("No users provided for update.");
+      return;
+    }
 
     const guild = await client.guilds.fetch(config.GUILD_ID); // Cache the guild object
-    const memberPromises = users.map(async (user) => {
-      const { discordUsername, faceitUsername, previousElo, gamePlayerId } =
-        user;
 
-      try {
-        const player: FaceitPlayer | null =
-          await faceitApiClient.getPlayerDataById(gamePlayerId);
+    await Promise.all(
+      users.map(async (user) => {
+        const { discordUsername, previousElo, gamePlayerId } = user;
 
-        if (!player || player.faceit_elo === previousElo) return null; // Skip unchanged users
+        try {
+          const player: FaceitPlayer | null =
+            await faceitApiClient.getPlayerDataById(gamePlayerId);
 
-        const member =
-          guild.members.cache.find((m) => m.user.tag === discordUsername) ??
-          (await guild.members
-            .fetch({ query: discordUsername, limit: 1 })
-            .then((m) => m.first()));
+          if (!player || player.faceit_elo === previousElo) return; // Skip unchanged users
 
-        if (!member) return null; // Skip if member not found
+          const member =
+            guild.members.cache.find((m) => m.user.tag === discordUsername) ??
+            (await guild.members
+              .fetch({ query: discordUsername, limit: 1 })
+              .then((m) => m.first()));
 
-        await Promise.all([
-          updateNickname(member, player),
-          updateUserElo(user.userId, player.faceit_elo),
-        ]);
+          if (!member) return; // Skip if member not found
 
-        const eloDifference = player.faceit_elo - previousElo;
-        const eloChange =
-          eloDifference > 0
-            ? `🟢 **\`+${eloDifference}\`**`
-            : `🔴 **\`-${Math.abs(eloDifference)}\`**`;
-
-        return {
-          name: `${discordUsername} (${faceitUsername})`,
-          value: `**Elo change:** ${previousElo} > ${player.faceit_elo}\n${eloChange}\n\n`,
-        };
-      } catch (error) {
-        logError(`Error processing user ${discordUsername}:`, error);
-        return null; // Skip user on error
-      }
-    });
-
-    const embedFields = (await Promise.all(memberPromises)).filter(
-      (field): field is { name: string; value: string } => field !== null
-    ); // Type guard for non-null values
-
-    if (embedFields.length > 0) {
-      const channel = (await client.channels.fetch(
-        config.BOT_UPDATES_CHANNEL_ID
-      )) as TextChannel;
-      const embed = new EmbedBuilder()
-        .setTitle("🔔 Automated elo summary")
-        .setColor("#00FF00")
-        .addFields(embedFields)
-        .setTimestamp();
-
-      await channel.send({ embeds: [embed] });
-    }
+          await Promise.all([
+            updateNickname(member, player),
+            updateUserElo(user.userId, player.faceit_elo),
+          ]);
+        } catch (error) {
+          logError(`Error processing user ${discordUsername}:`, error);
+        }
+      })
+    );
 
     console.log("Auto-update completed!");
   } catch (error) {
