@@ -89,10 +89,10 @@ const getEloDifference = async (previousElo: number, gamePlayerId: string) => {
 
   if (faceitPlayer.faceit_elo > previousElo) {
     const eloChange = faceitPlayer.faceit_elo - previousElo;
-    return `${`(${faceitPlayer.faceit_elo})  **\+${eloChange}\**`}`;
+    return `${`**\+${eloChange}\**(${faceitPlayer.faceit_elo})`}`;
   } else {
     const eloChange = previousElo - faceitPlayer?.faceit_elo;
-    return `${`(${faceitPlayer.faceit_elo})  **\-${eloChange}\**`}`;
+    return `${`**\-${eloChange}\** (${faceitPlayer.faceit_elo})`}`;
   }
 };
 
@@ -108,7 +108,7 @@ export const sendMatchFinishNotification = async (
           player.previousElo,
           player.gamePlayerId
         );
-        return `${player.faceitUsername} ${eloDifference || ""}`;
+        return `**${player.faceitUsername}**: ${eloDifference || ""}`;
       })
     );
 
