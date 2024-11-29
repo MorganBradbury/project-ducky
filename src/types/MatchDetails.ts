@@ -7,6 +7,7 @@ export type MatchDetails = {
   matchingPlayers: SystemUser[];
   faction: string; // Faction name will be added here
   results?: MatchFinishedDetails;
+  voiceChannelId?: string;
 };
 
 export type MatchFinishedDetails = {

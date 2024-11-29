@@ -52,34 +52,29 @@ const sendEmbedMessage = async (embed: EmbedBuilder) => {
 
 // Function to update voice channel name
 export const updateVoiceChannelName = async (
-  matchingPlayers: any[],
-  matchEnd?: boolean
+  voiceChannelId: string,
+  matchOngoing: boolean
 ) => {
   try {
     const guild = await client.guilds.fetch(config.GUILD_ID);
 
-    // Iterate over the channels in the guild
-    for (const channel of guild.channels.cache.values()) {
-      // Check if the channel is a VoiceChannel
-      if (channel instanceof VoiceChannel) {
-        // Check if any player is in this voice channel
-        const members = channel.members;
-        const memberUsernames = members.map((member) => member.user.username);
+    // Fetch the channel by ID
+    const channel = await guild.channels.fetch(voiceChannelId);
 
-        // Check if any of the matching players are in this channel
-        const playersInChannel = matchingPlayers.filter((player) =>
-          memberUsernames.includes(player.discordUsername)
-        );
-
-        if (playersInChannel.length > 0 && matchEnd != true) {
-          // Update the channel name to "CS 🟢 LIVE"
-          await channel.setName("CS [🟢LIVE]");
-          console.log(`Updated voice channel name to: CS 🟢 LIVE`);
-        } else {
-          await channel.setName("CS");
-          console.log(`Updated voice channel name to: CS`);
-        }
+    // Check if the channel is a VoiceChannel
+    if (channel instanceof VoiceChannel) {
+      // If there are no members in the voice channel, set the name to "CS"
+      if (channel.members.size === 0) {
+        await channel.setName("CS");
+        console.log("No members in the channel, renamed to: CS");
+      } else {
+        // Set the channel name based on the matchOngoing flag
+        const newName = matchOngoing ? "CS [🟢 LIVE]" : "CS";
+        await channel.setName(newName);
+        console.log(`Updated voice channel name to: ${newName}`);
       }
+    } else {
+      console.log("The specified channel is not a VoiceChannel.");
     }
   } catch (error) {
     console.error("Error updating voice channel name:", error);

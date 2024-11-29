@@ -12,15 +12,32 @@ import {
   sendMatchStartNotification,
   updateVoiceChannelName,
 } from "./services/discordHandler";
-import { SystemUser } from "./types/SystemUser";
+import { MatchDetails } from "./types/MatchDetails";
 
 const app = express();
-
-// Use the PORT environment variable or default to 3000 for local development
 const port = process.env.PORT || 3000;
 
 // Middleware
-app.use(express.json()); // No need for body-parser anymore
+app.use(express.json());
+
+// Helper function to handle match start/finish logic
+const handleMatchStatus = async (matchData: MatchDetails) => {
+  const matchExists = await checkMatchExists(matchData.matchId);
+  if (!matchData?.results) {
+    // Match has started
+    if (!matchExists) {
+      await insertMatch(matchData);
+      await sendMatchStartNotification(matchData);
+      await updateVoiceChannelName("1309222763994808374", true); // Update voice channel on match start
+    }
+  } else {
+    // Match has finished
+    await runAutoUpdateElo(matchData.matchingPlayers);
+    await markMatchComplete(matchData.matchId);
+    await sendMatchFinishNotification(matchData);
+    await updateVoiceChannelName("1309222763994808374", false); // Update voice channel on match end
+  }
+};
 
 // Webhook callback endpoint
 app.post("/api/webhook", async (req: Request, res: Response): Promise<void> => {
@@ -28,34 +45,12 @@ app.post("/api/webhook", async (req: Request, res: Response): Promise<void> => {
     const receivedData = req.body;
     console.log("Received webhook data:", receivedData);
 
-    if (
-      receivedData?.event == "match_status_ready" ||
-      receivedData?.event == "match_status_finished"
-    ) {
-      const matchData = await faceitApiClient.getMatchDetails(
-        receivedData.payload?.id
-      );
+    const { event, payload } = receivedData;
 
-      console.log(matchData);
+    if (event === "match_status_ready" || event === "match_status_finished") {
+      const matchData = await faceitApiClient.getMatchDetails(payload?.id);
       if (matchData) {
-        const matchExists = await checkMatchExists(matchData?.matchId);
-
-        console.log("match data retrieved: ", matchData);
-        if (matchData) {
-          if (!matchData?.results) {
-            if (!matchExists) {
-              insertMatch(matchData);
-              sendMatchStartNotification(matchData);
-              // Update voice channels when the match starts
-              await updateVoiceChannelName(matchData.matchingPlayers);
-            }
-          } else {
-            runAutoUpdateElo(matchData?.matchingPlayers);
-            markMatchComplete(matchData?.matchId);
-            sendMatchFinishNotification(matchData);
-            await updateVoiceChannelName(matchData.matchingPlayers, true);
-          }
-        }
+        await handleMatchStatus(matchData);
       }
     }
     res.status(200).json({ message: "Webhook processed successfully!" });
