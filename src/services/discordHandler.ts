@@ -77,30 +77,27 @@ export const sendMatchStartNotification = async (
   }
 };
 
+const getEloDifference = async (previousElo: number, gamePlayerId: string) => {
+  const faceitPlayer: FaceitPlayer | null =
+    await faceitApiClient.getPlayerDataById(gamePlayerId);
+
+  if (!faceitPlayer?.faceit_elo) {
+    return;
+  }
+
+  if (faceitPlayer.faceit_elo > previousElo) {
+    const eloChange = faceitPlayer.faceit_elo - previousElo;
+    return `${`🟢 +${eloChange} (${previousElo} > ${faceitPlayer.faceit_elo})`}`;
+  } else {
+    const eloChange = previousElo - faceitPlayer?.faceit_elo;
+    return `${`🔴 -${eloChange} (${previousElo} > ${faceitPlayer.faceit_elo})`}`;
+  }
+};
+
 // Notify about a match finish
 export const sendMatchFinishNotification = async (
   matchDetails: MatchDetails
 ) => {
-  const getEloDifference = async (
-    previousElo: number,
-    gamePlayerId: string
-  ) => {
-    const faceitPlayer: FaceitPlayer | null =
-      await faceitApiClient.getPlayerDataById(gamePlayerId);
-
-    if (!faceitPlayer?.faceit_elo) {
-      return;
-    }
-
-    if (faceitPlayer.faceit_elo > previousElo) {
-      const eloChange = faceitPlayer.faceit_elo - previousElo;
-      return `${`🟢 +${eloChange} (${previousElo} > ${faceitPlayer.faceit_elo})`}`;
-    } else {
-      const eloChange = previousElo - faceitPlayer?.faceit_elo;
-      return `${`🔴 -${eloChange} (${previousElo} > ${faceitPlayer.faceit_elo})`}`;
-    }
-  };
-
   try {
     const embed = new EmbedBuilder()
       .setTitle(
@@ -125,8 +122,8 @@ export const sendMatchFinishNotification = async (
           name: "Players",
           value: matchDetails.matchingPlayers
             .map(
-              (player) =>
-                `${player.faceitUsername} ${getEloDifference(
+              async (player) =>
+                `${player.faceitUsername} ${await getEloDifference(
                   player.previousElo,
                   player.gamePlayerId
                 )}`
