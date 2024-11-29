@@ -8,7 +8,6 @@ import {
 } from "./db/commands";
 import {
   sendMatchFinishNotification,
-  sendMatchStartNotification,
   updateVoiceChannelName,
 } from "./services/discordService";
 import { MatchDetails } from "./types/MatchDetails";
@@ -27,7 +26,6 @@ const runMatchStartFlow = async (matchId: string) => {
   if (matchData && matchData?.matchingPlayers.length != 0) {
     console.log("runMatchStartFlow: matchData", matchData);
     await insertMatch(matchData);
-    await sendMatchStartNotification(matchData);
     await updateVoiceChannelName(matchData?.voiceChannelId, true);
   } else {
     console.log(`runMatchStartFlow: No match data found for ID ${matchId}`);

@@ -140,43 +140,43 @@ export const updateVoiceChannelName = async (
 };
 
 // Notify about a match start
-export const sendMatchStartNotification = async (
-  matchDetails: MatchDetails
-) => {
-  try {
-    if (matchDetails.matchingPlayers.length == 0) {
-      console.log(
-        `sendMatchStartNotification: No matchingPlayers found: ${matchDetails.matchId}`,
-        matchDetails
-      );
-      return;
-    }
-    console.log("matchdetails", matchDetails);
-    const embed = new EmbedBuilder()
-      .setTitle("🚨  New Match Started!")
-      .setColor("#00A2FF")
-      .addFields(
-        { name: "Map", value: matchDetails.mapName[0] },
-        {
-          name: "Match Link",
-          value: `[Click here](${`https://www.faceit.com/en/cs2/room/`}${
-            matchDetails?.matchId
-          })`, // Use markdown for clickable link
-        },
-        {
-          name: "Players",
-          value: matchDetails.matchingPlayers
-            .map((player) => `${player.faceitUsername}`) // Explicitly type as string
-            .join("\n"), // Join players with newline
-        }
-      )
-      .setTimestamp();
+// export const sendMatchStartNotification = async (
+//   matchDetails: MatchDetails
+// ) => {
+//   try {
+//     if (matchDetails.matchingPlayers.length == 0) {
+//       console.log(
+//         `sendMatchStartNotification: No matchingPlayers found: ${matchDetails.matchId}`,
+//         matchDetails
+//       );
+//       return;
+//     }
+//     console.log("matchdetails", matchDetails);
+//     const embed = new EmbedBuilder()
+//       .setTitle("🚨  New Match Started!")
+//       .setColor("#00A2FF")
+//       .addFields(
+//         { name: "Map", value: matchDetails.mapName[0] },
+//         {
+//           name: "Match Link",
+//           value: `[Click here](${`https://www.faceit.com/en/cs2/room/`}${
+//             matchDetails?.matchId
+//           })`, // Use markdown for clickable link
+//         },
+//         {
+//           name: "Players",
+//           value: matchDetails.matchingPlayers
+//             .map((player) => `${player.faceitUsername}`) // Explicitly type as string
+//             .join("\n"), // Join players with newline
+//         }
+//       )
+//       .setTimestamp();
 
-    await sendEmbedMessage(embed);
-  } catch (error) {
-    console.error("Error sending match start notification:", error);
-  }
-};
+//     await sendEmbedMessage(embed);
+//   } catch (error) {
+//     console.error("Error sending match start notification:", error);
+//   }
+// };
 
 // Function to get Elo difference
 const getEloDifference = async (previousElo: number, gamePlayerId: string) => {
