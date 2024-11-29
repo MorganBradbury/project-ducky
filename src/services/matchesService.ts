@@ -35,22 +35,23 @@ export const runMatchFlow = async (matchId: string, event: string) => {
   try {
     let matchData: MatchDetails | null = null;
 
+    // If match is finished, get data from the database
     if (event === "match_status_finished") {
-      // Fetch match data from the database if match is finished
       matchData = await getMatchFromDatabase(matchId);
       if (!matchData) {
         console.log(`No match data found for finished match ID ${matchId}`);
         return;
       }
     } else {
-      // Otherwise, use Faceit API to get match data
+      // Otherwise, get data from the Faceit API
       matchData = await faceitApiClient.getMatchDetails(matchId);
       if (!matchData) {
-        console.log(`No match data found for ID ${matchId}`);
+        console.log(`No match data found for match ID ${matchId}`);
         return;
       }
     }
 
+    // Handle match events based on its status
     if (event === "match_status_ready") {
       // Handle match start: insert match and update voice channel
       await processMatchData(matchData, true);
