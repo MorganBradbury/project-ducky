@@ -144,6 +144,13 @@ export const sendMatchStartNotification = async (
   matchDetails: MatchDetails
 ) => {
   try {
+    if (matchDetails.matchingPlayers.length == 0) {
+      console.log(
+        `sendMatchStartNotification: No matchingPlayers found: ${matchDetails.matchId}`,
+        matchDetails
+      );
+      return;
+    }
     console.log("matchdetails", matchDetails);
     const embed = new EmbedBuilder()
       .setTitle("🚨  New Match Started!")
