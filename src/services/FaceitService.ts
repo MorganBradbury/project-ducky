@@ -42,13 +42,14 @@ class FaceitApiClient {
         ? faceitIdentifier.toString()
         : faceitIdentifier;
 
-    if (isNickname(identifier)) {
-      // If it's a nickname, append as query parameter
-      url = `${baseUrl}?nickname=${identifier}`;
-    } else {
-      // If it's a game player ID, append as query parameter
+    // Check if the identifier is a nickname (non-numeric) or game_player_id (numeric)
+    if (/^\d+$/.test(identifier)) {
+      // If it's numeric, it's a game_player_id
       params = { game: "cs2", game_player_id: identifier };
-      url = baseUrl; // No change needed, still /players for ID
+      url = baseUrl; // No need to modify the URL
+    } else {
+      // If it's not numeric, treat it as a nickname
+      url = `${baseUrl}?nickname=${identifier}`;
     }
 
     const data = await fetchData(this.client, url, params);
