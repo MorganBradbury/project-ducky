@@ -37,24 +37,21 @@ app.post("/api/webhook", async (req: Request, res: Response): Promise<void> => {
       );
       if (matchData) {
         const matchExists = await checkMatchExists(matchData?.matchId);
-        const isComplete = await isMatchComplete(matchData?.matchId);
 
-        if (isComplete != false) {
-          console.log("match data retrieved: ", matchData);
-          if (matchData) {
-            if (!matchData?.results) {
-              if (!matchExists) {
-                insertMatch(matchData);
-                sendMatchStartNotification(matchData);
-                // Update voice channels when the match starts
-                await updateVoiceChannelName(matchData.matchingPlayers);
-              }
-            } else {
-              runAutoUpdateElo(matchData?.matchingPlayers);
-              markMatchComplete(matchData?.matchId);
-              sendMatchFinishNotification(matchData);
-              await updateVoiceChannelName(matchData.matchingPlayers, true);
+        console.log("match data retrieved: ", matchData);
+        if (matchData) {
+          if (!matchData?.results) {
+            if (!matchExists) {
+              insertMatch(matchData);
+              sendMatchStartNotification(matchData);
+              // Update voice channels when the match starts
+              await updateVoiceChannelName(matchData.matchingPlayers);
             }
+          } else {
+            runAutoUpdateElo(matchData?.matchingPlayers);
+            markMatchComplete(matchData?.matchId);
+            sendMatchFinishNotification(matchData);
+            await updateVoiceChannelName(matchData.matchingPlayers, true);
           }
         }
       }
