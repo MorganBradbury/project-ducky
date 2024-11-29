@@ -155,14 +155,15 @@ export const getMatchFromDatabase = async (
       return null; // No match found
     }
 
-    // Assuming the columns returned are as expected, format the result
+    // Assuming game_player_ids is already an array (parsed JSON), no need to parse again
     const matchData = rows[0];
-    console.log("matchDatamatchData", matchData);
     return {
       matchId: matchData.match_id,
       mapName: matchData.map_name,
-      matchingPlayers: JSON.parse(matchData.game_player_ids), // parse as JSON if needed
-      faction: JSON.parse(matchData.faction), // parse as JSON if needed
+      matchingPlayers: Array.isArray(matchData.game_player_ids)
+        ? matchData.game_player_ids
+        : JSON.parse(matchData.game_player_ids), // Only parse if it's a string
+      faction: matchData.faction,
       voiceChannelId: matchData.voiceChannelId,
     } as MatchDetails;
   });
