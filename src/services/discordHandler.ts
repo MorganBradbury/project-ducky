@@ -65,7 +65,8 @@ export const updateVoiceChannelName = async (
     // Check if the channel is a VoiceChannel
     if (channel instanceof VoiceChannel) {
       // Set the channel name based on the matchOngoing flag
-      const newName = matchOngoing ? "CS [🟢 LIVE]" : "CS";
+      const newName =
+        matchOngoing && channel.members.size > 0 ? "CS [🟢 LIVE]" : "CS";
       await channel.setName(newName);
       console.log(`Updated voice channel name to: ${newName}`);
     } else {
