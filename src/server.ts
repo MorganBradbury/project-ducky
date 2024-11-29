@@ -10,7 +10,7 @@ import {
   sendMatchFinishNotification,
   sendMatchStartNotification,
   updateVoiceChannelName,
-} from "./services/discordHandler";
+} from "./services/discordService";
 import { MatchDetails } from "./types/MatchDetails";
 
 const app = express();

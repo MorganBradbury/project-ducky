@@ -91,6 +91,14 @@ export const insertMatch = async (
   const { matchId, matchingPlayers, mapName, faction, voiceChannelId } =
     matchDetails;
 
+  if (matchingPlayers.length == 0) {
+    console.log(
+      "Cannot log this record as no matching players found.",
+      matchDetails
+    );
+    return;
+  }
+
   try {
     // Perform the database insert
     await pool.query(SQL_QUERIES.INSERT_MATCH, [

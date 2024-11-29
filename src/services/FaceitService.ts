@@ -4,7 +4,7 @@ import { FaceitPlayer } from "../types/FaceitPlayer";
 import { validateAndExtract } from "../utils/generalUtils";
 import { getAllUsers } from "../db/commands";
 import { MatchDetails, MatchFinishedDetails } from "../types/MatchDetails";
-import { getApplicableVoiceChannel } from "./discordHandler";
+import { getApplicableVoiceChannel } from "./discordService";
 
 class FaceitApiClient {
   private client: AxiosInstance;
