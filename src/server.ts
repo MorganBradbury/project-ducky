@@ -10,7 +10,9 @@ import {
 import {
   sendMatchFinishNotification,
   sendMatchStartNotification,
+  updateVoiceChannelName,
 } from "./services/discordHandler";
+import { SystemUser } from "./types/SystemUser";
 
 const app = express();
 
@@ -44,6 +46,8 @@ app.post("/api/webhook", async (req: Request, res: Response): Promise<void> => {
               if (!matchExists) {
                 insertMatch(matchData);
                 sendMatchStartNotification(matchData);
+                // Update voice channels when the match starts
+                await updateVoiceChannelName(matchData.matchingPlayers);
               }
             } else {
               runAutoUpdateElo(matchData?.matchingPlayers);

@@ -4,6 +4,7 @@ import {
   Partials,
   TextChannel,
   EmbedBuilder,
+  VoiceChannel,
 } from "discord.js";
 import { MatchDetails } from "../types/MatchDetails";
 import { config } from "../config/index";
@@ -19,6 +20,7 @@ const client = new Client({
     GatewayIntentBits.GuildMessages,
     GatewayIntentBits.MessageContent,
     GatewayIntentBits.DirectMessages,
+    GatewayIntentBits.GuildVoiceStates, // Needed for voice channel updates
   ],
   partials: [Partials.Message, Partials.Channel],
 });
@@ -48,6 +50,40 @@ const sendEmbedMessage = async (embed: EmbedBuilder) => {
   }
 };
 
+// Function to update voice channel name
+export const updateVoiceChannelName = async (matchingPlayers: any[]) => {
+  try {
+    const guild = await client.guilds.fetch(config.GUILD_ID);
+
+    // Iterate over the channels in the guild
+    for (const channel of guild.channels.cache.values()) {
+      // Check if the channel is a VoiceChannel
+      if (channel instanceof VoiceChannel) {
+        // Check if any player is in this voice channel
+        const members = channel.members;
+        const memberUsernames = members.map((member) => member.user.username);
+
+        // Check if any of the matching players are in this channel
+        const playersInChannel = matchingPlayers.filter((player) =>
+          memberUsernames.includes(player.discordUsername)
+        );
+
+        if (playersInChannel.length > 0) {
+          // Update the channel name to "CS 🟢 LIVE"
+          await channel.setName("CS [🟢LIVE]");
+          console.log(`Updated voice channel name to: CS 🟢 LIVE`);
+        } else {
+          await channel.setName("CS");
+          console.log(`Updated voice channel name to: CS`);
+        }
+      }
+    }
+  } catch (error) {
+    console.error("Error updating voice channel name:", error);
+  }
+};
+
+// Notify about a match start
 export const sendMatchStartNotification = async (
   matchDetails: MatchDetails
 ) => {
@@ -71,12 +107,16 @@ export const sendMatchStartNotification = async (
       )
       .setTimestamp();
 
+    // Update the voice channel when the match starts
+    await updateVoiceChannelName(config.GUILD_ID, matchDetails.matchingPlayers);
+
     await sendEmbedMessage(embed);
   } catch (error) {
     console.error("Error sending match start notification:", error);
   }
 };
 
+// Function to get Elo difference
 const getEloDifference = async (previousElo: number, gamePlayerId: string) => {
   const faceitPlayer: FaceitPlayer | null =
     await faceitApiClient.getPlayerDataById(gamePlayerId);
