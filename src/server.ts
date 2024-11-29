@@ -22,7 +22,10 @@ app.use(express.json());
 
 // Helper function to handle match start/finish logic
 const handleMatchStatus = async (matchData: MatchDetails) => {
+  console.log("matchData", matchData);
   const matchExists = await checkMatchExists(matchData.matchId);
+  console.log("matchExists", matchExists);
+
   if (!matchData?.results) {
     // Match has started
     if (!matchExists) {
