@@ -81,19 +81,23 @@ export const sendMatchStartNotification = async (
 export const sendMatchFinishNotification = async (
   matchDetails: MatchDetails
 ) => {
-  const getEloDifference = async (player: SystemUser) => {
+  const getEloDifference = async (
+    previousElo: number,
+    gamePlayerId: string
+  ) => {
     const faceitPlayer: FaceitPlayer | null =
-      await faceitApiClient.getPlayerDataById(player.gamePlayerId);
+      await faceitApiClient.getPlayerDataById(gamePlayerId);
 
     if (!faceitPlayer?.faceit_elo) {
       return;
     }
 
-    console.log("newUserElo", faceitPlayer?.faceit_elo);
-    if (faceitPlayer?.faceit_elo > player?.previousElo) {
-      return faceitPlayer?.faceit_elo - player?.previousElo;
+    if (faceitPlayer.faceit_elo > previousElo) {
+      const eloChange = faceitPlayer.faceit_elo - previousElo;
+      return `${`🟢 +${eloChange} (${previousElo} > ${faceitPlayer.faceit_elo})`}`;
     } else {
-      return player?.previousElo - faceitPlayer?.faceit_elo;
+      const eloChange = previousElo - faceitPlayer?.faceit_elo;
+      return `${`🔴 -${eloChange} (${previousElo} > ${faceitPlayer.faceit_elo})`}`;
     }
   };
 
@@ -122,9 +126,10 @@ export const sendMatchFinishNotification = async (
           value: matchDetails.matchingPlayers
             .map(
               (player) =>
-                `${player.faceitUsername} (${
-                  matchDetails?.results?.win ? "🟢 +" : "🔴 -"
-                }${getEloDifference(player)})`
+                `${player.faceitUsername} ${getEloDifference(
+                  player.previousElo,
+                  player.gamePlayerId
+                )}`
             ) // Explicitly type as string
             .join("\n"),
         }
