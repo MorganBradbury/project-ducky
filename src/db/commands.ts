@@ -157,11 +157,12 @@ export const getMatchFromDatabase = async (
 
     // Assuming the columns returned are as expected, format the result
     const matchData = rows[0];
+    console.log("matchDatamatchData", matchData);
     return {
       matchId: matchData.match_id,
       mapName: matchData.map_name,
-      matchingPlayers: JSON.parse(matchData.matchingPlayers),
-      faction: JSON.parse(matchData.faction),
+      matchingPlayers: JSON.parse(matchData.game_player_ids), // parse as JSON if needed
+      faction: JSON.parse(matchData.faction), // parse as JSON if needed
       voiceChannelId: matchData.voiceChannelId,
     } as MatchDetails;
   });
