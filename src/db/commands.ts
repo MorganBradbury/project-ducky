@@ -1,6 +1,6 @@
 import { config } from "../config/index";
 import { SystemUser } from "../types/SystemUser";
-import mysql from "mysql2/promise";
+import mysql, { RowDataPacket } from "mysql2/promise";
 import { SQL_QUERIES } from "./queries";
 import { MatchDetails } from "../types/MatchDetails";
 
@@ -109,6 +109,16 @@ export const insertMatch = async (
 
 export const markMatchComplete = async (matchId: string): Promise<void> => {
   await pool.query(SQL_QUERIES.UPDATE_MATCH_COMPLETE, [matchId]);
+};
+
+export const isMatchComplete = async (matchId: string): Promise<boolean> => {
+  return useConnection(async (connection) => {
+    const [rows] = await connection.query<any[]>(
+      SQL_QUERIES.GET_MATCH_COMPLETE_STATUS,
+      [matchId]
+    );
+    return rows.length > 0; // Returns true if a record is found
+  });
 };
 
 export const checkMatchExists = async (matchId: string): Promise<boolean> => {

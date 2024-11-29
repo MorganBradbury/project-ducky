@@ -4,6 +4,7 @@ import { faceitApiClient } from "./services/FaceitService";
 import {
   checkMatchExists,
   insertMatch,
+  isMatchComplete,
   markMatchComplete,
 } from "./db/commands";
 import {
@@ -34,19 +35,21 @@ app.post("/api/webhook", async (req: Request, res: Response): Promise<void> => {
       );
       if (matchData) {
         const matchExists = await checkMatchExists(matchData?.matchId);
+        const isComplete = await isMatchComplete(matchData?.matchId);
 
-        console.log("match data retrieved: ", matchData);
-
-        if (matchData) {
-          if (!matchData?.results) {
-            if (!matchExists) {
-              insertMatch(matchData);
-              sendMatchStartNotification(matchData);
+        if (!isComplete) {
+          console.log("match data retrieved: ", matchData);
+          if (matchData) {
+            if (!matchData?.results) {
+              if (!matchExists) {
+                insertMatch(matchData);
+                sendMatchStartNotification(matchData);
+              }
+            } else {
+              runAutoUpdateElo(matchData?.matchingPlayers);
+              markMatchComplete(matchData?.matchId);
+              sendMatchFinishNotification(matchData);
             }
-          } else {
-            runAutoUpdateElo(matchData?.matchingPlayers);
-            markMatchComplete(matchData?.matchId);
-            sendMatchFinishNotification(matchData);
           }
         }
       }

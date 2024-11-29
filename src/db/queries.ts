@@ -26,4 +26,9 @@ export const SQL_QUERIES = {
   SET is_complete = TRUE
   WHERE match_id = ?
 `,
+  GET_MATCH_COMPLETE_STATUS: `
+  SELECT is_complete
+  FROM matches_played
+  WHERE match_id = ?;
+`,
 };
