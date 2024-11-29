@@ -7,6 +7,9 @@ import {
 } from "discord.js";
 import { MatchDetails } from "../types/MatchDetails";
 import { config } from "../config/index";
+import { SystemUser } from "../types/SystemUser";
+import { faceitApiClient } from "./FaceitService";
+import { FaceitPlayer } from "../types/FaceitPlayer";
 
 // Initialize the Discord client
 const client = new Client({
@@ -62,7 +65,7 @@ export const sendMatchStartNotification = async (
         {
           name: "Players",
           value: matchDetails.matchingPlayers
-            .map((p: string) => p) // Explicitly type as string
+            .map((player) => `${player.faceitUsername}`) // Explicitly type as string
             .join("\n"), // Join players with newline
         }
       )
@@ -78,6 +81,22 @@ export const sendMatchStartNotification = async (
 export const sendMatchFinishNotification = async (
   matchDetails: MatchDetails
 ) => {
+  const getEloDifference = async (player: SystemUser) => {
+    const faceitPlayer: FaceitPlayer | null =
+      await faceitApiClient.getPlayerDataById(player.gamePlayerId);
+
+    if (!faceitPlayer?.faceit_elo) {
+      return;
+    }
+
+    console.log("newUserElo", faceitPlayer?.faceit_elo);
+    if (faceitPlayer?.faceit_elo > player?.previousElo) {
+      return faceitPlayer?.faceit_elo - player?.previousElo;
+    } else {
+      return player?.previousElo - faceitPlayer?.faceit_elo;
+    }
+  };
+
   try {
     const embed = new EmbedBuilder()
       .setTitle(
@@ -99,9 +118,14 @@ export const sendMatchFinishNotification = async (
           })`,
         },
         {
-          name: "Stack",
+          name: "Players",
           value: matchDetails.matchingPlayers
-            .map((p: string) => p) // Explicitly type as string
+            .map(
+              (player) =>
+                `${player.faceitUsername} (${
+                  matchDetails?.results?.win ? "🟢 +" : "🔴 -"
+                }${getEloDifference(player)})`
+            ) // Explicitly type as string
             .join("\n"),
         }
       )

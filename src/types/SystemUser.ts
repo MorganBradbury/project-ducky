@@ -5,4 +5,5 @@ export type SystemUser = {
   faceitUsername: string;
   previousElo: number;
   gamePlayerId: string;
+  faceitId: string;
 };

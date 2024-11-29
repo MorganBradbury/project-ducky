@@ -74,20 +74,22 @@ class FaceitApiClient {
       ];
 
       // Filter users whose game_player_id matches any in the combinedRoster
-      const filteredUsers = allUsers.filter((user) =>
+      const matchingPlayers = allUsers.filter((user) =>
         combinedRoster.some(
           (player: any) => player.game_player_id === user.gamePlayerId
         )
       );
 
       // Collect the Faceit usernames of the filtered users
-      const filteredGamePlayerIds = filteredUsers.map(
-        (user) => `${user.faceitUsername} (${user.discordUsername})`
-      );
+      // const filteredGamePlayerIds = filteredUsers.map(
+      //   (user) => `${user.faceitUsername} (${user.discordUsername})`
+      // );
 
       // Determine the faction of the matching players based on their game_player_id
       const faction = teams.faction1.roster.some((player: any) =>
-        filteredUsers.some((user) => user.gamePlayerId == player.game_player_id)
+        matchingPlayers.some(
+          (user) => user.gamePlayerId == player.game_player_id
+        )
       )
         ? "faction1"
         : "faction2"; // If the player is in faction1, we assign Faction1, otherwise Faction2
@@ -99,8 +101,8 @@ class FaceitApiClient {
         matchId: match_id,
         mapName,
         matchLink,
-        matchingPlayers: filteredGamePlayerIds,
-        faction, // Set the determined faction
+        matchingPlayers,
+        faction,
       };
 
       if (matchData.status === "FINISHED") {
