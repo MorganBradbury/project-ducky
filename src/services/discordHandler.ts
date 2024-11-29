@@ -51,7 +51,10 @@ const sendEmbedMessage = async (embed: EmbedBuilder) => {
 };
 
 // Function to update voice channel name
-export const updateVoiceChannelName = async (matchingPlayers: any[]) => {
+export const updateVoiceChannelName = async (
+  matchingPlayers: any[],
+  matchEnd?: boolean
+) => {
   try {
     const guild = await client.guilds.fetch(config.GUILD_ID);
 
@@ -68,7 +71,7 @@ export const updateVoiceChannelName = async (matchingPlayers: any[]) => {
           memberUsernames.includes(player.discordUsername)
         );
 
-        if (playersInChannel.length > 0) {
+        if (playersInChannel.length > 0 && matchEnd != true) {
           // Update the channel name to "CS 🟢 LIVE"
           await channel.setName("CS [🟢LIVE]");
           console.log(`Updated voice channel name to: CS 🟢 LIVE`);
@@ -106,9 +109,6 @@ export const sendMatchStartNotification = async (
         }
       )
       .setTimestamp();
-
-    // Update the voice channel when the match starts
-    await updateVoiceChannelName(config.GUILD_ID, matchDetails.matchingPlayers);
 
     await sendEmbedMessage(embed);
   } catch (error) {

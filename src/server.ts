@@ -53,6 +53,7 @@ app.post("/api/webhook", async (req: Request, res: Response): Promise<void> => {
               runAutoUpdateElo(matchData?.matchingPlayers);
               markMatchComplete(matchData?.matchId);
               sendMatchFinishNotification(matchData);
+              await updateVoiceChannelName(matchData.matchingPlayers, true);
             }
           }
         }
