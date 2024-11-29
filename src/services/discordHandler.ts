@@ -55,6 +55,7 @@ export const updateVoiceChannelName = async (
   voiceChannelId: string,
   matchOngoing: boolean
 ) => {
+  console.log("got into update voice");
   try {
     const guild = await client.guilds.fetch(config.GUILD_ID);
 
@@ -63,6 +64,8 @@ export const updateVoiceChannelName = async (
 
     // Check if the channel is a VoiceChannel
     if (channel instanceof VoiceChannel) {
+      console.log("channel", channel);
+      console.log("member size", channel.members.size);
       // If there are no members in the voice channel, set the name to "CS"
       if (channel.members.size === 0) {
         await channel.setName("CS");

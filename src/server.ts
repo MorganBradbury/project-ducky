@@ -27,6 +27,7 @@ const handleMatchStatus = async (matchData: MatchDetails) => {
   console.log("matchExists", matchExists);
 
   if (!matchData?.results) {
+    console.log("resres", matchData?.results);
     // Match has started
     if (!matchExists) {
       await insertMatch(matchData);
