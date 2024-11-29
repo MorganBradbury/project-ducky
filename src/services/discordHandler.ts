@@ -80,6 +80,8 @@ export const sendMatchStartNotification = async (
 const getEloDifference = async (previousElo: number, gamePlayerId: string) => {
   const faceitPlayer: FaceitPlayer | null =
     await faceitApiClient.getPlayerDataById(gamePlayerId);
+  console.log("faceit api returns", faceitPlayer);
+  console.log(previousElo);
 
   if (!faceitPlayer?.faceit_elo) {
     return;
