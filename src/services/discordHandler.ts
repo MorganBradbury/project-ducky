@@ -51,45 +51,90 @@ const sendEmbedMessage = async (embed: EmbedBuilder) => {
   }
 };
 
-// Function to update voice channel name with rate-limit checking
-export const updateVoiceChannelName = async (
-  voiceChannelId: string,
-  matchOngoing: boolean
+// Function to get the applicable voice channel based on matching players' usernames
+export const getApplicableVoiceChannel = async (
+  matchingPlayers: SystemUser[]
 ) => {
-  console.log("got into update voice");
   try {
+    // Ensure the bot is connected to the guild
     const guild = await client.guilds.fetch(config.GUILD_ID);
 
-    // Fetch the channel by ID
-    const channel = await guild.channels.fetch(voiceChannelId);
+    // Fetch all voice channels in the guild
+    const channels = await guild.channels.fetch();
 
-    if (channel instanceof VoiceChannel) {
-      const newName =
-        matchOngoing && channel.members.size > 0 ? "CS [🟢 LIVE]" : "CS";
-
-      // Discord API endpoint for updating channel names
-      const url = `https://discord.com/api/v10/channels/${voiceChannelId}`;
-      const payload = { name: newName };
-
-      try {
-        // Make the API call
-        const response = await axios.patch(url, payload, {
-          headers: {
-            Authorization: `Bot ${config.DISCORD_BOT_TOKEN}`,
-            "Content-Type": "application/json",
-          },
-        });
-        console.log(`Updated voice channel name to: ${newName}`);
-      } catch (error: any) {
-        if (error.response?.status === 429) {
-          const retryAfter = error.response.headers["retry-after"];
-          console.error(`Rate limit hit! Retry after ${retryAfter} seconds.`);
-        } else {
-          throw error; // Re-throw if not a rate-limit error
+    // Loop through all the channels to find the applicable voice channel
+    for (const [channelId, channel] of channels) {
+      if (channel instanceof VoiceChannel) {
+        // Loop through all members in the voice channel
+        for (const member of channel.members.values()) {
+          // Check if the member's Discord username matches any of the matching players' usernames
+          if (
+            matchingPlayers.some(
+              (player) => player.discordUsername === member.user.username
+            )
+          ) {
+            // If a match is found, return the channel
+            return channelId;
+          }
         }
       }
-    } else {
-      console.log("The specified channel is not a VoiceChannel.");
+    }
+
+    // If no applicable voice channel was found, return null or handle accordingly
+    return "No channel found";
+  } catch (error) {
+    console.log("Error finding applicable voice channel:", error);
+    return "Error finding channel";
+  }
+};
+
+// Function to update voice channel name with rate-limit checking
+export const updateVoiceChannelName = async (
+  voiceChannelId: string | undefined,
+  matchOngoing: boolean
+) => {
+  try {
+    if (
+      voiceChannelId != undefined &&
+      voiceChannelId != "No channel found" &&
+      voiceChannelId != "Error finding channel" &&
+      voiceChannelId != null
+    ) {
+      const guild = await client.guilds.fetch(config.GUILD_ID);
+
+      // Fetch the channel by ID
+      const channel = await guild.channels.fetch(voiceChannelId);
+
+      if (channel instanceof VoiceChannel) {
+        const newName =
+          matchOngoing && channel.members.size > 0
+            ? "CS [🟢 LIVE - IN GAME]"
+            : "CS";
+
+        // Discord API endpoint for updating channel names
+        const url = `https://discord.com/api/v10/channels/${voiceChannelId}`;
+        const payload = { name: newName };
+
+        try {
+          // Make the API call
+          const response = await axios.patch(url, payload, {
+            headers: {
+              Authorization: `Bot ${config.DISCORD_BOT_TOKEN}`,
+              "Content-Type": "application/json",
+            },
+          });
+          console.log(`Updated voice channel name to: ${newName}`);
+        } catch (error: any) {
+          if (error.response?.status === 429) {
+            const retryAfter = error.response.headers["retry-after"];
+            console.error(`Rate limit hit! Retry after ${retryAfter} seconds.`);
+          } else {
+            throw error; // Re-throw if not a rate-limit error
+          }
+        }
+      } else {
+        console.log("The specified channel is not a VoiceChannel.");
+      }
     }
   } catch (error) {
     console.error("Error updating voice channel name:", error);

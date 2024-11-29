@@ -4,6 +4,7 @@ import { FaceitPlayer } from "../types/FaceitPlayer";
 import { validateAndExtract } from "../utils/generalUtils";
 import { getAllUsers } from "../db/commands";
 import { MatchDetails, MatchFinishedDetails } from "../types/MatchDetails";
+import { getApplicableVoiceChannel } from "./discordHandler";
 
 class FaceitApiClient {
   private client: AxiosInstance;
@@ -90,11 +91,14 @@ class FaceitApiClient {
 
       const mapName = voting?.map?.pick || "Unknown";
 
+      const voiceChannelId = await getApplicableVoiceChannel(matchingPlayers);
+
       let matchDetails: MatchDetails = {
         matchId: match_id,
         mapName,
         matchingPlayers,
         faction,
+        voiceChannelId,
       };
 
       if (matchData.status === "FINISHED") {

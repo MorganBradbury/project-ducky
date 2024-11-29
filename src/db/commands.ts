@@ -88,7 +88,8 @@ export const insertMatch = async (
   matchDetails: MatchDetails
 ): Promise<void> => {
   // Extract values from the matchDetails object
-  const { matchId, matchingPlayers, mapName, faction } = matchDetails;
+  const { matchId, matchingPlayers, mapName, faction, voiceChannelId } =
+    matchDetails;
 
   try {
     // Perform the database insert
@@ -98,6 +99,7 @@ export const insertMatch = async (
       false, // Assuming this is a placeholder for whether the match was finished or not
       mapName, // Map selected for the match
       faction, // Store factionPlayers as JSON string
+      voiceChannelId,
     ]);
     console.log(`Match ${matchId} inserted successfully.`);
   } catch (error) {

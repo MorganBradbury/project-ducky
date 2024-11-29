@@ -28,7 +28,7 @@ const runMatchStartFlow = async (matchId: string) => {
     console.log("runMatchStartFlow: matchData", matchData);
     await insertMatch(matchData);
     await sendMatchStartNotification(matchData);
-    await updateVoiceChannelName("1309222763994808374", true);
+    await updateVoiceChannelName(matchData?.voiceChannelId, true);
   } else {
     console.log(`runMatchStartFlow: No match data found for ID ${matchId}`);
   }
@@ -44,7 +44,7 @@ const runMatchEndFlow = async (matchId: string) => {
     await runAutoUpdateElo(matchData.matchingPlayers);
     await markMatchComplete(matchData.matchId);
     await sendMatchFinishNotification(matchData);
-    await updateVoiceChannelName("1309222763994808374", false);
+    await updateVoiceChannelName(matchData.voiceChannelId, false);
   } else {
     console.log(`runMatchEndFlow: No match data found for ID ${matchId}`);
   }
