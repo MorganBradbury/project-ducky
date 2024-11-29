@@ -24,7 +24,7 @@ const runMatchStartFlow = async (matchId: string) => {
   console.log("runMatchStartFlow", matchId);
   const matchData = await faceitApiClient.getMatchDetails(matchId);
 
-  if (matchData) {
+  if (matchData && matchData?.matchingPlayers.length != 0) {
     console.log("runMatchStartFlow: matchData", matchData);
     await insertMatch(matchData);
     await sendMatchStartNotification(matchData);
