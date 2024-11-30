@@ -62,7 +62,6 @@ class FaceitApiClient {
     };
   }
 
-  // New method to fetch match details
   async getMatchDetails(matchId: string): Promise<MatchDetails | null> {
     try {
       const response = await this.client.get(
@@ -96,53 +95,39 @@ class FaceitApiClient {
         )
       );
 
-      // Determine the faction of the matching players based on their game_player_id
-      const faction = teams.faction1.roster.some((player: any) =>
-        matchingPlayers.some(
-          (user) => user.gamePlayerId == player.game_player_id
-        )
-      )
-        ? "faction1"
-        : "faction2"; // If the player is in faction1, we assign Faction1, otherwise Faction2
-
       const mapName = voting?.map?.pick || "Unknown";
-
       const voiceChannelId = await getApplicableVoiceChannel(matchingPlayers);
+      // Determine the teamId based on matching players
+      let teamId: string = "";
+      if (matchingPlayers.length > 0) {
+        const matchingTeam = [teams.faction1, teams.faction2].find((faction) =>
+          faction.roster.some((player: any) =>
+            matchingPlayers.some(
+              (matchingPlayer) =>
+                matchingPlayer.gamePlayerId === player.game_player_id
+            )
+          )
+        );
+        teamId = matchingTeam?.faction_id || "";
+      }
 
-      let matchDetails: MatchDetails = {
+      return {
         matchId: match_id,
         mapName,
         matchingPlayers,
-        faction,
+        teamId,
         voiceChannelId,
       };
-
-      if (matchData.status === "FINISHED") {
-        const matchStats = await this.getMatchStats(matchId);
-
-        if (matchStats) {
-          const finalResultInfo: MatchFinishedDetails = {
-            win:
-              faction.toLowerCase() ===
-              matchData?.detailed_results[0]?.winner.toLowerCase(),
-            finalScore: matchStats.score || "N/A",
-          };
-
-          matchDetails = {
-            ...matchDetails,
-            results: finalResultInfo,
-          };
-        }
-      }
-
-      return matchDetails;
     } catch (error) {
       console.error(`Error fetching match details for ${matchId}:`, error);
       return null;
     }
   }
 
-  async getMatchStats(matchId: string): Promise<{ score: string } | null> {
+  async getMatchScore(
+    matchId: string,
+    teamId: string
+  ): Promise<MatchFinishedDetails | null> {
     try {
       const response = await this.client.get(
         `${FaceitApiEndpoints.MATCHES}/${matchId}/stats`
@@ -162,9 +147,12 @@ class FaceitApiClient {
         return null;
       }
 
-      return {
-        score: roundStats.Score,
+      const details: MatchFinishedDetails = {
+        finalScore: roundStats.Score,
+        win: roundStats.Winner,
       };
+
+      return details;
     } catch (error) {
       console.error(`Error fetching match stats for ${matchId}:`, error);
       return null;

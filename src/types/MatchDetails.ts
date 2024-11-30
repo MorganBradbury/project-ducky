@@ -4,7 +4,7 @@ export type MatchDetails = {
   matchId: string;
   mapName: string;
   matchingPlayers: SystemUser[];
-  faction: string; // Faction name will be added here
+  teamId: string;
   results?: MatchFinishedDetails;
   voiceChannelId?: string;
 };

@@ -88,16 +88,8 @@ export const insertMatch = async (
   matchDetails: MatchDetails
 ): Promise<void> => {
   // Extract values from the matchDetails object
-  const { matchId, matchingPlayers, mapName, faction, voiceChannelId } =
+  const { matchId, matchingPlayers, mapName, teamId, voiceChannelId } =
     matchDetails;
-
-  if (matchingPlayers.length == 0) {
-    console.log(
-      "Cannot log this record as no matching players found.",
-      matchDetails
-    );
-    return;
-  }
 
   try {
     // Perform the database insert
@@ -106,7 +98,7 @@ export const insertMatch = async (
       JSON.stringify(matchingPlayers), // Store gamePlayerIds as JSON string
       false, // Assuming this is a placeholder for whether the match was finished or not
       mapName, // Map selected for the match
-      faction, // Store factionPlayers as JSON string
+      teamId, // Store teamId
       voiceChannelId,
     ]);
     console.log(`Match ${matchId} inserted successfully.`);
@@ -139,5 +131,30 @@ export const checkMatchExists = async (matchId: string): Promise<boolean> => {
       [matchId]
     );
     return rows.length > 0; // Returns true if a record is found
+  });
+};
+
+export const getMatchDataFromDb = async (
+  matchId: string
+): Promise<MatchDetails | null> => {
+  return useConnection(async (connection) => {
+    const [rows] = await connection.query<RowDataPacket[]>(
+      SQL_QUERIES.SELECT_MATCH_DETAILS, // Use the query from SQL_QUERIES
+      [matchId]
+    );
+
+    if (rows.length > 0) {
+      const selectedRow = rows[0];
+      console.log(rows[0]);
+      return {
+        matchId: selectedRow?.match_id,
+        mapName: selectedRow?.map_name,
+        teamId: selectedRow?.teamId,
+        voiceChannelId: selectedRow?.voiceChannelId,
+        matchingPlayers: selectedRow?.game_player_ids,
+      };
+    }
+
+    return null; // Return null if no match is found
   });
 };
