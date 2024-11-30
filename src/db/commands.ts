@@ -167,3 +167,23 @@ export const getMatchDataFromDb = async (
     return null; // Return null if no match is found
   });
 };
+
+export const updateActiveScoresChannelId = async (
+  matchId: string,
+  newChannelId: string
+): Promise<void> => {
+  return useConnection(async (connection) => {
+    const [result] = await connection.query<RowDataPacket[]>(
+      SQL_QUERIES.UPDATE_ACTIVE_SCORES_CHANNEL_ID,
+      [newChannelId, matchId]
+    );
+
+    if ((result as any).affectedRows > 0) {
+      console.log(
+        `Successfully updated activeScoresChannelId for match ${matchId}`
+      );
+    } else {
+      console.log(`No match found with matchId ${matchId}`);
+    }
+  });
+};

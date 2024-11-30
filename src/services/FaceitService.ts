@@ -125,6 +125,35 @@ class FaceitApiClient {
     }
   }
 
+  async getActiveMatchScore(matchId: string): Promise<string | null> {
+    try {
+      const response = await this.client.get(
+        `${FaceitApiEndpoints.MATCHES}/${matchId}`
+      );
+      const matchData = response.data;
+
+      if (
+        !matchData ||
+        !matchData.results ||
+        !matchData.results.score ||
+        typeof matchData.results.score.faction1 === "undefined" ||
+        typeof matchData.results.score.faction2 === "undefined"
+      ) {
+        console.error(`Invalid match score data for match ID ${matchId}`);
+        return null;
+      }
+
+      const { faction1, faction2 } = matchData?.results?.score;
+
+      // Merge scores into the desired format "faction1:faction2"
+      const score = `${faction1}:${faction2}`;
+      return score;
+    } catch (error) {
+      console.error(`Error fetching match score for ${matchId}:`, error);
+      return null;
+    }
+  }
+
   async getMatchScore(
     matchId: string,
     teamId: string

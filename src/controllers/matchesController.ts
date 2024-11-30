@@ -5,6 +5,12 @@ import {
   deleteVoiceChannel,
 } from "../services/discordService";
 import { randomUUID } from "crypto";
+import { faceitApiClient } from "../services/FaceitService";
+import {
+  checkMatchExists,
+  getMatchDataFromDb,
+  updateActiveScoresChannelId,
+} from "../db/commands";
 
 enum AcceptedEventTypes {
   match_ready = "match_status_ready",
@@ -56,10 +62,41 @@ export const handleWebhook = async (
   }
 };
 
-export const createChannel = async (
+export const updateLiveScores = async (
   req: Request,
   res: Response
 ): Promise<void> => {
   console.log("Message received from worker!", req.body);
+
+  const matchId = req?.body?.matchId;
+
+  const doesMatchExist = await checkMatchExists(matchId);
+  if (!doesMatchExist) {
+    console.log(`No match found for ${matchId} from the DB`);
+    return;
+  }
+
+  let matchData = await faceitApiClient.getMatchDetails(matchId);
+  if (!matchData) {
+    console.log(`No match data found for ${matchId} from FACEIT API.`);
+    return;
+  }
+
+  const activeMatchLiveScore = await faceitApiClient.getActiveMatchScore(
+    matchId
+  );
+
+  const matchFromDb = await getMatchDataFromDb(matchId);
+
+  if (matchFromDb && matchFromDb?.activeScoresChannelId) {
+    await deleteVoiceChannel(matchFromDb?.activeScoresChannelId);
+    const newActiveScoresChannel = await createActiveScoresChannel(
+      "🚨 LIVE: (CS) " + activeMatchLiveScore
+    );
+    if (newActiveScoresChannel) {
+      await updateActiveScoresChannelId(matchId, newActiveScoresChannel);
+    }
+  }
+
   res.status(200).json({ message: "Webhook data received and processed." });
 };

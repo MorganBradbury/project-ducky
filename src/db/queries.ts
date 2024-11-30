@@ -47,4 +47,9 @@ export const SQL_QUERIES = {
   WHERE match_id = ?
   LIMIT 1
 `,
+  UPDATE_ACTIVE_SCORES_CHANNEL_ID: `
+    UPDATE matches_played
+    SET activeScoresChannelId = ?
+    WHERE matchId = ?
+  `,
 };
