@@ -1,3 +1,4 @@
+import path from "path";
 import { Worker } from "worker_threads";
 import { runAutoUpdateElo } from "../auto/autoUpdateElo";
 import {
@@ -55,8 +56,12 @@ export const startMatch = async (matchId: string) => {
       activeScoresChannelId: activeScoresChannelId || "",
     };
 
+    // Determine the absolute path to the worker file
+    const workerPath = path.resolve(__dirname, "../worker.js");
+    console.log(`Starting worker at path: ${workerPath}`);
+
     // Start the worker after creating the active scores channel
-    const worker = new Worker("../worker.js");
+    const worker = new Worker(workerPath);
     worker.postMessage({ type: "start", matchId: matchId });
     workers[matchId] = worker; // Store worker by matchId
   }
