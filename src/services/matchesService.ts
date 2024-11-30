@@ -73,7 +73,7 @@ export const endMatch = async (matchId: string) => {
     console.log("No match data found from DB", matchData);
     return;
   }
-  console.log("match complete status", matchData?.isComplete === true);
+  console.log("match complete status", matchData?.isComplete == true);
   console.log(matchData?.isComplete);
   if (matchData?.isComplete === true) {
     console.log("Match is already finished: ", matchData);
