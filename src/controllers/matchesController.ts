@@ -1,5 +1,6 @@
 import { Request, Response } from "express";
 import { endMatch, startMatch } from "../services/matchesService"; // Centralized match flow logic
+import { createVoiceChannel } from "../services/discordService";
 
 enum AcceptedEventTypes {
   match_ready = "match_status_ready",
@@ -49,4 +50,11 @@ export const handleWebhook = async (
       eventId: req?.body?.event,
     });
   }
+};
+
+export const createChannel = async (
+  req: Request,
+  res: Response
+): Promise<void> => {
+  createVoiceChannel("Test channel");
 };

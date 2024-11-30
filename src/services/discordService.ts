@@ -26,6 +26,37 @@ const client = new Client({
   partials: [Partials.Message, Partials.Channel],
 });
 
+// Function to create a new voice channel in a specific category
+export const createVoiceChannel = async (
+  channelName: string,
+  userLimit: number = 1,
+  bitrate: number = 64000
+): Promise<string | null> => {
+  try {
+    // Fetch the guild by ID
+    const guild = await client.guilds.fetch(config.GUILD_ID);
+    if (!guild) {
+      console.error("Guild not found");
+      return null;
+    }
+
+    // Create the new voice channel under the specified category
+    const channel = await guild.channels.create({
+      name: channelName,
+      type: 2, // 2 = Voice channel
+      parent: "1312126985883095060", // Fixed category ID
+      bitrate,
+      userLimit,
+    });
+
+    console.log(`Created new voice channel: ${channel.name}`);
+    return channel.id;
+  } catch (error) {
+    console.error("Error creating voice channel:", error);
+    return null;
+  }
+};
+
 // Helper function to send an embed message to a specific channel
 const sendEmbedMessage = async (embed: EmbedBuilder) => {
   try {
