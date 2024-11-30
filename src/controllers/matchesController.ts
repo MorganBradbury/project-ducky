@@ -60,7 +60,6 @@ export const createChannel = async (
   req: Request,
   res: Response
 ): Promise<void> => {
-  deleteVoiceChannel("1312465774572470334");
-  createActiveScoresChannel("Test channel " + randomUUID());
+  console.log("Message received from worker!", req.body);
   res.status(200).json({ message: "Webhook data received and processed." });
 };

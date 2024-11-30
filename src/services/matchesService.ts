@@ -1,3 +1,4 @@
+import { Worker } from "worker_threads";
 import { runAutoUpdateElo } from "../auto/autoUpdateElo";
 import {
   checkMatchExists,
@@ -12,6 +13,8 @@ import {
   updateVoiceChannelName,
 } from "./discordService";
 import { faceitApiClient } from "./FaceitService";
+
+let workers: Record<string, Worker> = {};
 
 const checkVoiceId = (voiceChannelId: string) =>
   voiceChannelId != undefined &&
@@ -51,6 +54,11 @@ export const startMatch = async (matchId: string) => {
       ...matchData,
       activeScoresChannelId: activeScoresChannelId || "",
     };
+
+    // Start the worker after creating the active scores channel
+    const worker = new Worker("../workers/worker.js");
+    worker.postMessage({ type: "start", matchId: matchId });
+    workers[matchId] = worker; // Store worker by matchId
   }
 
   await insertMatch(matchData);
@@ -96,10 +104,20 @@ export const endMatch = async (matchId: string) => {
   await markMatchComplete(matchId);
   await sendMatchFinishNotification(matchData);
   await runAutoUpdateElo(matchingPlayers);
+
   if (activeScoresChannelId) {
     await deleteVoiceChannel(activeScoresChannelId);
   }
+
   if (voiceChannelId && checkVoiceId(voiceChannelId)) {
     await updateVoiceChannelName(voiceChannelId, false);
+  }
+
+  // Stop the worker associated with this matchId
+  if (workers[matchId]) {
+    workers[matchId].postMessage({ type: "stop" });
+    workers[matchId].terminate(); // Clean up worker resources
+    delete workers[matchId]; // Remove worker from storage
+    console.log("Worker stopped for matchId:", matchId);
   }
 };
