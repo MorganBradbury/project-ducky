@@ -49,7 +49,7 @@ export const SQL_QUERIES = {
 `,
   UPDATE_ACTIVE_SCORES_CHANNEL_ID: `
     UPDATE matches_played
-    SET activeScoresChannelId = ?
-    WHERE matchId = ?
+    SET active_scores_channel_id = ?
+    WHERE match_id = ?
   `,
 };
