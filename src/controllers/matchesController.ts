@@ -39,6 +39,9 @@ export const handleWebhook = async (
     if (eventId === AcceptedEventTypes.match_finished) {
       await endMatch(matchId);
     }
+
+    res.status(200).json({ message: "Webhook data received and processed." });
+    return;
   } catch (error) {
     console.error("Error occured in handleWebhook", {
       error,
