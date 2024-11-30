@@ -1,7 +1,7 @@
 import { Request, Response } from "express";
 import { endMatch, startMatch } from "../services/matchesService"; // Centralized match flow logic
 import {
-  createVoiceChannel,
+  createActiveScoresChannel,
   deleteVoiceChannel,
 } from "../services/discordService";
 import { randomUUID } from "crypto";
@@ -61,6 +61,6 @@ export const createChannel = async (
   res: Response
 ): Promise<void> => {
   deleteVoiceChannel("1312465774572470334");
-  createVoiceChannel("Test channel " + randomUUID());
+  createActiveScoresChannel("Test channel " + randomUUID());
   res.status(200).json({ message: "Webhook data received and processed." });
 };

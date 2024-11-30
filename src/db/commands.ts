@@ -88,8 +88,14 @@ export const insertMatch = async (
   matchDetails: MatchDetails
 ): Promise<void> => {
   // Extract values from the matchDetails object
-  const { matchId, matchingPlayers, mapName, teamId, voiceChannelId } =
-    matchDetails;
+  const {
+    matchId,
+    matchingPlayers,
+    mapName,
+    teamId,
+    voiceChannelId,
+    activeScoresChannelId,
+  } = matchDetails;
 
   try {
     // Perform the database insert
@@ -100,6 +106,7 @@ export const insertMatch = async (
       mapName, // Map selected for the match
       teamId, // Store teamId
       voiceChannelId,
+      activeScoresChannelId,
     ]);
     console.log(`Match ${matchId} inserted successfully.`);
   } catch (error) {

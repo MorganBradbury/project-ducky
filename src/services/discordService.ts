@@ -27,7 +27,7 @@ const client = new Client({
 });
 
 // Function to create a new voice channel in a specific category
-export const createVoiceChannel = async (
+export const createActiveScoresChannel = async (
   channelName: string,
   userLimit: number = 1,
   bitrate: number = 64000

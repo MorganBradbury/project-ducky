@@ -7,6 +7,7 @@ export type MatchDetails = {
   teamId: string;
   results?: MatchFinishedDetails;
   voiceChannelId?: string;
+  activeScoresChannelId?: string;
 };
 
 export type MatchFinishedDetails = {

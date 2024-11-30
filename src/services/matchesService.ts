@@ -6,6 +6,8 @@ import {
   markMatchComplete,
 } from "../db/commands";
 import {
+  createActiveScoresChannel,
+  deleteVoiceChannel,
   sendMatchFinishNotification,
   updateVoiceChannelName,
 } from "./discordService";
@@ -26,7 +28,7 @@ export const startMatch = async (matchId: string) => {
     return;
   }
   // Retrieve initial match data from FACEIT API.
-  const matchData = await faceitApiClient.getMatchDetails(matchId);
+  let matchData = await faceitApiClient.getMatchDetails(matchId);
   if (!matchData) {
     console.log(`No match data found for ${matchId} from FACEIT API.`);
     return;
@@ -40,11 +42,18 @@ export const startMatch = async (matchId: string) => {
     return;
   }
 
-  await insertMatch(matchData);
-
   if (voiceChannelId && checkVoiceId(voiceChannelId)) {
     await updateVoiceChannelName(voiceChannelId, true);
+    const activeScoresChannelId = await createActiveScoresChannel(
+      "🚨 LIVE: (CS-1) 0:0"
+    );
+    matchData = {
+      ...matchData,
+      activeScoresChannelId: activeScoresChannelId || "",
+    };
   }
+
+  await insertMatch(matchData);
 };
 
 export const endMatch = async (matchId: string) => {
@@ -77,12 +86,15 @@ export const endMatch = async (matchId: string) => {
     };
   }
 
-  const { matchingPlayers, voiceChannelId } = matchData;
+  const { matchingPlayers, voiceChannelId, activeScoresChannelId } = matchData;
 
   await markMatchComplete(matchId);
   await sendMatchFinishNotification(matchData);
   await runAutoUpdateElo(matchingPlayers);
   if (voiceChannelId && checkVoiceId(voiceChannelId)) {
     await updateVoiceChannelName(voiceChannelId, false);
+  }
+  if (activeScoresChannelId) {
+    await deleteVoiceChannel(activeScoresChannelId);
   }
 };
