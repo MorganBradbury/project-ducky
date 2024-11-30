@@ -26,7 +26,7 @@ let interval: NodeJS.Timeout | undefined;
 const startTask = (matchId: string): void => {
   interval = setInterval(() => {
     sendPostRequest(matchId);
-  }, 60000); // Calls every 60 seconds (1 minute)
+  }, 20000); // Calls every 20 seconds
 };
 
 // Listen for messages from the main thread (the parent)
