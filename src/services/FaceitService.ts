@@ -179,7 +179,7 @@ class FaceitApiClient {
 
       const details: MatchFinishedDetails = {
         finalScore: roundStats.Score,
-        win: roundStats.Winner,
+        win: roundStats.Winner == teamId ? true : false,
       };
 
       return details;
