@@ -152,7 +152,6 @@ export const getMatchDataFromDb = async (
 
     if (rows.length > 0) {
       const selectedRow = rows[0];
-      console.log(rows[0]);
       return {
         matchId: selectedRow?.match_id,
         mapName: selectedRow?.map_name,
