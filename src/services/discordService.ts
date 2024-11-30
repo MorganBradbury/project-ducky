@@ -33,14 +33,12 @@ export const createVoiceChannel = async (
   bitrate: number = 64000
 ): Promise<string | null> => {
   try {
-    // Fetch the guild by ID
     const guild = await client.guilds.fetch(config.GUILD_ID);
     if (!guild) {
       console.error("Guild not found");
       return null;
     }
 
-    // Create the new voice channel under the specified category
     const channel = await guild.channels.create({
       name: channelName,
       type: 2, // 2 = Voice channel
@@ -60,7 +58,6 @@ export const createVoiceChannel = async (
 // Helper function to send an embed message to a specific channel
 const sendEmbedMessage = async (embed: EmbedBuilder) => {
   try {
-    // Ensure the client is logged in before accessing channels
     if (!client.isReady()) {
       console.error("Discord client is not ready!");
       return;
@@ -87,31 +84,23 @@ export const getApplicableVoiceChannel = async (
   matchingPlayers: SystemUser[]
 ) => {
   try {
-    // Ensure the bot is connected to the guild
     const guild = await client.guilds.fetch(config.GUILD_ID);
-
-    // Fetch all voice channels in the guild
     const channels = await guild.channels.fetch();
 
-    // Loop through all the channels to find the applicable voice channel
     for (const [channelId, channel] of channels) {
       if (channel instanceof VoiceChannel) {
-        // Loop through all members in the voice channel
         for (const member of channel.members.values()) {
-          // Check if the member's Discord username matches any of the matching players' usernames
           if (
             matchingPlayers.some(
               (player) => player.discordUsername === member.user.username
             )
           ) {
-            // If a match is found, return the channel
             return channelId;
           }
         }
       }
     }
 
-    // If no applicable voice channel was found, return null or handle accordingly
     return "No channel found";
   } catch (error) {
     console.log("Error finding applicable voice channel:", error);
@@ -126,20 +115,16 @@ export const updateVoiceChannelName = async (
 ) => {
   try {
     const guild = await client.guilds.fetch(config.GUILD_ID);
-
-    // Fetch the channel by ID
     const channel = await guild.channels.fetch(voiceChannelId);
 
     if (channel instanceof VoiceChannel) {
       const newName =
         matchOngoing && channel.members.size > 0 ? "CS [🟢 LIVE]" : "CS";
 
-      // Discord API endpoint for updating channel names
       const url = `https://discord.com/api/v10/channels/${voiceChannelId}`;
       const payload = { name: newName };
 
       try {
-        // Make the API call
         const response = await axios.patch(url, payload, {
           headers: {
             Authorization: `Bot ${config.DISCORD_BOT_TOKEN}`,
@@ -152,7 +137,7 @@ export const updateVoiceChannelName = async (
           const retryAfter = error.response.headers["retry-after"];
           console.error(`Rate limit hit! Retry after ${retryAfter} seconds.`);
         } else {
-          throw error; // Re-throw if not a rate-limit error
+          throw error;
         }
       }
     } else {
@@ -161,6 +146,42 @@ export const updateVoiceChannelName = async (
   } catch (error) {
     console.error("Error updating voice channel name:", error);
     return;
+  }
+};
+
+// Function to delete a voice channel by ID
+export const deleteVoiceChannel = async (voiceChannelId: string) => {
+  try {
+    const guild = await client.guilds.fetch(config.GUILD_ID);
+    if (!guild) {
+      console.error("Guild not found");
+      return false;
+    }
+
+    const channel = await guild.channels.fetch(voiceChannelId);
+    if (!channel) {
+      console.error(`Channel with ID ${voiceChannelId} not found.`);
+      return false;
+    }
+
+    if (channel instanceof VoiceChannel) {
+      await channel.delete();
+      console.log(
+        `Voice channel with ID ${voiceChannelId} deleted successfully.`
+      );
+      return true;
+    } else {
+      console.error(
+        `Channel with ID ${voiceChannelId} is not a voice channel.`
+      );
+      return false;
+    }
+  } catch (error) {
+    console.error(
+      `Error deleting voice channel with ID ${voiceChannelId}:`,
+      error
+    );
+    return false;
   }
 };
 
@@ -188,7 +209,6 @@ export const sendMatchFinishNotification = async (
   matchDetails: MatchDetails
 ) => {
   try {
-    // Resolve all player ELO differences before creating the embed
     const playerDetails = await Promise.all(
       matchDetails.matchingPlayers.map(async (player) => {
         const eloDifference = await getEloDifference(
@@ -212,7 +232,7 @@ export const sendMatchFinishNotification = async (
           name: "Match Link",
           value: `[Click here](${`https://www.faceit.com/en/cs2/room/`}${
             matchDetails?.matchId
-          })`, // Use markdown for clickable link
+          })`,
         },
         {
           name: "Match Result",
@@ -222,7 +242,7 @@ export const sendMatchFinishNotification = async (
         },
         {
           name: "Players",
-          value: playerDetails.join("\n"), // Join resolved player details
+          value: playerDetails.join("\n"),
         }
       )
       .setTimestamp();
