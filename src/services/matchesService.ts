@@ -11,6 +11,12 @@ import {
 } from "./discordService";
 import { faceitApiClient } from "./FaceitService";
 
+const checkVoiceId = (voiceChannelId: string) =>
+  voiceChannelId != undefined &&
+  voiceChannelId != "No channel found" &&
+  voiceChannelId != "Error finding channel" &&
+  voiceChannelId != null;
+
 export const startMatch = async (matchId: string) => {
   console.log("Processing startMatch()", matchId);
 
@@ -35,7 +41,10 @@ export const startMatch = async (matchId: string) => {
   }
 
   await insertMatch(matchData);
-  await updateVoiceChannelName(voiceChannelId, true);
+
+  if (voiceChannelId && checkVoiceId(voiceChannelId)) {
+    await updateVoiceChannelName(voiceChannelId, true);
+  }
 };
 
 export const endMatch = async (matchId: string) => {
@@ -46,13 +55,6 @@ export const endMatch = async (matchId: string) => {
     console.log(`No match found for ${matchId} from the DB`);
     return;
   }
-
-  // Retrieve initial match data from FACEIT API.
-  //   const matchData = await faceitApiClient.getMatchDetails(matchId);
-  //   if (!matchData) {
-  //     console.log(`No match data found for ${matchId} from FACEIT API.`);
-  //     return;
-  //   }
 
   let matchData = await getMatchDataFromDb(matchId);
 
@@ -80,5 +82,7 @@ export const endMatch = async (matchId: string) => {
   await markMatchComplete(matchId);
   await sendMatchFinishNotification(matchData);
   await runAutoUpdateElo(matchingPlayers);
-  await updateVoiceChannelName(voiceChannelId, false);
+  if (voiceChannelId && checkVoiceId(voiceChannelId)) {
+    await updateVoiceChannelName(voiceChannelId, false);
+  }
 };

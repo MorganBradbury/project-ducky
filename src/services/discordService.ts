@@ -90,52 +90,46 @@ export const getApplicableVoiceChannel = async (
 
 // Function to update voice channel name with rate-limit checking
 export const updateVoiceChannelName = async (
-  voiceChannelId: string | undefined,
+  voiceChannelId: string,
   matchOngoing: boolean
 ) => {
   try {
-    if (
-      voiceChannelId != undefined &&
-      voiceChannelId != "No channel found" &&
-      voiceChannelId != "Error finding channel" &&
-      voiceChannelId != null
-    ) {
-      const guild = await client.guilds.fetch(config.GUILD_ID);
+    const guild = await client.guilds.fetch(config.GUILD_ID);
 
-      // Fetch the channel by ID
-      const channel = await guild.channels.fetch(voiceChannelId);
+    // Fetch the channel by ID
+    const channel = await guild.channels.fetch(voiceChannelId);
 
-      if (channel instanceof VoiceChannel) {
-        const newName =
-          matchOngoing && channel.members.size > 0 ? "CS [🟢 LIVE]" : "CS";
+    if (channel instanceof VoiceChannel) {
+      const newName =
+        matchOngoing && channel.members.size > 0 ? "CS [🟢 LIVE]" : "CS";
 
-        // Discord API endpoint for updating channel names
-        const url = `https://discord.com/api/v10/channels/${voiceChannelId}`;
-        const payload = { name: newName };
+      // Discord API endpoint for updating channel names
+      const url = `https://discord.com/api/v10/channels/${voiceChannelId}`;
+      const payload = { name: newName };
 
-        try {
-          // Make the API call
-          const response = await axios.patch(url, payload, {
-            headers: {
-              Authorization: `Bot ${config.DISCORD_BOT_TOKEN}`,
-              "Content-Type": "application/json",
-            },
-          });
-          console.log(`Updated voice channel name to: ${newName}`);
-        } catch (error: any) {
-          if (error.response?.status === 429) {
-            const retryAfter = error.response.headers["retry-after"];
-            console.error(`Rate limit hit! Retry after ${retryAfter} seconds.`);
-          } else {
-            throw error; // Re-throw if not a rate-limit error
-          }
+      try {
+        // Make the API call
+        const response = await axios.patch(url, payload, {
+          headers: {
+            Authorization: `Bot ${config.DISCORD_BOT_TOKEN}`,
+            "Content-Type": "application/json",
+          },
+        });
+        console.log(`Updated voice channel name to: ${newName}`);
+      } catch (error: any) {
+        if (error.response?.status === 429) {
+          const retryAfter = error.response.headers["retry-after"];
+          console.error(`Rate limit hit! Retry after ${retryAfter} seconds.`);
+        } else {
+          throw error; // Re-throw if not a rate-limit error
         }
-      } else {
-        console.log("The specified channel is not a VoiceChannel.");
       }
+    } else {
+      console.log("The specified channel is not a VoiceChannel.");
     }
   } catch (error) {
     console.error("Error updating voice channel name:", error);
+    return;
   }
 };
 
