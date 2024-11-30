@@ -91,10 +91,10 @@ export const endMatch = async (matchId: string) => {
   await markMatchComplete(matchId);
   await sendMatchFinishNotification(matchData);
   await runAutoUpdateElo(matchingPlayers);
-  if (voiceChannelId && checkVoiceId(voiceChannelId)) {
-    await updateVoiceChannelName(voiceChannelId, false);
-  }
   if (activeScoresChannelId) {
     await deleteVoiceChannel(activeScoresChannelId);
+  }
+  if (voiceChannelId && checkVoiceId(voiceChannelId)) {
+    await updateVoiceChannelName(voiceChannelId, false);
   }
 };
