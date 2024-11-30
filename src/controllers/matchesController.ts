@@ -90,8 +90,10 @@ export const updateLiveScores = async (
 
   if (matchFromDb && matchFromDb?.activeScoresChannelId) {
     await deleteVoiceChannel(matchFromDb?.activeScoresChannelId);
+
     const newActiveScoresChannel = await createActiveScoresChannel(
-      "🚨 LIVE: (CS) " + activeMatchLiveScore
+      "🚨 LIVE: (CS) " +
+        (activeMatchLiveScore != null ? activeMatchLiveScore : "0:0")
     );
     if (newActiveScoresChannel) {
       await updateActiveScoresChannelId(matchId, newActiveScoresChannel);
