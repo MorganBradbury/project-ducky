@@ -56,7 +56,7 @@ export const startMatch = async (matchId: string) => {
     };
 
     // Start the worker after creating the active scores channel
-    const worker = new Worker("../workers/worker.js");
+    const worker = new Worker("../worker.js");
     worker.postMessage({ type: "start", matchId: matchId });
     workers[matchId] = worker; // Store worker by matchId
   }
