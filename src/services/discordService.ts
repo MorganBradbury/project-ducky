@@ -176,7 +176,7 @@ export const sendMatchFinishNotification = async (
       )
       .setColor(matchDetails.results?.win ? "#00FF00" : "#FF0000")
       .addFields(
-        { name: "Map", value: matchDetails.mapName[0] },
+        { name: "Map", value: matchDetails.mapName },
         {
           name: "Match Link",
           value: `[Click here](${`https://www.faceit.com/en/cs2/room/`}${
