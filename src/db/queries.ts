@@ -17,7 +17,7 @@ export const SQL_QUERIES = {
     WHERE discordUsername = ?
   `,
   INSERT_MATCH: `
-  INSERT INTO matches_played (match_id, game_player_ids, is_complete, map_name, teamId, voiceChannelId, activeScoresChannelId)
+  INSERT INTO matches_played (match_id, game_player_ids, is_complete, map_name, teamId, voiceChannelId, active_scores_channel_id)
   VALUES (?, ?, ?, ?, ?, ?, ?)
   ON DUPLICATE KEY UPDATE match_id = match_id
 `,
