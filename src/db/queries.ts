@@ -44,7 +44,7 @@ export const SQL_QUERIES = {
 `,
   SELECT_MATCH_DETAILS: `
   SELECT * FROM matches_played
-  WHERE matchId = ?
+  WHERE match_id = ?
   LIMIT 1
 `,
 };
