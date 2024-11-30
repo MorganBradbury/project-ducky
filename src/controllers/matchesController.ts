@@ -4,6 +4,7 @@ import {
   createVoiceChannel,
   deleteVoiceChannel,
 } from "../services/discordService";
+import { randomUUID } from "crypto";
 
 enum AcceptedEventTypes {
   match_ready = "match_status_ready",
@@ -60,6 +61,6 @@ export const createChannel = async (
   res: Response
 ): Promise<void> => {
   deleteVoiceChannel("1312465774572470334");
-  createVoiceChannel("Test channel");
+  createVoiceChannel("Test channel " + randomUUID());
   res.status(200).json({ message: "Webhook data received and processed." });
 };
