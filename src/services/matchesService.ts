@@ -74,6 +74,11 @@ export const endMatch = async (matchId: string) => {
     return;
   }
 
+  if (matchData?.isComplete === true) {
+    console.log("Match is already finished: ", matchData);
+    return;
+  }
+
   const finalMatchDetails = await faceitApiClient.getMatchScore(
     matchId,
     matchData?.teamId

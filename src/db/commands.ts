@@ -160,6 +160,7 @@ export const getMatchDataFromDb = async (
         voiceChannelId: selectedRow?.voiceChannelId,
         matchingPlayers: selectedRow?.game_player_ids,
         activeScoresChannelId: selectedRow?.active_scores_channel_id,
+        isComplete: selectedRow?.is_complete,
       };
     }
 

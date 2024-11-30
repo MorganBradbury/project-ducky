@@ -117,6 +117,7 @@ class FaceitApiClient {
         matchingPlayers,
         teamId,
         voiceChannelId,
+        isComplete: false,
       };
     } catch (error) {
       console.error(`Error fetching match details for ${matchId}:`, error);
