@@ -159,6 +159,7 @@ export const getMatchDataFromDb = async (
         teamId: selectedRow?.teamId,
         voiceChannelId: selectedRow?.voiceChannelId,
         matchingPlayers: selectedRow?.game_player_ids,
+        activeScoresChannelId: selectedRow?.active_scores_channel_id,
       };
     }
 
