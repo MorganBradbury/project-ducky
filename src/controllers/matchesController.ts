@@ -67,7 +67,7 @@ export const updateLiveScores = async (
   res: Response
 ): Promise<void> => {
   console.log("Message received from worker!", req.body);
-
+  return;
   const matchId = req?.body?.matchId;
 
   const doesMatchExist = await checkMatchExists(matchId);
@@ -84,6 +84,7 @@ export const updateLiveScores = async (
 
   const activeMatchLiveScore = await faceitApiClient.getActiveMatchScore(
     matchId,
+    //@ts-ignore
     matchData?.teamId
   );
 
@@ -94,11 +95,13 @@ export const updateLiveScores = async (
       console.log(
         `Scores are the same: ${activeMatchLiveScore}, ${matchFromDb?.currentResult}`
       );
+      return;
     } else {
       console.log(
         `Scores are different: ${activeMatchLiveScore}, ${matchFromDb?.currentResult}`
       );
     }
+    //@ts-ignore
 
     await deleteVoiceChannel(matchFromDb?.activeScoresChannelId);
     const channelNameScore =
@@ -112,6 +115,7 @@ export const updateLiveScores = async (
       if (newActiveScoresChannel) {
         await updateActiveScoresChannelId(
           matchId,
+          //@ts-ignore
           newActiveScoresChannel,
           activeMatchLiveScore ? activeMatchLiveScore : "0:0"
         );
