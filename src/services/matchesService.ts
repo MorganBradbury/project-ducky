@@ -150,7 +150,7 @@ export const cancelMatch = async (matchId: string) => {
     return;
   }
 
-  if (matchData?.isComplete == true) {
+  if (matchData?.isComplete === true) {
     console.log("Match is already finished: ", matchData);
     return;
   }
@@ -170,25 +170,36 @@ export const cancelMatch = async (matchId: string) => {
     try {
       // Create a new voice channel and get its ID
       const newChannelId = await createNewVoiceChannel(
-        "CS",
+        `New Voice Channel for Match ${matchId}`,
         config.VC_GAMES_CATEGORY_ID
       );
 
-      if (newChannelId) {
-        // Get the list of users in the old voice channel
-        const membersInChannel = await getUsersInVoiceChannel(voiceChannelId);
-
-        // Move each user to the new voice channel
-        for (const member of membersInChannel) {
-          await moveUserToChannel(member.id, newChannelId);
-        }
-        // Delete the old voice channel
-        await deleteVoiceChannel(voiceChannelId);
-
-        console.log(
-          `Moved users from voiceChannelId: ${voiceChannelId} to newChannelId: ${newChannelId}`
-        );
+      if (!newChannelId) {
+        console.error("Failed to create a new voice channel.");
+        return;
       }
+
+      // Get the list of users in the old voice channel
+      const membersInChannel = await getUsersInVoiceChannel(voiceChannelId);
+
+      if (membersInChannel.length === 0) {
+        console.log(`No members in the voiceChannelId: ${voiceChannelId}`);
+      }
+
+      // Move each user to the new voice channel
+      for (const member of membersInChannel) {
+        await moveUserToChannel(member.id, newChannelId);
+      }
+
+      // Wait briefly to ensure moves are processed
+      await new Promise((resolve) => setTimeout(resolve, 1000)); // 1-second delay
+
+      // Delete the old voice channel
+      await deleteVoiceChannel(voiceChannelId);
+
+      console.log(
+        `Moved users from voiceChannelId: ${voiceChannelId} to newChannelId: ${newChannelId}`
+      );
     } catch (error) {
       console.error("Error while moving users to a new channel:", error);
     }
