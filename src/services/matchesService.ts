@@ -54,6 +54,7 @@ export const startMatch = async (matchId: string) => {
     matchData = {
       ...matchData,
       activeScoresChannelId: activeScoresChannelId || "",
+      currentResult: "0:0",
     };
 
     // Determine the absolute path to the worker file
