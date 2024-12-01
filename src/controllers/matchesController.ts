@@ -112,7 +112,8 @@ export const updateLiveScores = async (
 
       const newActiveScoresChannel = await createNewVoiceChannel(
         newChannelName,
-        config.VC_ACTIVE_SCORES_CATEGORY_ID
+        config.VC_ACTIVE_SCORES_CATEGORY_ID,
+        true
       );
 
       await updateActiveScoresChannelId(

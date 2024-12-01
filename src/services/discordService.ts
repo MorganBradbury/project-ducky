@@ -12,6 +12,7 @@ import { SystemUser } from "../types/SystemUser";
 import { faceitApiClient } from "./FaceitService";
 import { FaceitPlayer } from "../types/FaceitPlayer";
 import axios from "axios";
+import { PermissionFlagsBits } from "discord.js";
 
 // Initialize the Discord client
 const client = new Client({
@@ -29,7 +30,8 @@ const client = new Client({
 // Function to create a new voice channel in a specific category
 export const createNewVoiceChannel = async (
   channelName: string,
-  parentId: string
+  parentId: string,
+  voiceScoresChannel?: boolean
 ): Promise<string | null> => {
   try {
     const guild = await client.guilds.fetch(config.GUILD_ID);
@@ -41,18 +43,24 @@ export const createNewVoiceChannel = async (
     // Fetch the @everyone role for the guild
     const everyoneRole = guild.roles.everyone;
 
+    // Build the permission overrides based on the flag
+    const permissionOverrides = voiceScoresChannel
+      ? [
+          {
+            id: everyoneRole.id, // The @everyone role ID
+            deny: [PermissionFlagsBits.Connect], // Use the PermissionFlagsBits enum
+          },
+        ]
+      : undefined; // No overrides if the flag is false
+
+    // Create the new voice channel
     const channel = await guild.channels.create({
       name: channelName,
       type: 2, // 2 = Voice channel
       parent: parentId, // Fixed category ID
       bitrate: 64000,
       userLimit: 1,
-      permissionOverwrites: [
-        {
-          id: everyoneRole.id, // The @everyone role ID
-          deny: ["Connect"], // Deny the CONNECT permission
-        },
-      ],
+      permissionOverwrites: permissionOverrides, // Apply overrides conditionally
     });
 
     console.log(`Created new voice channel: ${channel.name}`);
