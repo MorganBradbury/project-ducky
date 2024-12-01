@@ -88,7 +88,11 @@ export const updateLiveScores = async (
 
   const matchFromDb = await getMatchDataFromDb(matchId);
 
-  if (!matchFromDb || !matchFromDb?.activeScoresChannelId) {
+  if (
+    !matchFromDb ||
+    !matchFromDb?.activeScoresChannelId ||
+    !activeMatchLiveScore
+  ) {
     console.log("No match data found for", matchId);
   }
 
@@ -98,22 +102,35 @@ export const updateLiveScores = async (
 
   if (activeMatchLiveScore != matchFromDb?.currentResult) {
     if (matchFromDb?.activeScoresChannelId) {
+      console.log(
+        `Go to delete ${matchFromDb.matchId}:${matchFromDb?.activeScoresChannelId} from DB`
+      );
       await deleteVoiceChannel(matchFromDb?.activeScoresChannelId);
       const activeScore =
         activeMatchLiveScore != null ? activeMatchLiveScore : "0:0";
       const newChannelName = `🚨 LIVE: (CS) ${activeScore}`;
 
+      console.log(`New channel name go set to`, newChannelName);
       const newActiveScoresChannel = await createActiveScoresChannel(
         newChannelName
       );
 
-      if (newActiveScoresChannel) {
-        await updateActiveScoresChannelId(
-          matchId,
-          newActiveScoresChannel,
-          activeMatchLiveScore ? activeMatchLiveScore : "0:0"
-        );
-      }
+      console.log(`Gone to create new channel with ID`, newActiveScoresChannel);
+
+      await updateActiveScoresChannelId(
+        matchId,
+        //@ts-ignore
+        newActiveScoresChannel,
+        //@ts-ignore
+        activeMatchLiveScore
+      );
+      console.log(`Updated scores channel data to `, {
+        matchId,
+        //@ts-ignore
+        newActiveScoresChannel,
+        //@ts-ignore
+        activeMatchLiveScore,
+      });
     }
   }
 
