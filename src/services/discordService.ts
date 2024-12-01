@@ -39,12 +39,21 @@ export const createActiveScoresChannel = async (
       return null;
     }
 
+    // Fetch the @everyone role for the guild
+    const everyoneRole = guild.roles.everyone;
+
     const channel = await guild.channels.create({
       name: channelName,
       type: 2, // 2 = Voice channel
       parent: "1312126985883095060", // Fixed category ID
       bitrate,
       userLimit,
+      permissionOverwrites: [
+        {
+          id: everyoneRole.id, // The @everyone role ID
+          deny: ["Connect"], // Deny the CONNECT permission
+        },
+      ],
     });
 
     console.log(`Created new voice channel: ${channel.name}`);
@@ -194,7 +203,6 @@ const getEloDifference = async (previousElo: number, gamePlayerId: string) => {
   if (!faceitPlayer?.faceit_elo) {
     return;
   }
-  console.log("testing", faceitPlayer.faceit_elo + " : " + previousElo);
   if (faceitPlayer.faceit_elo > previousElo) {
     const eloChange = faceitPlayer.faceit_elo - previousElo;
     return `${`**\+${eloChange}\** (${faceitPlayer.faceit_elo})`}`;
