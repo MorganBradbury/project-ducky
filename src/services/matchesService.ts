@@ -195,7 +195,7 @@ export const cancelMatch = async (matchId: string) => {
       await new Promise((resolve) => setTimeout(resolve, 1000)); // 1-second delay
 
       // Delete the old voice channel
-      await deleteVoiceChannel(voiceChannelId);
+      //await deleteVoiceChannel(voiceChannelId);
 
       console.log(
         `Moved users from voiceChannelId: ${voiceChannelId} to newChannelId: ${newChannelId}`
