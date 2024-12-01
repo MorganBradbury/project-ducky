@@ -49,7 +49,7 @@ export const startMatch = async (matchId: string) => {
   if (voiceChannelId && checkVoiceId(voiceChannelId)) {
     await updateVoiceChannelName(voiceChannelId, true);
     const activeScoresChannelId = await createActiveScoresChannel(
-      "🚨 LIVE: (CS-1) 0:0"
+      "🚨 LIVE: (CS-1) 0:0 🔒"
     );
     matchData = {
       ...matchData,
