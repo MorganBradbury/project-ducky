@@ -169,12 +169,13 @@ export const getMatchDataFromDb = async (
 
 export const updateActiveScoresChannelId = async (
   matchId: string,
-  newChannelId: string
+  newChannelId: string,
+  activeMatchLiveScore: string
 ): Promise<void> => {
   return useConnection(async (connection) => {
     const [result] = await connection.query<RowDataPacket[]>(
       SQL_QUERIES.UPDATE_ACTIVE_SCORES_CHANNEL_ID,
-      [newChannelId, matchId]
+      [newChannelId, matchId, activeMatchLiveScore]
     );
 
     if ((result as any).affectedRows > 0) {

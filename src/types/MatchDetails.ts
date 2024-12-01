@@ -9,6 +9,7 @@ export type MatchDetails = {
   voiceChannelId?: string;
   activeScoresChannelId?: string;
   isComplete: boolean;
+  currentResult?: string;
 };
 
 export type MatchFinishedDetails = {

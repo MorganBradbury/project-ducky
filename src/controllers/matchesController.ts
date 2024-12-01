@@ -89,6 +89,14 @@ export const updateLiveScores = async (
 
   const matchFromDb = await getMatchDataFromDb(matchId);
 
+  if (matchFromDb?.currentResult == activeMatchLiveScore) {
+    console.log(
+      "score is the same",
+      matchFromDb?.currentResult + ":" + activeMatchLiveScore
+    );
+    return;
+  }
+
   if (matchFromDb && matchFromDb?.activeScoresChannelId) {
     await deleteVoiceChannel(matchFromDb?.activeScoresChannelId);
 
@@ -97,7 +105,11 @@ export const updateLiveScores = async (
         (activeMatchLiveScore != null ? activeMatchLiveScore : "0:0")
     );
     if (newActiveScoresChannel) {
-      await updateActiveScoresChannelId(matchId, newActiveScoresChannel);
+      await updateActiveScoresChannelId(
+        matchId,
+        newActiveScoresChannel,
+        activeMatchLiveScore ?? ""
+      );
     }
   }
 
