@@ -89,27 +89,35 @@ export const updateLiveScores = async (
 
   const matchFromDb = await getMatchDataFromDb(matchId);
 
-  if (matchFromDb?.currentResult == activeMatchLiveScore) {
-    console.log(
-      "score is the same",
-      matchFromDb?.currentResult + ":" + activeMatchLiveScore
-    );
-    return;
-  }
-
   if (matchFromDb && matchFromDb?.activeScoresChannelId) {
-    await deleteVoiceChannel(matchFromDb?.activeScoresChannelId);
-
-    const newActiveScoresChannel = await createActiveScoresChannel(
-      "🚨 LIVE: (CS) " +
-        (activeMatchLiveScore != null ? activeMatchLiveScore : "0:0")
-    );
-    if (newActiveScoresChannel) {
-      await updateActiveScoresChannelId(
-        matchId,
-        newActiveScoresChannel,
-        activeMatchLiveScore ?? ""
+    if (matchFromDb?.currentResult == activeMatchLiveScore) {
+      console.log(
+        `Scores are the same: ${activeMatchLiveScore}, ${matchFromDb?.currentResult}`
       );
+      return;
+    } else {
+      console.log(
+        `Scores are different: ${activeMatchLiveScore}, ${matchFromDb?.currentResult}`
+      );
+    }
+
+    await deleteVoiceChannel(matchFromDb?.activeScoresChannelId);
+    const newChannelName =
+      "🚨 LIVE: (CS) " + activeMatchLiveScore != null
+        ? activeMatchLiveScore
+        : "0:0";
+
+    if (newChannelName) {
+      const newActiveScoresChannel = await createActiveScoresChannel(
+        newChannelName
+      );
+      if (newActiveScoresChannel) {
+        await updateActiveScoresChannelId(
+          matchId,
+          newActiveScoresChannel,
+          activeMatchLiveScore ? activeMatchLiveScore : "0:0"
+        );
+      }
     }
   }
 

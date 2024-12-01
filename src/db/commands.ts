@@ -160,6 +160,7 @@ export const getMatchDataFromDb = async (
         matchingPlayers: selectedRow?.game_player_ids,
         activeScoresChannelId: selectedRow?.active_scores_channel_id,
         isComplete: selectedRow?.is_complete,
+        currentResult: selectedRow?.current_score_live,
       };
     }
 
