@@ -178,7 +178,7 @@ export const updateActiveScoresChannelId = async (
   return useConnection(async (connection) => {
     const [result] = await connection.query<RowDataPacket[]>(
       SQL_QUERIES.UPDATE_ACTIVE_SCORES_CHANNEL_ID,
-      [newChannelId, matchId, activeMatchLiveScore]
+      [newChannelId, activeMatchLiveScore, matchId]
     );
 
     if ((result as any).affectedRows > 0) {
