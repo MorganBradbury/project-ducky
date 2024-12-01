@@ -83,7 +83,8 @@ export const updateLiveScores = async (
   }
 
   const activeMatchLiveScore = await faceitApiClient.getActiveMatchScore(
-    matchId
+    matchId,
+    matchData?.teamId
   );
 
   const matchFromDb = await getMatchDataFromDb(matchId);

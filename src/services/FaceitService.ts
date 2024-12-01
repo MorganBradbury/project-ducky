@@ -125,7 +125,10 @@ class FaceitApiClient {
     }
   }
 
-  async getActiveMatchScore(matchId: string): Promise<string | null> {
+  async getActiveMatchScore(
+    matchId: string,
+    teamId: string
+  ): Promise<string | null> {
     try {
       const response = await this.client.get(
         `${FaceitApiEndpoints.MATCHES}/${matchId}`
@@ -143,10 +146,33 @@ class FaceitApiClient {
         return null;
       }
 
-      const { faction1, faction2 } = matchData?.results?.score;
+      // Find which faction the teamId belongs to
+      const { faction1, faction2 } = matchData?.teams;
+      let teamFaction: "faction1" | "faction2" | null = null;
 
-      // Merge scores into the desired format "faction1:faction2"
-      const score = `${faction1}:${faction2}`;
+      if (faction1 && faction1.faction_id === teamId) {
+        teamFaction = "faction1";
+      } else if (faction2 && faction2.faction_id === teamId) {
+        teamFaction = "faction2";
+      }
+
+      if (teamFaction === null) {
+        console.error(`Team ID ${teamId} not found in match ${matchId}`);
+        return null;
+      }
+
+      // Extract the scores for the two factions
+      const faction1Score = matchData.results.score.faction1;
+      const faction2Score = matchData.results.score.faction2;
+
+      // Put the team's score first
+      let score: string;
+      if (teamFaction === "faction1") {
+        score = `${faction1Score}:${faction2Score}`;
+      } else {
+        score = `${faction2Score}:${faction1Score}`;
+      }
+
       return score;
     } catch (error) {
       console.error(`Error fetching match score for ${matchId}:`, error);
