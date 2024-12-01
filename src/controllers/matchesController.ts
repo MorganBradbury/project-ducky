@@ -67,7 +67,6 @@ export const updateLiveScores = async (
   res: Response
 ): Promise<void> => {
   console.log("Message received from worker!", req.body);
-  return;
   const matchId = req?.body?.matchId;
 
   const doesMatchExist = await checkMatchExists(matchId);
@@ -84,38 +83,29 @@ export const updateLiveScores = async (
 
   const activeMatchLiveScore = await faceitApiClient.getActiveMatchScore(
     matchId,
-    //@ts-ignore
     matchData?.teamId
   );
 
   const matchFromDb = await getMatchDataFromDb(matchId);
 
-  if (matchFromDb && matchFromDb?.activeScoresChannelId) {
-    if (matchFromDb?.currentResult == activeMatchLiveScore) {
-      console.log(
-        `Scores are the same: ${activeMatchLiveScore}, ${matchFromDb?.currentResult}`
-      );
-      return;
-    } else {
-      console.log(
-        `Scores are different: ${activeMatchLiveScore}, ${matchFromDb?.currentResult}`
-      );
-    }
-    //@ts-ignore
+  if (!matchFromDb || !matchFromDb?.activeScoresChannelId) {
+    console.log("No match data found for", matchId);
+  }
 
-    await deleteVoiceChannel(matchFromDb?.activeScoresChannelId);
-    const channelNameScore =
-      activeMatchLiveScore != null ? activeMatchLiveScore : "0:0";
-    const newChannelName = `🚨 LIVE: (CS) ${channelNameScore}`;
+  if (activeMatchLiveScore != matchFromDb?.currentResult) {
+    if (matchFromDb?.activeScoresChannelId) {
+      await deleteVoiceChannel(matchFromDb?.activeScoresChannelId);
+      const activeScore =
+        activeMatchLiveScore != null ? activeMatchLiveScore : "0:0";
+      const newChannelName = `🚨 LIVE: (CS) ${activeScore}`;
 
-    if (newChannelName) {
       const newActiveScoresChannel = await createActiveScoresChannel(
         newChannelName
       );
+
       if (newActiveScoresChannel) {
         await updateActiveScoresChannelId(
           matchId,
-          //@ts-ignore
           newActiveScoresChannel,
           activeMatchLiveScore ? activeMatchLiveScore : "0:0"
         );
