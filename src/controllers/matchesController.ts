@@ -94,7 +94,6 @@ export const updateLiveScores = async (
       console.log(
         `Scores are the same: ${activeMatchLiveScore}, ${matchFromDb?.currentResult}`
       );
-      return;
     } else {
       console.log(
         `Scores are different: ${activeMatchLiveScore}, ${matchFromDb?.currentResult}`
@@ -102,10 +101,9 @@ export const updateLiveScores = async (
     }
 
     await deleteVoiceChannel(matchFromDb?.activeScoresChannelId);
-    const newChannelName =
-      "🚨 LIVE: (CS) " + activeMatchLiveScore != null
-        ? activeMatchLiveScore
-        : "0:0";
+    const channelNameScore =
+      activeMatchLiveScore != null ? activeMatchLiveScore : "0:0";
+    const newChannelName = `🚨 LIVE: (CS) ${channelNameScore}`;
 
     if (newChannelName) {
       const newActiveScoresChannel = await createActiveScoresChannel(
