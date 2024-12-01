@@ -95,6 +95,7 @@ export const insertMatch = async (
     teamId,
     voiceChannelId,
     activeScoresChannelId,
+    currentResult,
   } = matchDetails;
 
   try {
@@ -107,6 +108,7 @@ export const insertMatch = async (
       teamId, // Store teamId
       voiceChannelId,
       activeScoresChannelId,
+      currentResult,
     ]);
     console.log(`Match ${matchId} inserted successfully.`);
   } catch (error) {
