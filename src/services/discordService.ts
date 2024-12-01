@@ -302,6 +302,23 @@ export const moveUserToChannel = async (
   newChannelId: string
 ) => {
   try {
+    // Validate user's current voice state
+    const guild = await client.guilds.fetch(config.GUILD_ID);
+    const member = await guild.members.fetch(userId);
+
+    if (!member.voice.channelId) {
+      console.log(
+        `User ${userId} is not currently in a voice channel. Skipping move.`
+      );
+      return;
+    }
+
+    const currentChannelId = member.voice.channelId;
+
+    console.log(
+      `User ${userId} is in channel ${currentChannelId}. Moving to ${newChannelId}`
+    );
+
     const url = `https://discord.com/api/v10/guilds/${config.GUILD_ID}/voice-states/${userId}`;
     const payload = { channel_id: newChannelId };
 
@@ -314,10 +331,17 @@ export const moveUserToChannel = async (
 
     console.log(`Moved user ${userId} to channel ${newChannelId}`);
   } catch (error) {
-    console.error(
-      `Error moving user ${userId} to channel ${newChannelId}:`,
-      error
-    );
+    if (axios.isAxiosError(error) && error.response?.status === 404) {
+      console.error(
+        `Cannot move user ${userId} to channel ${newChannelId}: User might not be in a voice channel.`,
+        error.message
+      );
+    } else {
+      console.error(
+        `Error moving user ${userId} to channel ${newChannelId}:`,
+        error
+      );
+    }
   }
 };
 
