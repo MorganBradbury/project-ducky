@@ -1,5 +1,5 @@
 import { Request, Response } from "express";
-import { endMatch, startMatch } from "../services/matchesService"; // Centralized match flow logic
+import { cancelMatch, endMatch, startMatch } from "../services/matchesService"; // Centralized match flow logic
 import {
   createActiveScoresChannel,
   deleteVoiceChannel,
@@ -15,6 +15,7 @@ import {
 enum AcceptedEventTypes {
   match_ready = "match_status_ready",
   match_finished = "match_status_finished",
+  match_cancelled = "match_status_cancelled",
 }
 
 // Main controller function to handle the webhook for match events
@@ -29,6 +30,7 @@ export const handleWebhook = async (
     const acceptedHookEvents = [
       AcceptedEventTypes.match_ready,
       AcceptedEventTypes.match_finished,
+      AcceptedEventTypes.match_cancelled,
     ];
 
     if (!matchId || !eventId) {
@@ -49,6 +51,10 @@ export const handleWebhook = async (
     // Match has just finished.
     if (eventId === AcceptedEventTypes.match_finished) {
       await endMatch(matchId);
+    }
+
+    if (eventId === AcceptedEventTypes.match_cancelled) {
+      await cancelMatch(matchId);
     }
 
     res.status(200).json({ message: "Webhook data received and processed." });
