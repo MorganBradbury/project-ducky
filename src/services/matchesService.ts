@@ -8,12 +8,15 @@ import {
   markMatchComplete,
 } from "../db/commands";
 import {
-  createActiveScoresChannel,
+  createNewVoiceChannel,
   deleteVoiceChannel,
+  getUsersInVoiceChannel,
+  moveUserToChannel,
   sendMatchFinishNotification,
   updateVoiceChannelName,
 } from "./discordService";
 import { faceitApiClient } from "./FaceitService";
+import { config } from "../config/index";
 
 let workers: Record<string, Worker> = {};
 
@@ -48,8 +51,9 @@ export const startMatch = async (matchId: string) => {
 
   if (voiceChannelId && checkVoiceId(voiceChannelId)) {
     await updateVoiceChannelName(voiceChannelId, true);
-    const activeScoresChannelId = await createActiveScoresChannel(
-      "🚨 LIVE: (CS) 0:0 🔒"
+    const activeScoresChannelId = await createNewVoiceChannel(
+      "🚨 LIVE: (CS) 0:0 🔒",
+      config.VC_ACTIVE_SCORES_CATEGORY_ID
     );
     matchData = {
       ...matchData,
@@ -153,14 +157,41 @@ export const cancelMatch = async (matchId: string) => {
 
   const { voiceChannelId, activeScoresChannelId } = matchData;
 
+  // Mark match as complete in the database
   await markMatchComplete(matchId);
 
+  // Delete the scores channel if it exists
   if (activeScoresChannelId) {
     await deleteVoiceChannel(activeScoresChannelId);
   }
 
+  // Handle moving users from the old voice channel to a new one
   if (voiceChannelId && checkVoiceId(voiceChannelId)) {
-    await updateVoiceChannelName(voiceChannelId, false);
+    try {
+      // Create a new voice channel and get its ID
+      const newChannelId = await createNewVoiceChannel(
+        "CS",
+        config.VC_GAMES_CATEGORY_ID
+      );
+
+      if (newChannelId) {
+        // Get the list of users in the old voice channel
+        const membersInChannel = await getUsersInVoiceChannel(voiceChannelId);
+
+        // Move each user to the new voice channel
+        for (const member of membersInChannel) {
+          await moveUserToChannel(member.id, newChannelId);
+        }
+        // Delete the old voice channel
+        await deleteVoiceChannel(voiceChannelId);
+
+        console.log(
+          `Moved users from voiceChannelId: ${voiceChannelId} to newChannelId: ${newChannelId}`
+        );
+      }
+    } catch (error) {
+      console.error("Error while moving users to a new channel:", error);
+    }
   }
 
   // Stop the worker associated with this matchId

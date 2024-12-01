@@ -1,7 +1,7 @@
 import { Request, Response } from "express";
 import { cancelMatch, endMatch, startMatch } from "../services/matchesService"; // Centralized match flow logic
 import {
-  createActiveScoresChannel,
+  createNewVoiceChannel,
   deleteVoiceChannel,
 } from "../services/discordService";
 import { randomUUID } from "crypto";
@@ -11,6 +11,7 @@ import {
   getMatchDataFromDb,
   updateActiveScoresChannelId,
 } from "../db/commands";
+import { config } from "../config";
 
 enum AcceptedEventTypes {
   match_ready = "match_status_ready",
@@ -109,8 +110,9 @@ export const updateLiveScores = async (
         activeMatchLiveScore != null ? activeMatchLiveScore : "0:0";
       const newChannelName = `🚨 LIVE: (CS) ${activeScore} 🔒`;
 
-      const newActiveScoresChannel = await createActiveScoresChannel(
-        newChannelName
+      const newActiveScoresChannel = await createNewVoiceChannel(
+        newChannelName,
+        config.VC_ACTIVE_SCORES_CATEGORY_ID
       );
 
       await updateActiveScoresChannelId(

@@ -18,6 +18,9 @@ export const config = {
   GUILD_ID: loadEnvVar("GUILD_ID"),
   BOT_UPDATES_CHANNEL_ID: loadEnvVar("BOT_UPDATES_CHANNEL_ID"),
   SERVER_OWNER_ID: loadEnvVar("SERVER_OWNER_ID"),
+  VC_ACTIVE_SCORES_CATEGORY_ID: loadEnvVar("VC_ACTIVE_SCORES_CATEGORY_ID"),
+  VC_GAMES_CATEGORY_ID: loadEnvVar("SERVER_OWNER_ID"),
+
   MYSQL: {
     host: loadEnvVar("MYSQLHOST"),
     user: loadEnvVar("MYSQLUSER"),
@@ -29,4 +32,3 @@ export const config = {
     queueLimit: 0,
   },
 };
-

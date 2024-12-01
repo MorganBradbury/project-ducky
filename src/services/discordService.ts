@@ -27,10 +27,9 @@ const client = new Client({
 });
 
 // Function to create a new voice channel in a specific category
-export const createActiveScoresChannel = async (
+export const createNewVoiceChannel = async (
   channelName: string,
-  userLimit: number = 1,
-  bitrate: number = 64000
+  parentId: string
 ): Promise<string | null> => {
   try {
     const guild = await client.guilds.fetch(config.GUILD_ID);
@@ -45,9 +44,9 @@ export const createActiveScoresChannel = async (
     const channel = await guild.channels.create({
       name: channelName,
       type: 2, // 2 = Voice channel
-      parent: "1312126985883095060", // Fixed category ID
-      bitrate,
-      userLimit,
+      parent: parentId, // Fixed category ID
+      bitrate: 64000,
+      userLimit: 1,
       permissionOverwrites: [
         {
           id: everyoneRole.id, // The @everyone role ID
@@ -258,6 +257,59 @@ export const sendMatchFinishNotification = async (
     await sendEmbedMessage(embed);
   } catch (error) {
     console.error("Error sending match finish notification:", error);
+  }
+};
+
+// Helper function to get all users in a voice channel
+export const getUsersInVoiceChannel = async (voiceChannelId: string) => {
+  try {
+    const guild = await client.guilds.fetch(config.GUILD_ID);
+    if (!guild) {
+      console.error("Guild not found.");
+      return [];
+    }
+
+    const channel = await guild.channels.fetch(voiceChannelId);
+    if (!channel || !(channel instanceof VoiceChannel)) {
+      console.error(
+        `Channel with ID ${voiceChannelId} is not a valid voice channel.`
+      );
+      return [];
+    }
+
+    // Fetch and return members in the voice channel
+    return Array.from(channel.members.values());
+  } catch (error) {
+    console.error(
+      `Error fetching users from voice channel ${voiceChannelId}:`,
+      error
+    );
+    return [];
+  }
+};
+
+// Helper function to move a user to a specific voice channel
+export const moveUserToChannel = async (
+  userId: string,
+  newChannelId: string
+) => {
+  try {
+    const url = `https://discord.com/api/v10/guilds/${config.GUILD_ID}/voice-states/${userId}`;
+    const payload = { channel_id: newChannelId };
+
+    await axios.patch(url, payload, {
+      headers: {
+        Authorization: `Bot ${config.DISCORD_BOT_TOKEN}`,
+        "Content-Type": "application/json",
+      },
+    });
+
+    console.log(`Moved user ${userId} to channel ${newChannelId}`);
+  } catch (error) {
+    console.error(
+      `Error moving user ${userId} to channel ${newChannelId}:`,
+      error
+    );
   }
 };
 
