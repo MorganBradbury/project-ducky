@@ -92,6 +92,10 @@ export const updateLiveScores = async (
     console.log("No match data found for", matchId);
   }
 
+  console.log(
+    `scores data: ${activeMatchLiveScore} ${matchFromDb?.currentResult}`
+  );
+
   if (activeMatchLiveScore != matchFromDb?.currentResult) {
     if (matchFromDb?.activeScoresChannelId) {
       await deleteVoiceChannel(matchFromDb?.activeScoresChannelId);
