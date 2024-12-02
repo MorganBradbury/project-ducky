@@ -117,7 +117,7 @@ export const insertMatch = async (
 };
 
 export const markMatchComplete = async (matchId: string): Promise<void> => {
-  await pool.query(SQL_QUERIES.UPDATE_MATCH_COMPLETE, [matchId]);
+  await pool.query(SQL_QUERIES.DELETE_MATCH, [matchId]);
 };
 
 export const isMatchComplete = async (matchId: string): Promise<boolean> => {

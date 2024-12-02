@@ -111,7 +111,6 @@ export const endMatch = async (matchId: string) => {
 
   const { matchingPlayers, voiceChannelId, activeScoresChannelId } = matchData;
 
-  await markMatchComplete(matchId);
   await sendMatchFinishNotification(matchData);
   await runAutoUpdateElo(matchingPlayers);
 
@@ -122,6 +121,8 @@ export const endMatch = async (matchId: string) => {
   if (voiceChannelId && checkVoiceId(voiceChannelId)) {
     await updateVoiceChannelName(voiceChannelId, false);
   }
+
+  await markMatchComplete(matchId);
 
   // Stop the worker associated with this matchId
   if (workers[matchId]) {
@@ -156,9 +157,6 @@ export const cancelMatch = async (matchId: string) => {
   }
 
   const { voiceChannelId, activeScoresChannelId } = matchData;
-
-  // Mark match as complete in the database
-  await markMatchComplete(matchId);
 
   // Delete the scores channel if it exists
   if (activeScoresChannelId) {
@@ -201,6 +199,9 @@ export const cancelMatch = async (matchId: string) => {
       console.error("Error while moving users to a new channel:", error);
     }
   }
+
+  // Mark match as complete in the database
+  await markMatchComplete(matchId);
 
   // Stop the worker associated with this matchId
   if (workers[matchId]) {

@@ -21,11 +21,11 @@ export const SQL_QUERIES = {
   VALUES (?, ?, ?, ?, ?, ?, ?, ?)
   ON DUPLICATE KEY UPDATE match_id = match_id
 `,
-  UPDATE_MATCH_COMPLETE: `
-  UPDATE matches_played
-  SET is_complete = TRUE
+  DELETE_MATCH: `
+  DELETE FROM matches_played
   WHERE match_id = ?
-`,
+  `,
+
   GET_MATCH_COMPLETE_STATUS: `
   SELECT is_complete
   FROM matches_played
