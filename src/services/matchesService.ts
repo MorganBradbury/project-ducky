@@ -175,7 +175,7 @@ export const cancelMatch = async (matchId: string) => {
     try {
       // Create a new voice channel and get its ID
       const newChannelId = await createNewVoiceChannel(
-        `CS`,
+        `${matchData?.gamersVcName}` || "CS",
         config.VC_GAMES_CATEGORY_ID
       );
 
