@@ -302,7 +302,6 @@ export const moveUserToChannel = async (
   newChannelId: string
 ) => {
   try {
-    // Validate user's current voice state
     const guild = await client.guilds.fetch(config.GUILD_ID);
     const member = await guild.members.fetch(userId);
 
@@ -313,35 +312,19 @@ export const moveUserToChannel = async (
       return;
     }
 
-    const currentChannelId = member.voice.channelId;
-
     console.log(
-      `User ${userId} is in channel ${currentChannelId}. Moving to ${newChannelId}`
+      `User ${userId} is in channel ${member.voice.channelId}. Moving to ${newChannelId}`
     );
 
-    const url = `https://discord.com/api/v10/guilds/${config.GUILD_ID}/voice-states/${userId}`;
-    const payload = { channel_id: newChannelId };
-
-    await axios.patch(url, payload, {
-      headers: {
-        Authorization: `Bot ${config.DISCORD_BOT_TOKEN}`,
-        "Content-Type": "application/json",
-      },
-    });
+    // Use Discord.js method to move the user
+    await member.voice.setChannel(newChannelId);
 
     console.log(`Moved user ${userId} to channel ${newChannelId}`);
   } catch (error) {
-    if (axios.isAxiosError(error) && error.response?.status === 404) {
-      console.error(
-        `Cannot move user ${userId} to channel ${newChannelId}: User might not be in a voice channel.`,
-        error.message
-      );
-    } else {
-      console.error(
-        `Error moving user ${userId} to channel ${newChannelId}:`,
-        error
-      );
-    }
+    console.error(
+      `Error moving user ${userId} to channel ${newChannelId}:`,
+      error
+    );
   }
 };
 
