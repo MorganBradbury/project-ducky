@@ -73,7 +73,6 @@ export const updateLiveScores = async (
   req: Request,
   res: Response
 ): Promise<void> => {
-  console.log("Message received from worker!", req.body);
   const matchId = req?.body?.matchId;
 
   const doesMatchExist = await checkMatchExists(matchId);

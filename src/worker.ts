@@ -9,10 +9,10 @@ const API_URL =
 const sendPostRequest = async (matchId: string): Promise<void> => {
   try {
     const response = await axios.post(API_URL, { matchId });
-    console.log(
-      `POST request successful for matchId: ${matchId}`,
-      response.data
-    );
+    // console.log(
+    //   `POST request successful for matchId: ${matchId}`,
+    //   response.data
+    // );
   } catch (error: any) {
     console.error(
       `Error sending POST request for matchId: ${matchId}`,
