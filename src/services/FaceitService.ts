@@ -96,7 +96,7 @@ class FaceitApiClient {
       );
 
       const mapName = voting?.map?.pick || "Unknown";
-      const voiceChannelId = await getApplicableVoiceChannel(matchingPlayers);
+      const voiceChannelData = await getApplicableVoiceChannel(matchingPlayers);
       // Determine the teamId based on matching players
       let teamId: string = "";
       if (matchingPlayers.length > 0) {
@@ -116,9 +116,12 @@ class FaceitApiClient {
         mapName,
         matchingPlayers,
         teamId,
-        voiceChannelId,
+        //@ts-ignore
+        voiceChannelId: voiceChannelData?.channelId ?? "",
         isComplete: false,
         currentResult: "0:0",
+        //@ts-ignore
+        gamersVcName: voiceChannelData?.channelName,
       };
     } catch (error) {
       console.error(`Error fetching match details for ${matchId}:`, error);

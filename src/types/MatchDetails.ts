@@ -10,6 +10,7 @@ export type MatchDetails = {
   activeScoresChannelId?: string;
   isComplete: boolean;
   currentResult?: string;
+  gamersVcName?: string;
 };
 
 export type MatchFinishedDetails = {

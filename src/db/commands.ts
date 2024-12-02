@@ -96,6 +96,7 @@ export const insertMatch = async (
     voiceChannelId,
     activeScoresChannelId,
     currentResult,
+    gamersVcName,
   } = matchDetails;
 
   try {
@@ -109,6 +110,7 @@ export const insertMatch = async (
       voiceChannelId,
       activeScoresChannelId,
       currentResult,
+      gamersVcName,
     ]);
     console.log(`Match ${matchId} inserted successfully.`);
   } catch (error) {
@@ -163,6 +165,7 @@ export const getMatchDataFromDb = async (
         activeScoresChannelId: selectedRow?.active_scores_channel_id,
         isComplete: selectedRow?.is_complete,
         currentResult: selectedRow?.current_score_live,
+        gamersVcName: selectedRow?.gamers_vc_name,
       };
     }
 

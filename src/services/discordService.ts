@@ -98,7 +98,7 @@ const sendEmbedMessage = async (embed: EmbedBuilder) => {
 // Function to get the applicable voice channel based on matching players' usernames
 export const getApplicableVoiceChannel = async (
   matchingPlayers: SystemUser[]
-) => {
+): Promise<{ channelId: string; channelName: string } | string> => {
   try {
     const guild = await client.guilds.fetch(config.GUILD_ID);
     const channels = await guild.channels.fetch();
@@ -111,7 +111,7 @@ export const getApplicableVoiceChannel = async (
               (player) => player.discordUsername === member.user.username
             )
           ) {
-            return channelId;
+            return { channelId, channelName: channel.name };
           }
         }
       }
@@ -119,7 +119,7 @@ export const getApplicableVoiceChannel = async (
 
     return "No channel found";
   } catch (error) {
-    console.log("Error finding applicable voice channel:", error);
+    console.error("Error finding applicable voice channel:", error);
     return "Error finding channel";
   }
 };
@@ -127,6 +127,7 @@ export const getApplicableVoiceChannel = async (
 // Function to update voice channel name with rate-limit checking
 export const updateVoiceChannelName = async (
   voiceChannelId: string,
+  gamersVcName: string,
   matchOngoing: boolean
 ) => {
   try {
@@ -135,7 +136,9 @@ export const updateVoiceChannelName = async (
 
     if (channel instanceof VoiceChannel) {
       const newName =
-        matchOngoing && channel.members.size > 0 ? "CS [🟢 LIVE]" : "CS";
+        matchOngoing && channel.members.size > 0
+          ? `${gamersVcName} [🟢 LIVE]`
+          : `${gamersVcName}`;
 
       const url = `https://discord.com/api/v10/channels/${voiceChannelId}`;
       const payload = { name: newName };

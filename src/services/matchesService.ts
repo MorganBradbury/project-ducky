@@ -41,7 +41,7 @@ export const startMatch = async (matchId: string) => {
     return;
   }
 
-  const { matchingPlayers, voiceChannelId } = matchData;
+  const { matchingPlayers, voiceChannelId, gamersVcName } = matchData;
   if (matchingPlayers.length == 0) {
     console.log(
       `No matching players found for match: ${matchId} from FACEIT API.`
@@ -50,9 +50,9 @@ export const startMatch = async (matchId: string) => {
   }
 
   if (voiceChannelId && checkVoiceId(voiceChannelId)) {
-    await updateVoiceChannelName(voiceChannelId, true);
+    await updateVoiceChannelName(voiceChannelId, gamersVcName || "CS", true);
     const activeScoresChannelId = await createNewVoiceChannel(
-      "🚨 LIVE: (CS) 0:0",
+      `🚨 LIVE: (${gamersVcName}) 0:0`,
       config.VC_ACTIVE_SCORES_CATEGORY_ID
     );
     matchData = {
@@ -109,7 +109,12 @@ export const endMatch = async (matchId: string) => {
     };
   }
 
-  const { matchingPlayers, voiceChannelId, activeScoresChannelId } = matchData;
+  const {
+    matchingPlayers,
+    voiceChannelId,
+    activeScoresChannelId,
+    gamersVcName,
+  } = matchData;
 
   await sendMatchFinishNotification(matchData);
   await runAutoUpdateElo(matchingPlayers);
@@ -119,7 +124,7 @@ export const endMatch = async (matchId: string) => {
   }
 
   if (voiceChannelId && checkVoiceId(voiceChannelId)) {
-    await updateVoiceChannelName(voiceChannelId, false);
+    await updateVoiceChannelName(voiceChannelId, gamersVcName || "CS", false);
   }
 
   await markMatchComplete(matchId);
