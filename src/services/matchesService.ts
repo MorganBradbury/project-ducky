@@ -52,7 +52,7 @@ export const startMatch = async (matchId: string) => {
   if (voiceChannelId && checkVoiceId(voiceChannelId)) {
     await updateVoiceChannelName(voiceChannelId, true);
     const activeScoresChannelId = await createNewVoiceChannel(
-      "🚨 LIVE: (CS) 0:0 🔒",
+      "🚨 LIVE: (CS) 0:0",
       config.VC_ACTIVE_SCORES_CATEGORY_ID
     );
     matchData = {
