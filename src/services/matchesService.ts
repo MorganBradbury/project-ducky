@@ -137,7 +137,7 @@ export const endMatch = async (matchId: string) => {
       delete workers[matchId]; // Remove worker from storage
       console.log("Worker stopped for matchId:", matchId);
     }
-  }, 5000);
+  }, 2500);
 };
 
 export const cancelMatch = async (matchId: string) => {
