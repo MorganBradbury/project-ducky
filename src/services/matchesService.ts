@@ -75,67 +75,69 @@ export const startMatch = async (matchId: string) => {
 };
 
 export const endMatch = async (matchId: string) => {
-  console.log("Processing endMatch()", matchId);
+  setTimeout(async () => {
+    console.log("Processing endMatch()", matchId);
 
-  const matchAlreadyExists = await checkMatchExists(matchId);
-  if (!matchAlreadyExists) {
-    console.log(`No match found for ${matchId} from the DB`);
-    return;
-  }
+    const matchAlreadyExists = await checkMatchExists(matchId);
+    if (!matchAlreadyExists) {
+      console.log(`No match found for ${matchId} from the DB`);
+      return;
+    }
 
-  let matchData = await getMatchDataFromDb(matchId);
+    let matchData = await getMatchDataFromDb(matchId);
 
-  console.log(`Test querying DB Data: ${matchId}`, matchData);
+    console.log(`Test querying DB Data: ${matchId}`, matchData);
 
-  if (!matchData) {
-    console.log("No match data found from DB", matchData);
-    return;
-  }
+    if (!matchData) {
+      console.log("No match data found from DB", matchData);
+      return;
+    }
 
-  if (matchData?.isComplete == true) {
-    console.log("Match is already finished: ", matchData);
-    return;
-  }
+    if (matchData?.isComplete == true) {
+      console.log("Match is already finished: ", matchData);
+      return;
+    }
 
-  const finalMatchDetails = await faceitApiClient.getMatchScore(
-    matchId,
-    matchData?.teamId
-  );
+    const finalMatchDetails = await faceitApiClient.getMatchScore(
+      matchId,
+      matchData?.teamId
+    );
 
-  if (finalMatchDetails) {
-    matchData = {
-      ...matchData,
-      results: finalMatchDetails,
-    };
-  }
+    if (finalMatchDetails) {
+      matchData = {
+        ...matchData,
+        results: finalMatchDetails,
+      };
+    }
 
-  const {
-    matchingPlayers,
-    voiceChannelId,
-    activeScoresChannelId,
-    gamersVcName,
-  } = matchData;
+    const {
+      matchingPlayers,
+      voiceChannelId,
+      activeScoresChannelId,
+      gamersVcName,
+    } = matchData;
 
-  await sendMatchFinishNotification(matchData);
-  await runAutoUpdateElo(matchingPlayers);
+    await sendMatchFinishNotification(matchData);
+    await runAutoUpdateElo(matchingPlayers);
 
-  if (activeScoresChannelId) {
-    await deleteVoiceChannel(activeScoresChannelId);
-  }
+    if (activeScoresChannelId) {
+      await deleteVoiceChannel(activeScoresChannelId);
+    }
 
-  if (voiceChannelId && checkVoiceId(voiceChannelId)) {
-    await updateVoiceChannelName(voiceChannelId, gamersVcName || "CS", false);
-  }
+    if (voiceChannelId && checkVoiceId(voiceChannelId)) {
+      await updateVoiceChannelName(voiceChannelId, gamersVcName || "CS", false);
+    }
 
-  await markMatchComplete(matchId);
+    await markMatchComplete(matchId);
 
-  // Stop the worker associated with this matchId
-  if (workers[matchId]) {
-    workers[matchId].postMessage({ type: "stop" });
-    workers[matchId].terminate(); // Clean up worker resources
-    delete workers[matchId]; // Remove worker from storage
-    console.log("Worker stopped for matchId:", matchId);
-  }
+    // Stop the worker associated with this matchId
+    if (workers[matchId]) {
+      workers[matchId].postMessage({ type: "stop" });
+      workers[matchId].terminate(); // Clean up worker resources
+      delete workers[matchId]; // Remove worker from storage
+      console.log("Worker stopped for matchId:", matchId);
+    }
+  }, 5000);
 };
 
 export const cancelMatch = async (matchId: string) => {
