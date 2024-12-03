@@ -222,7 +222,6 @@ const getEloDifference = async (previousElo: number, gamePlayerId: string) => {
   }
 };
 
-// Notify about a match finish
 export const sendMatchFinishNotification = async (
   matchDetails: MatchDetails
 ) => {
@@ -237,26 +236,25 @@ export const sendMatchFinishNotification = async (
       })
     );
 
+    // Determine win/loss based on finalScore or eloDifference
+    const finalScore = matchDetails.results?.finalScore;
+    const isWin =
+      finalScore !== undefined
+        ? matchDetails.results?.win
+        : playerDetails.some((detail) => detail.includes("+"));
+
     const embed = new EmbedBuilder()
-      .setTitle(
-        `🚨  Match finished update (${
-          matchDetails.results?.win ? "WIN" : "LOSS"
-        })`
-      )
-      .setColor(matchDetails.results?.win ? "#00FF00" : "#FF0000")
+      .setTitle(`🚨  Match finished update (${isWin ? "WIN" : "LOSS"})`)
+      .setColor(isWin ? "#00FF00" : "#FF0000")
       .addFields(
         { name: "Map", value: matchDetails.mapName },
         {
           name: "Match Link",
-          value: `[Click here](${`https://www.faceit.com/en/cs2/room/`}${
-            matchDetails?.matchId
-          })`,
+          value: `[Click here](https://www.faceit.com/en/cs2/room/${matchDetails?.matchId})`,
         },
         {
           name: "Match Result",
-          value: `${matchDetails.results?.finalScore} (${
-            matchDetails.results?.win ? "WIN" : "LOSS"
-          })`,
+          value: `${finalScore || "N/A"} (${isWin ? "WIN" : "LOSS"})`,
         },
         {
           name: "Players",

@@ -79,6 +79,11 @@ class FaceitApiClient {
         return null;
       }
 
+      if (matchData?.best_of > 1) {
+        console.log("Match is not a best of 1.");
+        return null;
+      }
+
       const { match_id, voting, teams } = matchData;
       const allUsers = await getAllUsers();
 
