@@ -1,4 +1,4 @@
-import { config } from "../config/index";
+import { config } from "../config";
 import { SystemUser } from "../types/SystemUser";
 import mysql, { RowDataPacket } from "mysql2/promise";
 import { SQL_QUERIES } from "./queries";

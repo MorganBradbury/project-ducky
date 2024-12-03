@@ -8,11 +8,7 @@ const API_URL =
 // Function to send a POST request to the API
 const sendPostRequest = async (matchId: string): Promise<void> => {
   try {
-    const response = await axios.post(API_URL, { matchId });
-    // console.log(
-    //   `POST request successful for matchId: ${matchId}`,
-    //   response.data
-    // );
+    await axios.post(API_URL, { matchId });
   } catch (error: any) {
     console.error(
       `Error sending POST request for matchId: ${matchId}`,

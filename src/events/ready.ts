@@ -10,9 +10,12 @@ client.once("ready", async () => {
 
   try {
     console.log("Refreshing application (/) commands...");
-    await rest.put(Routes.applicationGuildCommands(config.CLIENT_ID, config.GUILD_ID), {
-      body: commands,
-    });
+    await rest.put(
+      Routes.applicationGuildCommands(config.CLIENT_ID, config.GUILD_ID),
+      {
+        body: commands,
+      }
+    );
     console.log("Successfully reloaded commands.");
   } catch (error) {
     console.error("Error refreshing commands:", error);

@@ -5,14 +5,16 @@ import {
   TextChannel,
   EmbedBuilder,
   VoiceChannel,
+  ChannelType,
+  PermissionFlagsBits,
 } from "discord.js";
 import { MatchDetails } from "../types/MatchDetails";
-import { config } from "../config/index";
+import { config } from "../config";
 import { SystemUser } from "../types/SystemUser";
 import { faceitApiClient } from "./FaceitService";
 import { FaceitPlayer } from "../types/FaceitPlayer";
-import axios from "axios";
-import { PermissionFlagsBits } from "discord.js";
+import { updateNickname } from "../utils/nicknameUtils";
+import { updateUserElo } from "../db/commands";
 
 // Initialize the Discord client
 const client = new Client({
@@ -22,10 +24,18 @@ const client = new Client({
     GatewayIntentBits.GuildMessages,
     GatewayIntentBits.MessageContent,
     GatewayIntentBits.DirectMessages,
-    GatewayIntentBits.GuildVoiceStates, // Needed for voice channel updates
+    GatewayIntentBits.GuildVoiceStates,
   ],
   partials: [Partials.Message, Partials.Channel],
 });
+
+// Ensure client readiness before making API calls
+const ensureClientReady = async (): Promise<void> => {
+  if (!client.isReady()) {
+    await new Promise<void>((resolve) => client.once("ready", () => resolve()));
+    console.log("Discord client is ready!");
+  }
+};
 
 // Function to create a new voice channel in a specific category
 export const createNewVoiceChannel = async (
@@ -34,33 +44,32 @@ export const createNewVoiceChannel = async (
   voiceScoresChannel?: boolean
 ): Promise<string | null> => {
   try {
+    await ensureClientReady();
     const guild = await client.guilds.fetch(config.GUILD_ID);
-    if (!guild) {
-      console.error("Guild not found");
+    if (!guild) throw new Error("Guild not found");
+
+    const parentCategory = guild.channels.cache.get(parentId);
+    if (!parentCategory || parentCategory.type !== ChannelType.GuildCategory) {
+      console.error(`Parent category with ID ${parentId} not found.`);
       return null;
     }
 
-    // Fetch the @everyone role for the guild
-    const everyoneRole = guild.roles.everyone;
-
-    // Build the permission overrides based on the flag
     const permissionOverrides = voiceScoresChannel
       ? [
           {
-            id: everyoneRole.id, // The @everyone role ID
-            deny: [PermissionFlagsBits.Connect], // Use the PermissionFlagsBits enum
+            id: guild.roles.everyone.id,
+            deny: [PermissionFlagsBits.Connect],
           },
         ]
-      : undefined; // No overrides if the flag is false
+      : undefined;
 
-    // Create the new voice channel
     const channel = await guild.channels.create({
       name: channelName,
-      type: 2, // 2 = Voice channel
-      parent: parentId, // Fixed category ID
+      type: ChannelType.GuildVoice,
+      parent: parentId,
       bitrate: 64000,
       userLimit: 1,
-      permissionOverwrites: permissionOverrides, // Apply overrides conditionally
+      permissionOverwrites: permissionOverrides,
     });
 
     console.log(`Created new voice channel: ${channel.name}`);
@@ -74,21 +83,18 @@ export const createNewVoiceChannel = async (
 // Helper function to send an embed message to a specific channel
 const sendEmbedMessage = async (embed: EmbedBuilder) => {
   try {
-    if (!client.isReady()) {
-      console.error("Discord client is not ready!");
-      return;
-    }
-
+    await ensureClientReady();
     const channel = (await client.channels.fetch(
       config.BOT_UPDATES_CHANNEL_ID
     )) as TextChannel;
 
     if (!channel) {
-      console.log(
+      console.error(
         `Channel with ID ${config.BOT_UPDATES_CHANNEL_ID} not found.`
       );
       return;
     }
+
     await channel.send({ embeds: [embed] });
   } catch (error) {
     console.error("Error sending message to Discord channel:", error);
@@ -100,24 +106,25 @@ export const getApplicableVoiceChannel = async (
   matchingPlayers: SystemUser[]
 ): Promise<{ channelId: string; channelName: string } | string> => {
   try {
+    await ensureClientReady();
     const guild = await client.guilds.fetch(config.GUILD_ID);
-    const channels = await guild.channels.fetch();
+    const channels = guild.channels.cache;
 
-    for (const [channelId, channel] of channels) {
-      if (channel instanceof VoiceChannel) {
-        for (const member of channel.members.values()) {
-          if (
-            matchingPlayers.some(
-              (player) => player.discordUsername === member.user.username
-            )
-          ) {
-            return { channelId, channelName: channel.name };
-          }
-        }
-      }
-    }
+    const applicableChannel = channels
+      .filter(
+        (channel): channel is VoiceChannel => channel instanceof VoiceChannel
+      )
+      .find((channel) =>
+        channel.members.some((member) =>
+          matchingPlayers.some(
+            (player) => player.discordUsername === member.user.username
+          )
+        )
+      );
 
-    return "No channel found";
+    return applicableChannel
+      ? { channelId: applicableChannel.id, channelName: applicableChannel.name }
+      : "No channel found";
   } catch (error) {
     console.error("Error finding applicable voice channel:", error);
     return "Error finding channel";
@@ -131,6 +138,7 @@ export const updateVoiceChannelName = async (
   matchOngoing: boolean
 ) => {
   try {
+    await ensureClientReady();
     const guild = await client.guilds.fetch(config.GUILD_ID);
     const channel = await guild.channels.fetch(voiceChannelId);
 
@@ -140,61 +148,37 @@ export const updateVoiceChannelName = async (
           ? `${gamersVcName} [🟢 LIVE]`
           : `${gamersVcName}`;
 
-      const url = `https://discord.com/api/v10/channels/${voiceChannelId}`;
-      const payload = { name: newName };
-
-      try {
-        const response = await axios.patch(url, payload, {
-          headers: {
-            Authorization: `Bot ${config.DISCORD_BOT_TOKEN}`,
-            "Content-Type": "application/json",
-          },
-        });
-        console.log(`Updated voice channel name to: ${newName}`);
-      } catch (error: any) {
-        if (error.response?.status === 429) {
-          const retryAfter = error.response.headers["retry-after"];
-          console.error(`Rate limit hit! Retry after ${retryAfter} seconds.`);
-        } else {
-          throw error;
-        }
-      }
+      await channel.edit({ name: newName });
+      console.log(`Updated voice channel name to: ${newName}`);
     } else {
-      console.log("The specified channel is not a VoiceChannel.");
+      console.error("The specified channel is not a VoiceChannel.");
     }
   } catch (error) {
     console.error("Error updating voice channel name:", error);
-    return;
   }
 };
 
 // Function to delete a voice channel by ID
-export const deleteVoiceChannel = async (voiceChannelId: string) => {
+export const deleteVoiceChannel = async (
+  voiceChannelId: string
+): Promise<boolean> => {
   try {
+    await ensureClientReady();
     const guild = await client.guilds.fetch(config.GUILD_ID);
-    if (!guild) {
-      console.error("Guild not found");
-      return false;
-    }
 
     const channel = await guild.channels.fetch(voiceChannelId);
-    if (!channel) {
-      console.error(`Channel with ID ${voiceChannelId} not found.`);
-      return false;
-    }
-
-    if (channel instanceof VoiceChannel) {
+    if (channel && channel instanceof VoiceChannel) {
       await channel.delete();
       console.log(
         `Voice channel with ID ${voiceChannelId} deleted successfully.`
       );
       return true;
-    } else {
-      console.error(
-        `Channel with ID ${voiceChannelId} is not a voice channel.`
-      );
-      return false;
     }
+
+    console.warn(
+      `Channel with ID ${voiceChannelId} not found or not a VoiceChannel.`
+    );
+    return true; // Idempotent
   } catch (error) {
     console.error(
       `Error deleting voice channel with ID ${voiceChannelId}:`,
@@ -204,24 +188,21 @@ export const deleteVoiceChannel = async (voiceChannelId: string) => {
   }
 };
 
-// Function to get Elo difference
-const getEloDifference = async (previousElo: number, gamePlayerId: string) => {
-  const faceitPlayer: FaceitPlayer | null = await faceitApiClient.getPlayerData(
-    gamePlayerId
-  );
+// Helper function to calculate Elo difference
+const getEloDifference = async (
+  previousElo: number,
+  gamePlayerId: string
+): Promise<string | undefined> => {
+  const faceitPlayer = await faceitApiClient.getPlayerData(gamePlayerId);
+  if (!faceitPlayer?.faceit_elo) return;
 
-  if (!faceitPlayer?.faceit_elo) {
-    return;
-  }
-  if (faceitPlayer.faceit_elo > previousElo) {
-    const eloChange = faceitPlayer.faceit_elo - previousElo;
-    return `${`**\+${eloChange}\** (${faceitPlayer.faceit_elo})`}`;
-  } else {
-    const eloChange = previousElo - faceitPlayer?.faceit_elo;
-    return `${`**\-${eloChange}\** (${faceitPlayer.faceit_elo})`}`;
-  }
+  const eloChange = faceitPlayer.faceit_elo - previousElo;
+  return eloChange > 0
+    ? `**+${eloChange}** (${faceitPlayer.faceit_elo})`
+    : `**-${Math.abs(eloChange)}** (${faceitPlayer.faceit_elo})`;
 };
 
+// Function to send a match finish notification
 export const sendMatchFinishNotification = async (
   matchDetails: MatchDetails
 ) => {
@@ -232,19 +213,17 @@ export const sendMatchFinishNotification = async (
           player.previousElo,
           player.gamePlayerId
         );
-        return `**${player.faceitUsername}**: ${eloDifference || ""}`;
+        return `**${player.faceitUsername}**: ${eloDifference || "N/A"}`;
       })
     );
 
-    // Determine win/loss based on finalScore or eloDifference
     const finalScore = matchDetails.results?.finalScore;
     const isWin =
-      finalScore !== undefined
-        ? matchDetails.results?.win
-        : playerDetails.some((detail) => detail.includes("+"));
+      matchDetails.results?.win ??
+      playerDetails.some((detail) => detail.includes("+"));
 
     const embed = new EmbedBuilder()
-      .setTitle(`🚨  Match finished update (${isWin ? "WIN" : "LOSS"})`)
+      .setTitle(`🚨 Match finished update (${isWin ? "WIN" : "LOSS"})`)
       .setColor(isWin ? "#00FF00" : "#FF0000")
       .addFields(
         { name: "Map", value: matchDetails.mapName },
@@ -256,10 +235,7 @@ export const sendMatchFinishNotification = async (
           name: "Match Result",
           value: `${finalScore || "N/A"} (${isWin ? "WIN" : "LOSS"})`,
         },
-        {
-          name: "Players",
-          value: playerDetails.join("\n"),
-        }
+        { name: "Players", value: playerDetails.join("\n") }
       )
       .setTimestamp();
 
@@ -329,16 +305,50 @@ export const moveUserToChannel = async (
   }
 };
 
-// Ensure client is logged in before using it
-const loginBot = async () => {
+export const updateDiscordProfiles = async (users: SystemUser[]) => {
   try {
-    if (!client.isReady()) {
-      await client.login(config.DISCORD_BOT_TOKEN);
+    if (!users.length) {
+      console.log("No users provided for update.");
+      return;
     }
+
+    const guild = await client.guilds.fetch(config.GUILD_ID); // Cache the guild object
+
+    await Promise.all(
+      users.map(async (user) => {
+        const { discordUsername, previousElo, gamePlayerId } = user;
+
+        try {
+          const player: FaceitPlayer | null =
+            await faceitApiClient.getPlayerData(gamePlayerId);
+
+          if (!player || player.faceit_elo === previousElo) return; // Skip unchanged users
+
+          const member =
+            guild.members.cache.find((m) => m.user.tag === discordUsername) ??
+            (await guild.members
+              .fetch({ query: discordUsername, limit: 1 })
+              .then((m) => m.first()));
+
+          if (!member) return; // Skip if member not found
+
+          await Promise.all([
+            updateNickname(member, player),
+            updateUserElo(user.userId, player.faceit_elo),
+          ]);
+        } catch (error) {
+          console.error(`Error processing user ${discordUsername}:`, error);
+        }
+      })
+    );
+
+    console.log("Auto-update completed!");
   } catch (error) {
-    console.error("Error logging in to Discord:", error);
+    console.error("Error running auto-update:", error);
   }
 };
 
 // Log in to the Discord client
-loginBot();
+client.login(config.DISCORD_BOT_TOKEN).catch((error) => {
+  console.error("Error logging in to Discord:", error);
+});
