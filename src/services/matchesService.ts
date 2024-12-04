@@ -1,5 +1,6 @@
 import path from "path";
 import { Worker } from "worker_threads";
+import { runAutoUpdateElo } from "../auto/autoUpdateElo";
 import {
   checkMatchExists,
   getMatchDataFromDb,
@@ -15,7 +16,7 @@ import {
   updateVoiceChannelName,
 } from "./discordService";
 import { faceitApiClient } from "./FaceitService";
-import { config } from "../config";
+import { config } from "../config/index";
 
 let workers: Record<string, Worker> = {};
 
@@ -217,9 +218,3 @@ export const cancelMatch = async (matchId: string) => {
     console.log("Worker stopped for matchId:", matchId);
   }
 };
-
-function runAutoUpdateElo(
-  matchingPlayers: import("../types/SystemUser").SystemUser[]
-) {
-  throw new Error("Function not implemented.");
-}
