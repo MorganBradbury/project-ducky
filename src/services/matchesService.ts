@@ -1,6 +1,5 @@
 import path from "path";
 import { Worker } from "worker_threads";
-import { runAutoUpdateElo } from "../auto/autoUpdateElo";
 import {
   checkMatchExists,
   getMatchDataFromDb,
@@ -12,11 +11,12 @@ import {
   deleteVoiceChannel,
   getUsersInVoiceChannel,
   moveUserToChannel,
+  runEloUpdate,
   sendMatchFinishNotification,
   updateVoiceChannelName,
 } from "./discordService";
 import { faceitApiClient } from "./FaceitService";
-import { config } from "../config/index";
+import { config } from "../config";
 
 let workers: Record<string, Worker> = {};
 
@@ -118,7 +118,7 @@ export const endMatch = async (matchId: string) => {
     } = matchData;
 
     await sendMatchFinishNotification(matchData);
-    await runAutoUpdateElo(matchingPlayers);
+    await runEloUpdate(matchingPlayers);
 
     if (activeScoresChannelId) {
       await deleteVoiceChannel(activeScoresChannelId);

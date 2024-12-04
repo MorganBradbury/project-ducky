@@ -7,12 +7,14 @@ import {
   VoiceChannel,
 } from "discord.js";
 import { MatchDetails } from "../types/MatchDetails";
-import { config } from "../config/index";
 import { SystemUser } from "../types/SystemUser";
 import { faceitApiClient } from "./FaceitService";
 import { FaceitPlayer } from "../types/FaceitPlayer";
 import axios from "axios";
 import { PermissionFlagsBits } from "discord.js";
+import { config } from "../config";
+import { updateNickname } from "../utils/nicknameUtils";
+import { updateUserElo } from "../db/commands";
 
 // Initialize the Discord client
 const client = new Client({
@@ -337,6 +339,50 @@ const loginBot = async () => {
     }
   } catch (error) {
     console.error("Error logging in to Discord:", error);
+  }
+};
+
+// Main function to update Elo
+export const runEloUpdate = async (users: SystemUser[]) => {
+  try {
+    if (!users.length) {
+      console.log("No users provided for update.");
+      return;
+    }
+
+    const guild = await client.guilds.fetch(config.GUILD_ID); // Cache the guild object
+
+    await Promise.all(
+      users.map(async (user) => {
+        const { discordUsername, previousElo, gamePlayerId } = user;
+
+        try {
+          const player: FaceitPlayer | null =
+            await faceitApiClient.getPlayerData(gamePlayerId);
+
+          if (!player || player.faceit_elo === previousElo) return; // Skip unchanged users
+
+          const member =
+            guild.members.cache.find((m) => m.user.tag === discordUsername) ??
+            (await guild.members
+              .fetch({ query: discordUsername, limit: 1 })
+              .then((m) => m.first()));
+
+          if (!member) return; // Skip if member not found
+
+          await Promise.all([
+            updateNickname(member, player),
+            updateUserElo(user.userId, player.faceit_elo),
+          ]);
+        } catch (error) {
+          console.log(`Error processing user ${discordUsername}:`, error);
+        }
+      })
+    );
+
+    console.log("Auto-update completed!");
+  } catch (error) {
+    console.log("Error running auto-update:", error);
   }
 };
 
