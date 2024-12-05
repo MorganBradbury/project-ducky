@@ -61,7 +61,6 @@ export const createNewVoiceChannel = async (
       type: 2, // 2 = Voice channel
       parent: parentId, // Fixed category ID
       bitrate: 64000,
-      userLimit: 1,
       permissionOverwrites: permissionOverrides, // Apply overrides conditionally
     });
 
