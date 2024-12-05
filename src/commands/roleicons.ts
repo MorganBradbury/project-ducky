@@ -57,10 +57,11 @@ export const setRoleIconCommand = {
     await interaction.reply(
       `Updating nicknames for ${membersWithRole.size} members with the role "${role.name}". This may take some time...`
     );
-
     try {
       for (const member of membersWithRole.values()) {
         const newNickname = `${emoji} ${member.displayName}`;
+        console.log(`new nickname: ${newNickname}`);
+
         await member.setNickname(newNickname).catch((err) => {
           console.error(
             `Failed to update nickname for ${member.user.tag}:`,
