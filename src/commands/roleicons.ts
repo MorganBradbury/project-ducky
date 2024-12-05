@@ -46,6 +46,9 @@ export const setRoleIconCommand = {
       member.roles.cache.has(role.id)
     );
 
+    console.log(membersWithRole);
+    console.log(role.id);
+
     if (membersWithRole.size === 0) {
       await interaction.reply({
         content: `No members found with the role "${role.name}".`,
