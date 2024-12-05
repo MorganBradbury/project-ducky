@@ -23,14 +23,14 @@ export const setRoleIconCommand = {
     const emoji = interaction.options.getString("emoji", true);
 
     // Validate the emoji
-    const emojiRegex = /<a?:\w+:\d+>/;
-    if (!emojiRegex.test(emoji)) {
-      await interaction.reply({
-        content: "Please provide a valid custom emoji uploaded to this server.",
-        ephemeral: true,
-      });
-      return;
-    }
+    // const emojiRegex = /<a?:\w+:\d+>/;
+    // if (!emojiRegex.test(emoji)) {
+    //   await interaction.reply({
+    //     content: "Please provide a valid custom emoji uploaded to this server.",
+    //     ephemeral: true,
+    //   });
+    //   return;
+    // }
 
     // Ensure the bot can manage nicknames
     const guild = interaction.guild;
