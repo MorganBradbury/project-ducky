@@ -42,7 +42,8 @@ export const setRoleIconCommand = {
       return;
     }
 
-    const membersWithRole = guild.members.cache.filter((member) =>
+    const guildMembers = await guild.members.fetch(); // Fetch all members in the guild
+    const membersWithRole = guildMembers.filter((member) =>
       member.roles.cache.has(role.id)
     );
 
