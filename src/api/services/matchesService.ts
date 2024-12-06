@@ -62,7 +62,7 @@ export const startMatch = async (matchId: string) => {
     };
 
     // Determine the absolute path to the worker file
-    const workerPath = path.resolve(__dirname, "../worker.js");
+    const workerPath = path.resolve(__dirname, "../../worker.js");
     console.log(`Starting worker at path: ${workerPath}`);
 
     // Start the worker after creating the active scores channel
