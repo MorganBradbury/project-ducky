@@ -5,6 +5,8 @@ import {
   TextChannel,
   EmbedBuilder,
   VoiceChannel,
+  GuildMember,
+  Role,
 } from "discord.js";
 import { MatchDetails } from "../types/MatchDetails";
 import { SystemUser } from "../types/SystemUser";
@@ -372,6 +374,7 @@ export const runEloUpdate = async (users: SystemUser[]) => {
           await Promise.all([
             updateNickname(member, player),
             updateUserElo(user.userId, player.faceit_elo),
+            updateServerRoles(member, player),
           ]);
         } catch (error) {
           console.log(`Error processing user ${discordUsername}:`, error);
@@ -382,6 +385,57 @@ export const runEloUpdate = async (users: SystemUser[]) => {
     console.log("Auto-update completed!");
   } catch (error) {
     console.log("Error running auto-update:", error);
+  }
+};
+
+/**
+ * Updates a member's roles based on their Faceit skill level.
+ * Removes any roles containing "Level" and assigns the appropriate "Level [skill_level]" role.
+ *
+ * @param {GuildMember} member - The Discord guild member to update.
+ * @param {FaceitPlayer} player - The Faceit player data containing the skill level.
+ */
+const updateServerRoles = async (member: GuildMember, player: FaceitPlayer) => {
+  try {
+    if (!member || !player) {
+      console.error("Member or player data is missing.");
+      return;
+    }
+
+    const guild = await client.guilds.fetch(config.GUILD_ID); // Cache the guild object
+    const skillLevelRoleName = `Level ${player.skill_level}`;
+
+    // Fetch all roles in the guild
+    const roles = await guild.roles.fetch();
+
+    // Find the role that matches the current skill level
+    const targetRole = roles.find((role) => role.name === skillLevelRoleName);
+
+    if (!targetRole) {
+      console.warn(`Role ${skillLevelRoleName} not found in the guild.`);
+      return;
+    }
+
+    // Remove all roles containing "Level" from the member
+    const levelRoles = member.roles.cache.filter((role: Role) =>
+      role.name.includes("Level")
+    );
+
+    await Promise.all(
+      levelRoles.map((role: Role) =>
+        member.roles.remove(role).catch(console.error)
+      )
+    );
+
+    // Assign the correct role based on skill level
+    if (!member.roles.cache.has(targetRole.id)) {
+      await member.roles.add(targetRole);
+      console.log(
+        `Assigned role ${skillLevelRoleName} to member ${member.user.tag}.`
+      );
+    }
+  } catch (error) {
+    console.error("Error updating server roles:", error);
   }
 };
 

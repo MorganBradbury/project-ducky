@@ -59,6 +59,7 @@ class FaceitApiClient {
       faceit_elo: data?.games?.cs2?.faceit_elo,
       game_player_id: data?.games?.cs2?.game_player_id,
       player_id: data?.player_id,
+      skill_level: data?.games?.cs2?.skill_level,
     };
   }
 
