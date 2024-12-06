@@ -1,8 +1,9 @@
-import { ChatInputCommandInteraction } from "discord.js"; // Use specific interaction type
+import { ChatInputCommandInteraction, GuildMember } from "discord.js"; // Use specific interaction type
 import { addUser } from "../db/commands";
 import { updateNickname } from "../utils/nicknameUtils";
 import { faceitApiClient } from "../services/FaceitService";
 import { FaceitPlayer } from "../types/FaceitPlayer";
+import { updateServerRoles } from "../services/discordService";
 
 export const registerTrackingCommand = {
   name: "ducky_track_elo",
@@ -34,6 +35,7 @@ export const registerTrackingCommand = {
         ).then(async () => {
           //@ts-ignore
           await updateNickname(interaction.member, player);
+          await updateServerRoles(interaction.member as GuildMember, player);
           await interaction.reply({
             content:
               "☑️ Your elo will now be tracked and updated automatically.",

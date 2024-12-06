@@ -395,7 +395,10 @@ export const runEloUpdate = async (users: SystemUser[]) => {
  * @param {GuildMember} member - The Discord guild member to update.
  * @param {FaceitPlayer} player - The Faceit player data containing the skill level.
  */
-const updateServerRoles = async (member: GuildMember, player: FaceitPlayer) => {
+export const updateServerRoles = async (
+  member: GuildMember,
+  player: FaceitPlayer
+) => {
   try {
     if (!member || !player) {
       console.error("Member or player data is missing.");
