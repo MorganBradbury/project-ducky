@@ -1,5 +1,5 @@
 import { ChatInputCommandInteraction, EmbedBuilder } from "discord.js";
-import { getAllUsers } from "../db/commands";
+import { getAllUsers } from "../../db/commands";
 
 export const leaderboardCommand = {
   name: "leaderboard",

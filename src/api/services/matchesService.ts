@@ -5,7 +5,7 @@ import {
   getMatchDataFromDb,
   insertMatch,
   markMatchComplete,
-} from "../db/commands";
+} from "../../db/commands";
 import {
   createNewVoiceChannel,
   deleteVoiceChannel,
@@ -16,7 +16,7 @@ import {
   updateVoiceChannelName,
 } from "./discordService";
 import { faceitApiClient } from "./FaceitService";
-import { config } from "../config";
+import { config } from "../../config";
 
 let workers: Record<string, Worker> = {};
 

@@ -8,15 +8,15 @@ import {
   GuildMember,
   Role,
 } from "discord.js";
-import { MatchDetails } from "../types/MatchDetails";
-import { SystemUser } from "../types/SystemUser";
+import { MatchDetails } from "../../types/MatchDetails";
+import { SystemUser } from "../../types/SystemUser";
 import { faceitApiClient } from "./FaceitService";
-import { FaceitPlayer } from "../types/FaceitPlayer";
+import { FaceitPlayer } from "../../types/FaceitPlayer";
 import axios from "axios";
 import { PermissionFlagsBits } from "discord.js";
-import { config } from "../config";
-import { updateNickname } from "../utils/nicknameUtils";
-import { updateUserElo } from "../db/commands";
+import { config } from "../../config";
+import { updateNickname } from "../../utils/nicknameUtils";
+import { updateUserElo } from "../../db/commands";
 
 // Initialize the Discord client
 const client = new Client({

@@ -1,5 +1,5 @@
 import { client } from "./bot";
-import { config } from "./config";
+import { config } from "../config";
 import "./events/ready";
 import "./events/interaction";
 import "./events/autoRole";

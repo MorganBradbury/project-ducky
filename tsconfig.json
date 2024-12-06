@@ -7,6 +7,6 @@
     "strict": true,
     "esModuleInterop": true
   },
-  "include": ["src/*"], // This ensures the `workers` folder is considered
+  "include": ["**/*"], // This ensures the `workers` folder is considered
   "exclude": ["node_modules", "dist"]
 }

@@ -3,7 +3,6 @@ import { deleteUserCommand } from "./delete";
 import { listUsersCommand } from "./users";
 import { helpCommand } from "./help";
 import { leaderboardCommand } from "./leaderboard";
-import { setRoleIconCommand } from "./roleicons";
 
 export const commands = [
   registerTrackingCommand,
@@ -11,7 +10,6 @@ export const commands = [
   listUsersCommand,
   helpCommand,
   leaderboardCommand,
-  setRoleIconCommand,
 ];
 
 export const commandsMap = new Map(commands.map((cmd) => [cmd.name, cmd]));

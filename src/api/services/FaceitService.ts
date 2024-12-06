@@ -1,11 +1,11 @@
 import axios, { AxiosInstance } from "axios";
-import { config } from "../config";
-import { FaceitPlayer } from "../types/FaceitPlayer";
-import { getAllUsers } from "../db/commands";
-import { MatchDetails, MatchFinishedDetails } from "../types/MatchDetails";
+import { config } from "../../config";
+import { FaceitPlayer } from "../../types/FaceitPlayer";
+import { getAllUsers } from "../../db/commands";
+import { MatchDetails, MatchFinishedDetails } from "../../types/MatchDetails";
 import { getApplicableVoiceChannel } from "./discordService";
-import { isNickname } from "../utils/nicknameUtils";
-import { fetchData } from "../utils/apiRequestUtil";
+import { isNickname } from "../../utils/nicknameUtils";
+import { fetchData } from "../../utils/apiRequestUtil";
 
 // Enum to store API endpoints
 enum FaceitApiEndpoints {

@@ -10,8 +10,8 @@ import {
   checkMatchExists,
   getMatchDataFromDb,
   updateActiveScoresChannelId,
-} from "../db/commands";
-import { config } from "../config";
+} from "../../db/commands";
+import { config } from "../../config";
 
 enum AcceptedEventTypes {
   match_ready = "match_status_ready",

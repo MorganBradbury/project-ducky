@@ -1,6 +1,6 @@
 import { REST, Routes } from "discord.js";
 import { client } from "../bot";
-import { config } from "../config";
+import { config } from "../../config";
 import { commands } from "../commands";
 
 client.once("ready", async () => {
