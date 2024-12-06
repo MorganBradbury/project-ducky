@@ -44,13 +44,14 @@ export const registerTrackingCommand = {
           );
         });
       } else {
-        await interaction.reply(
-          "Invalid FACEIT nickname. Please make sure you are entering your name correctly. It is CASE SENSITIVE"
-        );
+        await interaction.reply({
+          content: `"Invalid FACEIT nickname. Please make sure you are entering your name correctly. It is CASE SENSITIVE"`,
+          ephemeral: true,
+        });
       }
     } catch (error) {
       console.error("Error updating FACEIT level:", error);
-      await interaction.reply(`Failed. ${error}`);
+      await interaction.reply({ content: `Failed. ${error}`, ephemeral: true });
     }
   },
 };
