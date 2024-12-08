@@ -46,13 +46,13 @@ export const createPoll = async (
   // Send the poll message
   const message = await (isCommand
     ? source.reply({
-        content: "@everyone Who wants to play CS?",
+        content: "Who wants to play CS?",
         embeds: [embed],
         components: [row],
         fetchReply: true,
       })
     : source.channel.send({
-        content: "@everyone Who wants to play CS?",
+        content: "Who wants to play CS?",
         embeds: [embed],
         components: [row],
       }));
