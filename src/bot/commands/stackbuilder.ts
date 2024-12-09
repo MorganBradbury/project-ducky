@@ -59,7 +59,7 @@ export const stackBuilderCommand = {
     await createPoll(interaction, time, true);
     activePolls.set(channelId, {
       timestamp: now,
-      participants: [interaction.user.id], // Add the author as the first participant
+      participants: [],
       authorId: interaction.user.id,
     });
   },
@@ -111,11 +111,19 @@ export const createPoll = async (
 
   const channelId = message.channelId;
   source.client.gameData = source.client.gameData || {};
+
+  // Ensure source is correctly defined and has the necessary properties
+  const userId = isCommand ? source.user.id : source.author.id; // Check if source has `user` or `author`
+  if (!userId) {
+    console.error("Error: Unable to find user ID in the source.");
+    return;
+  }
+
   source.client.gameData[channelId] = {
     messageId: message.id,
-    participants: [source.user.id], // Add the host as the first participant
+    participants: [userId], // Add the host as the first participant
     maxPlayers: 5,
-    host: isCommand ? source.user.id : source.author.id,
+    host: userId, // Ensure that host is set correctly
   };
 
   const filter = (i: any) =>
