@@ -59,7 +59,7 @@ export const stackBuilderCommand = {
     await createPoll(interaction, time, true);
     activePolls.set(channelId, {
       timestamp: now,
-      participants: [],
+      participants: [interaction.user.id], // Add the author as the first participant
       authorId: interaction.user.id,
     });
   },
@@ -113,7 +113,7 @@ export const createPoll = async (
   source.client.gameData = source.client.gameData || {};
   source.client.gameData[channelId] = {
     messageId: message.id,
-    participants: [],
+    participants: [source.user.id], // Add the host as the first participant
     maxPlayers: 5,
     host: isCommand ? source.user.id : source.author.id,
   };
@@ -181,7 +181,7 @@ export const createPoll = async (
 
     // Update the embed
     const participantTags = gameData.participants
-      .map((id: string) => `<@${id}>`)
+      .map((id: string) => `<@${id}>`) // Properly tag the users
       .join("\n");
     const updatedEmbed = EmbedBuilder.from(embed).setDescription(
       `Game at **${time}**. Click "Join" if you want to play! We need 5 players (including the host).\n\n**Participants:**\n${
