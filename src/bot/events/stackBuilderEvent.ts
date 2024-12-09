@@ -1,7 +1,14 @@
 import { Client, Message } from "discord.js";
 import { createPoll } from "../commands/stackbuilder";
 
-const triggerKeywords = ["cs?", "playing?", "anyone playing?", "cs"];
+const triggerKeywords = [
+  "cs?",
+  "playing?",
+  "anyone playing?",
+  "cs",
+  "any gamers",
+  "anyone gaming",
+];
 const triggerRoles = ["level 10"];
 
 // Regex patterns for time parsing

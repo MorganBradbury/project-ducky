@@ -158,9 +158,9 @@ export const createPoll = async (
       }
 
       gameData.participants.push(userId);
-      await interaction.reply({
-        content: `<@${username}> has joined the stack!`, // Correct tag format
-      });
+      // await interaction.reply({
+      //   content: `<@${username}> has joined the stack!`, // Correct tag format
+      // });
     } else if (interaction.customId === "leave_game") {
       // Handle leaving
       if (!gameData.participants.includes(userId)) {
@@ -174,9 +174,9 @@ export const createPoll = async (
       gameData.participants = gameData.participants.filter(
         (id: string) => id !== userId
       );
-      await interaction.reply({
-        content: `<@${username}> has left the stack!`, // Correct tag format
-      });
+      // await interaction.reply({
+      //   content: `<@${username}> has left the stack!`, // Correct tag format
+      // });
     } else if (interaction.customId === "cancel_poll") {
       // Handle poll cancellation
       if (userId !== gameData.host) {
