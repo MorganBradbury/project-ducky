@@ -74,17 +74,24 @@ export const createPoll = async (
   time: string,
   isCommand: boolean
 ) => {
+  // Check if 'source' has the 'user' or 'author' property
+  const userId = source.user?.id || source.author?.id;
+  if (!userId) {
+    console.error("Error: Unable to find user ID in the source.");
+    return;
+  }
+
   // Format time string to avoid repeated "at"
   const formattedTime = time.replace(/\bat\b/, "").trim();
 
   // Add the author's ID as the first participant in the list
-  const initialParticipants = [source.user.id];
+  const initialParticipants = [userId];
 
   // Create the initial embed with the author included
   const embed = new EmbedBuilder()
     .setTitle("Who wants to play?")
     .setDescription(
-      `Game **${formattedTime}**. Click "Join" if you want to play! We need 5 players (creator is already included).\n\n**Participants:**\n<@${source.user.id}>` // Include the author in the participants list
+      `Game **${formattedTime}**. Click "Join" if you want to play! We need 5 players (creator is already included).\n\n**Participants:**\n<@${userId}>` // Include the author in the participants list
     )
     .setColor("#00FF00");
 
@@ -118,13 +125,6 @@ export const createPoll = async (
 
   const channelId = message.channelId;
   source.client.gameData = source.client.gameData || {};
-
-  // Ensure source is correctly defined and has the necessary properties
-  const userId = isCommand ? source.user.id : source.author.id;
-  if (!userId) {
-    console.error("Error: Unable to find user ID in the source.");
-    return;
-  }
 
   source.client.gameData[channelId] = {
     messageId: message.id,
