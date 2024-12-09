@@ -91,7 +91,7 @@ export const createPoll = async (
   const embed = new EmbedBuilder()
     .setTitle("Who wants to play?")
     .setDescription(
-      `Game **${formattedTime}**. Click "Join" if you want to play! We need 5 players (creator is already included).\n\n**Participants:**\n<@${userId}>` // Include the author in the participants list
+      `Game **${formattedTime}**. Click "Join" if you want to play! We need 5 players. \n\n**Participants:**\n<@${userId}>` // Include the author in the participants list
     )
     .setColor("#00FF00");
 
@@ -112,13 +112,13 @@ export const createPoll = async (
 
   const message = await (isCommand
     ? source.reply({
-        content: "Who wants to play CS?",
+        content: "",
         embeds: [embed],
         components: [row],
         fetchReply: true,
       })
     : source.channel.send({
-        content: "Who wants to play CS?",
+        content: "",
         embeds: [embed],
         components: [row],
       }));
@@ -159,7 +159,7 @@ export const createPoll = async (
 
       gameData.participants.push(userId);
       await interaction.reply({
-        content: `@${username} has joined the stack!`,
+        content: `**@${username}** has joined the stack!`, // Correct tag format
       });
     } else if (interaction.customId === "leave_game") {
       // Handle leaving
@@ -175,7 +175,7 @@ export const createPoll = async (
         (id: string) => id !== userId
       );
       await interaction.reply({
-        content: `@${username} has left the stack!`,
+        content: `**@${username}** has left the stack!`, // Correct tag format
       });
     } else if (interaction.customId === "cancel_poll") {
       // Handle poll cancellation
