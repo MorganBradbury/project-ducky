@@ -200,7 +200,7 @@ export const createPoll = async (
       .join("\n");
 
     const updatedEmbed = EmbedBuilder.from(embed).setDescription(
-      `Game **${formattedTime}**. Click "Join" if you want to play! We need 5 players (creator is already included).\n\n**Participants:**\n${
+      `Game **${formattedTime}**. Click "Join" if you want to play! We need 5 players. \n\n**Participants:**\n${
         participantTags || "No one yet"
       }`
     );
