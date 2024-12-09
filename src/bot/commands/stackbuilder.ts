@@ -159,7 +159,7 @@ export const createPoll = async (
 
       gameData.participants.push(userId);
       await interaction.reply({
-        content: `**@${username}** has joined the stack!`, // Correct tag format
+        content: `<@${username}> has joined the stack!`, // Correct tag format
       });
     } else if (interaction.customId === "leave_game") {
       // Handle leaving
@@ -175,7 +175,7 @@ export const createPoll = async (
         (id: string) => id !== userId
       );
       await interaction.reply({
-        content: `**@${username}** has left the stack!`, // Correct tag format
+        content: `<@${username}> has left the stack!`, // Correct tag format
       });
     } else if (interaction.customId === "cancel_poll") {
       // Handle poll cancellation
