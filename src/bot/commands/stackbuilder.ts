@@ -45,11 +45,11 @@ export const stackBuilderCommand = {
     // Check if a poll already exists in this channel
     if (
       activePolls.has(channelId) &&
-      now - activePolls.get(channelId)!.timestamp < 15 * 60 * 1000
+      now - activePolls.get(channelId)!.timestamp < 30 * 60 * 1000
     ) {
       await interaction.reply({
         content:
-          "A game poll is already active in this channel. Please wait until it expires (15 minutes cooldown).",
+          "A game poll is already active in this channel. Please wait until it expires (30 minutes cooldown).",
         ephemeral: true,
       });
       return;
