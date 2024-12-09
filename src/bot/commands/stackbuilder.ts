@@ -59,7 +59,7 @@ export const stackBuilderCommand = {
     await createPoll(interaction, time, true);
     activePolls.set(channelId, {
       timestamp: now,
-      participants: [],
+      participants: [interaction.user.id], // Add creator immediately to participants
       authorId: interaction.user.id,
     });
   },
@@ -74,10 +74,13 @@ export const createPoll = async (
   time: string,
   isCommand: boolean
 ) => {
+  // Format time string to avoid repeated "at"
+  const formattedTime = time.replace(/\bat\b/, "").trim();
+
   const embed = new EmbedBuilder()
     .setTitle("Who wants to play?")
     .setDescription(
-      `Game at **${time}**. Click "Join" if you want to play! We need 5 players (including the host).\n\n**Participants:**`
+      `Game **${formattedTime}**. Click "Join" if you want to play! We need 5 players (creator is already included).\n\n**Participants:**`
     )
     .setColor("#00FF00");
 
@@ -187,12 +190,13 @@ export const createPoll = async (
       return;
     }
 
-    // Update the embed
+    // Update the embed with the participants
     const participantTags = gameData.participants
       .map((id: string) => `<@${id}>`) // Properly tag the users
       .join("\n");
+
     const updatedEmbed = EmbedBuilder.from(embed).setDescription(
-      `Game at **${time}**. Click "Join" if you want to play! We need 5 players (including the host).\n\n**Participants:**\n${
+      `Game **${formattedTime}**. Click "Join" if you want to play! We need 5 players (creator is already included).\n\n**Participants:**\n${
         participantTags || "No one yet"
       }`
     );
