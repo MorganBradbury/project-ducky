@@ -4,7 +4,7 @@
   "main": "index.js",
   "scripts": {
     "build": "tsc",
-    "start-server": "tsc && node dist/api/server.js",
+    "start-server": "node dist/api/server.js",
     "start": "node dist/bot/main.js",
     "dev": "tsc --watch && nodemon dist/bot/main.js"
   },
