@@ -10,7 +10,4 @@ export const apiRoutes = express.Router();
 // Webhook callback endpoint
 apiRoutes.post("/webhook", handleWebhook);
 apiRoutes.post("/updatelivescores", updateLiveScores);
-apiRoutes.post(
-  "/api/minecraft/playercount",
-  MinecraftController.getPlayerCount
-);
+apiRoutes.post("/minecraft/playercount", MinecraftController.getPlayerCount);
