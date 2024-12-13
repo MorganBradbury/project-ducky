@@ -1,6 +1,5 @@
 import express from "express";
 import { apiRoutes } from "../api/routes/apiRoutes";
-import MinecraftController from "./controllers/minecraftController";
 
 const app = express();
 const port = process.env.PORT || 3000;

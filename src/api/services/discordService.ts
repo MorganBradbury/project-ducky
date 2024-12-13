@@ -332,17 +332,6 @@ export const moveUserToChannel = async (
   }
 };
 
-// Ensure client is logged in before using it
-const loginBot = async () => {
-  try {
-    if (!client.isReady()) {
-      await client.login(config.DISCORD_BOT_TOKEN);
-    }
-  } catch (error) {
-    console.error("Error logging in to Discord:", error);
-  }
-};
-
 // Main function to update Elo
 export const runEloUpdate = async (users: SystemUser[]) => {
   try {
@@ -452,35 +441,57 @@ export const updateMinecraftVoiceChannel = async (
     // Dynamically fetch all channels from the guild
     const allChannels = await guild.channels.fetch(); // Fetches all channels directly from Discord
 
-    // Filter channels that belong to the specified category and are voice channels
+    // Ensure we are working with the correct category ID
     const categoryId = config.VC_MINECRAFT_FEED_CATEGORY_ID;
-    const channelsInCategory: any = allChannels.filter(
-      (channel) => channel?.parentId === categoryId && channel.type === 2 // Voice channels
+
+    // Filter channels that belong to the specified category and are voice channels
+    const channelsInCategory = allChannels.filter(
+      (channel) =>
+        channel && channel.parentId === categoryId && channel.type === 2 // 2 is for voice channels
     );
 
     // If no active players, delete all voice channels in the category
     if (playerCount === 0) {
-      for (const channel of channelsInCategory) {
-        if (channel) await deleteVoiceChannel(channel.id); // Delete all channels
+      // Check if there are any channels to delete
+      if (channelsInCategory.size > 0) {
+        console.log("Deleting channels:", channelsInCategory.size);
+        for (const channel of channelsInCategory.values()) {
+          // Null check before accessing channel properties
+          if (channel && channel.id) {
+            try {
+              console.log(`Deleting channel with ID: ${channel.id}`);
+              await deleteVoiceChannel(channel.id); // Delete the channel
+            } catch (error) {
+              console.error(
+                `Failed to delete channel with ID ${channel.id}:`,
+                error
+              );
+            }
+          }
+        }
+        return { message: "All channels deleted due to no active players." };
+      } else {
+        return {
+          message: "No channels to delete, none found in the category.",
+        };
       }
-      return { message: "All channels deleted due to no active players." };
     }
 
     // Create a new voice channel with the active player count
-    const channelName = `🟢 ACTIVE: ${playerCount}`;
-    const existingActiveChannel = channelsInCategory.find((channel: any) =>
-      channel?.name.startsWith("🟢 ACTIVE")
+    const channelName = `🟢 LIVE PLAYERS: ${playerCount}`;
+    const existingActiveChannel = channelsInCategory.find(
+      (channel: any) => channel && channel.name.startsWith("🟢 LIVE PLAYERS")
     );
 
-    // If there's an existing ACTIVE channel and its name does not match the current player count
+    // If there's an existing ACTIVE channel and its name doesn't match the current player count
     if (existingActiveChannel && existingActiveChannel.name !== channelName) {
-      // Delete the existing channel
+      console.log(`Deleting old ACTIVE channel: ${existingActiveChannel.id}`);
       await deleteVoiceChannel(existingActiveChannel.id);
 
       // Create a new channel with the updated player count
       await createNewVoiceChannel(channelName, categoryId, true);
     } else if (!existingActiveChannel) {
-      // If there's no existing ACTIVE channel, create it
+      // If there's no existing ACTIVE channel, create one
       await createNewVoiceChannel(channelName, categoryId, true);
     }
 
@@ -491,5 +502,14 @@ export const updateMinecraftVoiceChannel = async (
   }
 };
 
+const loginBot = async () => {
+  try {
+    if (!client.isReady()) {
+      await client.login(config.DISCORD_BOT_TOKEN);
+    }
+  } catch (error) {
+    console.error("Error logging in to Discord:", error);
+  }
+};
 // Log in to the Discord client
 loginBot();
