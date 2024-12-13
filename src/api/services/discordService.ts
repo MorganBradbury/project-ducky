@@ -435,72 +435,71 @@ export const updateServerRoles = async (
 export const updateMinecraftVoiceChannel = async (
   playerCount: number // This is the number of active players
 ): Promise<{ message: string }> => {
-  return { message: "stopped" };
-  // try {
-  //   const guild = await client.guilds.fetch(config.GUILD_ID);
+  try {
+    const guild = await client.guilds.fetch(config.GUILD_ID);
 
-  //   // Dynamically fetch all channels from the guild
-  //   const allChannels = await guild.channels.fetch(); // Fetches all channels directly from Discord
+    // Dynamically fetch all channels from the guild
+    const allChannels = await guild.channels.fetch(); // Fetches all channels directly from Discord
 
-  //   // Ensure we are working with the correct category ID
-  //   const categoryId = config.VC_MINECRAFT_FEED_CATEGORY_ID;
+    // Ensure we are working with the correct category ID
+    const categoryId = config.VC_MINECRAFT_FEED_CATEGORY_ID;
 
-  //   // Filter channels that belong to the specified category and are voice channels
-  //   const channelsInCategory = allChannels.filter(
-  //     (channel) =>
-  //       channel && channel.parentId === categoryId && channel.type === 2 // 2 is for voice channels
-  //   );
+    // Filter channels that belong to the specified category and are voice channels
+    const channelsInCategory = allChannels.filter(
+      (channel) =>
+        channel && channel.parentId === categoryId && channel.type === 2 // 2 is for voice channels
+    );
 
-  //   // If no active players, delete all voice channels in the category
-  //   if (playerCount === 0) {
-  //     // Check if there are any channels to delete
-  //     if (channelsInCategory.size > 0) {
-  //       console.log("Deleting channels:", channelsInCategory.size);
-  //       for (const channel of channelsInCategory.values()) {
-  //         // Null check before accessing channel properties
-  //         if (channel && channel.id) {
-  //           try {
-  //             console.log(`Deleting channel with ID: ${channel.id}`);
-  //             await deleteVoiceChannel(channel.id); // Delete the channel
-  //           } catch (error) {
-  //             console.error(
-  //               `Failed to delete channel with ID ${channel.id}:`,
-  //               error
-  //             );
-  //           }
-  //         }
-  //       }
-  //       return { message: "All channels deleted due to no active players." };
-  //     } else {
-  //       return {
-  //         message: "No channels to delete, none found in the category.",
-  //       };
-  //     }
-  //   }
+    // If no active players, delete all voice channels in the category
+    if (playerCount === 0) {
+      // Check if there are any channels to delete
+      if (channelsInCategory.size > 0) {
+        console.log("Deleting channels:", channelsInCategory.size);
+        for (const channel of channelsInCategory.values()) {
+          // Null check before accessing channel properties
+          if (channel && channel.id) {
+            try {
+              console.log(`Deleting channel with ID: ${channel.id}`);
+              await deleteVoiceChannel(channel.id); // Delete the channel
+            } catch (error) {
+              console.error(
+                `Failed to delete channel with ID ${channel.id}:`,
+                error
+              );
+            }
+          }
+        }
+        return { message: "All channels deleted due to no active players." };
+      } else {
+        return {
+          message: "No channels to delete, none found in the category.",
+        };
+      }
+    }
 
-  //   // Create a new voice channel with the active player count
-  //   const channelName = `🟢 LIVE PLAYERS: ${playerCount}`;
-  //   const existingActiveChannel = channelsInCategory.find(
-  //     (channel: any) => channel && channel.name.startsWith("🟢 LIVE PLAYERS")
-  //   );
+    // Create a new voice channel with the active player count
+    const channelName = `🟢 LIVE PLAYERS: ${playerCount}`;
+    const existingActiveChannel = channelsInCategory.find(
+      (channel: any) => channel && channel.name.startsWith("🟢 LIVE PLAYERS")
+    );
 
-  //   // If there's an existing ACTIVE channel and its name doesn't match the current player count
-  //   if (existingActiveChannel && existingActiveChannel.name !== channelName) {
-  //     console.log(`Deleting old ACTIVE channel: ${existingActiveChannel.id}`);
-  //     await deleteVoiceChannel(existingActiveChannel.id);
+    // If there's an existing ACTIVE channel and its name doesn't match the current player count
+    if (existingActiveChannel && existingActiveChannel.name !== channelName) {
+      console.log(`Deleting old ACTIVE channel: ${existingActiveChannel.id}`);
+      await deleteVoiceChannel(existingActiveChannel.id);
 
-  //     // Create a new channel with the updated player count
-  //     await createNewVoiceChannel(channelName, categoryId, true);
-  //   } else if (!existingActiveChannel) {
-  //     // If there's no existing ACTIVE channel, create one
-  //     await createNewVoiceChannel(channelName, categoryId, true);
-  //   }
+      // Create a new channel with the updated player count
+      await createNewVoiceChannel(channelName, categoryId, true);
+    } else if (!existingActiveChannel) {
+      // If there's no existing ACTIVE channel, create one
+      await createNewVoiceChannel(channelName, categoryId, true);
+    }
 
-  //   return { message: "Voice channel updated successfully." };
-  // } catch (error: any) {
-  //   console.error("Error updating Minecraft voice channel:", error);
-  //   return { message: error.message };
-  // }
+    return { message: "Voice channel updated successfully." };
+  } catch (error: any) {
+    console.error("Error updating Minecraft voice channel:", error);
+    return { message: error.message };
+  }
 };
 
 const loginBot = async () => {
