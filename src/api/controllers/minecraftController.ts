@@ -9,6 +9,7 @@ export const getPlayerCount = async (
   try {
     // Get the current player count from the Minecraft server
     const activePlayers = await minecraftActivePlayers();
+    console.log("activePlayers", activePlayers);
 
     if (
       activePlayers === null ||
