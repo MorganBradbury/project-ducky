@@ -1,26 +1,36 @@
 import { Request, Response } from "express";
-import { queryFull } from "minecraft-server-util";
-import { config } from "../../config";
 import { updateMinecraftVoiceChannel } from "../services/discordService";
+import { minecraftActivePlayers } from "../services/minecraftService";
 
 export const getPlayerCount = async (
   req: Request,
   res: Response
 ): Promise<void> => {
-  const HOST = config.MINECRAFT_SERVER_IP; // Replace with your server's IP
-  const PORT = config.MINECRAFT_SERVER_PORT; // Replace if your query port differs
   try {
-    // Fetch server information
-    const serverInfo: any = await queryFull(HOST, Number(PORT));
-    const playerCount = serverInfo?.players.online;
+    // Get the current player count from the Minecraft server
+    const activePlayers = await minecraftActivePlayers();
+
+    if (
+      activePlayers === null ||
+      activePlayers.length == 0 ||
+      activePlayers == undefined
+    ) {
+      // Handle the error if player count is unavailable
+      res.status(500).json({
+        status: "error",
+        message: "Unable to fetch the player count from the Minecraft server.",
+      });
+    }
 
     // Update the Minecraft voice channel
-    const result = await updateMinecraftVoiceChannel(playerCount);
+    if (activePlayers != undefined) {
+      await updateMinecraftVoiceChannel(activePlayers?.length);
+    }
 
     res.status(200).json({
       status: "success",
-      playersOnline: playerCount,
-      message: result.message,
+      playersOnline: activePlayers,
+      message: "Loaded users",
     });
   } catch (error: any) {
     res.status(500).json({
