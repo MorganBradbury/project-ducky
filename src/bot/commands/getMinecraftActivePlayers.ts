@@ -11,7 +11,10 @@ export const getMinecraftActivePlayers = {
       const users = await minecraftActivePlayers();
 
       if (users === null || users.length === 0) {
-        await interaction.reply("No players are currently on the server");
+        await interaction.reply({
+          content: "No players are currently on the server",
+          ephemeral: true,
+        });
         return;
       }
 
@@ -22,10 +25,13 @@ export const getMinecraftActivePlayers = {
         .setColor("#00FF00")
         .setDescription(userList);
 
-      await interaction.reply({ embeds: [embed] });
+      await interaction.reply({ embeds: [embed], ephemeral: true });
     } catch (error) {
       console.error("Error fetching minecraft players:", error);
-      await interaction.reply(`Failed to get server players: ${error}`);
+      await interaction.reply({
+        content: `Failed to get server players: ${error}`,
+        ephemeral: true,
+      });
     }
   },
 };
