@@ -435,6 +435,7 @@ export const updateServerRoles = async (
 export const updateMinecraftVoiceChannel = async (
   playerCount: number // This is the number of active players
 ): Promise<{ message: string }> => {
+  return { message: "stopped" };
   try {
     const guild = await client.guilds.fetch(config.GUILD_ID);
 
