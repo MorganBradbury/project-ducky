@@ -3,9 +3,14 @@ import {
   handleWebhook,
   updateLiveScores,
 } from "../controllers/matchesController";
+import MinecraftController from "../controllers/minecraftController";
 
 export const apiRoutes = express.Router();
 
 // Webhook callback endpoint
 apiRoutes.post("/webhook", handleWebhook);
 apiRoutes.post("/updatelivescores", updateLiveScores);
+apiRoutes.post(
+  "/api/minecraft/playercount",
+  MinecraftController.getPlayerCount
+);
