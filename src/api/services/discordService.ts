@@ -442,5 +442,54 @@ export const updateServerRoles = async (
   }
 };
 
+// Function to manage the Minecraft voice channel
+export const updateMinecraftVoiceChannel = async (
+  playerCount: number // This is the number of active players
+): Promise<{ message: string }> => {
+  try {
+    const guild = await client.guilds.fetch(config.GUILD_ID);
+
+    // Dynamically fetch all channels from the guild
+    const allChannels = await guild.channels.fetch(); // Fetches all channels directly from Discord
+
+    // Filter channels that belong to the specified category and are voice channels
+    const categoryId = config.VC_MINECRAFT_FEED_CATEGORY_ID;
+    const channelsInCategory: any = allChannels.filter(
+      (channel) => channel?.parentId === categoryId && channel.type === 2 // Voice channels
+    );
+
+    // If no active players, delete all voice channels in the category
+    if (playerCount === 0) {
+      for (const channel of channelsInCategory) {
+        if (channel) await deleteVoiceChannel(channel.id); // Delete all channels
+      }
+      return { message: "All channels deleted due to no active players." };
+    }
+
+    // Create a new voice channel with the active player count
+    const channelName = `🟢 ACTIVE: ${playerCount}`;
+    const existingActiveChannel = channelsInCategory.find((channel: any) =>
+      channel?.name.startsWith("🟢 ACTIVE")
+    );
+
+    // If there's an existing ACTIVE channel and its name does not match the current player count
+    if (existingActiveChannel && existingActiveChannel.name !== channelName) {
+      // Delete the existing channel
+      await deleteVoiceChannel(existingActiveChannel.id);
+
+      // Create a new channel with the updated player count
+      await createNewVoiceChannel(channelName, categoryId, true);
+    } else if (!existingActiveChannel) {
+      // If there's no existing ACTIVE channel, create it
+      await createNewVoiceChannel(channelName, categoryId, true);
+    }
+
+    return { message: "Voice channel updated successfully." };
+  } catch (error: any) {
+    console.error("Error updating Minecraft voice channel:", error);
+    return { message: error.message };
+  }
+};
+
 // Log in to the Discord client
 loginBot();

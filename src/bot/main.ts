@@ -3,10 +3,6 @@ import { config } from "../config";
 import "./events/ready";
 import "./events/interaction";
 import "./events/autoRole";
-import { handleMessage } from "./events/stackBuilderEvent";
-
-// Initialize all additional event handlers
-handleMessage(client);
 
 // Login the bot
 client
