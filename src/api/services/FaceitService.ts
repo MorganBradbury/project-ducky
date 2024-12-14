@@ -127,7 +127,7 @@ class FaceitApiClient {
         isComplete: false,
         currentResult: "0:0",
         //@ts-ignore
-        gamersVcName: voiceChannelData?.channelName,
+        gamersVcName: String(voiceChannelData?.channelName).replace("🟣", ""),
       };
     } catch (error) {
       console.error(`Error fetching match details for ${matchId}:`, error);
