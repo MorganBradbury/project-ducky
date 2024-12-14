@@ -17,9 +17,9 @@ export const getPlayerCount = async (
       activePlayers == undefined
     ) {
       // Handle the error if player count is unavailable
-      res.status(500).json({
-        status: "error",
-        message: "Unable to fetch the player count from the Minecraft server.",
+      res.status(200).json({
+        status: "No active players",
+        message: "No active players",
       });
     }
 
@@ -37,7 +37,8 @@ export const getPlayerCount = async (
     res.status(500).json({
       status: "error",
       message:
-        "Unable to query the Minecraft server or update Discord channels.",
+        "Unable to query the Minecraft server or update Discord channels." +
+        error.message,
       error: error.message,
     });
   }
