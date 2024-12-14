@@ -17,7 +17,7 @@ export const getActivePlayers = {
         return;
       }
 
-      const userList = users.map((user) => `**${user}**`).join("\n");
+      const userList = users.map((user: any) => `**${user}**`).join("\n");
 
       const embed = new EmbedBuilder()
         .setTitle("Minecraft server active players")
