@@ -10,9 +10,8 @@ export const minecraftActivePlayers = async (): Promise<[] | null> => {
 
   try {
     // Fetch server information
-    const serverInfo: any = await queryFull(HOST, Number(PORT));
-    console.log(serverInfo);
-    return serverInfo?.players.list || null; // Return the player count or null if it's unavailable
+    const serverData: any = await queryFull(HOST, Number(PORT));
+    return serverData?.players.list || null; // Return the player count or null if it's unavailable
   } catch (error) {
     console.error("Error fetching player count:", error);
     return null; // Return null if there's an error

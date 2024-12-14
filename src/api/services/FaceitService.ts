@@ -3,7 +3,7 @@ import { config } from "../../config";
 import { FaceitPlayer } from "../../types/FaceitPlayer";
 import { getAllUsers } from "../../db/commands";
 import { MatchDetails, MatchFinishedDetails } from "../../types/MatchDetails";
-import { getApplicableVoiceChannel } from "./discordService";
+import { getApplicableVoiceChannel } from "./DiscordService";
 import { isNickname } from "../../utils/nicknameUtils";
 import { fetchData } from "../../utils/apiRequestUtil";
 
@@ -127,7 +127,7 @@ class FaceitApiClient {
         isComplete: false,
         currentResult: "0:0",
         //@ts-ignore
-        gamersVcName: String(voiceChannelData?.channelName).replace("🟣", ""),
+        gamersVcName: String(voiceChannelData?.channelName).replace("🟠 ", ""),
       };
     } catch (error) {
       console.error(`Error fetching match details for ${matchId}:`, error);
@@ -224,6 +224,24 @@ class FaceitApiClient {
       return null;
     }
   }
+
+  // Function to get Elo difference
+  async calculateEloDifference(previousElo: number, gamePlayerId: string) {
+    const faceitPlayer: FaceitPlayer | null = await this.getPlayerData(
+      gamePlayerId
+    );
+
+    if (!faceitPlayer?.faceit_elo) {
+      return;
+    }
+    if (faceitPlayer.faceit_elo > previousElo) {
+      const eloChange = faceitPlayer.faceit_elo - previousElo;
+      return `${`**\+${eloChange}\** (${faceitPlayer.faceit_elo})`}`;
+    } else {
+      const eloChange = previousElo - faceitPlayer?.faceit_elo;
+      return `${`**\-${eloChange}\** (${faceitPlayer.faceit_elo})`}`;
+    }
+  }
 }
 
-export const faceitApiClient = new FaceitApiClient();
+export const FaceitService = new FaceitApiClient();

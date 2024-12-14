@@ -14,8 +14,8 @@ import {
   runEloUpdate,
   sendMatchFinishNotification,
   updateVoiceChannelName,
-} from "./discordService";
-import { faceitApiClient } from "./FaceitService";
+} from "./DiscordService";
+import { FaceitService } from "./FaceitService";
 import { config } from "../../config";
 
 let workers: Record<string, Worker> = {};
@@ -35,7 +35,7 @@ export const startMatch = async (matchId: string) => {
     return;
   }
   // Retrieve initial match data from FACEIT API.
-  let matchData = await faceitApiClient.getMatchDetails(matchId);
+  let matchData = await FaceitService.getMatchDetails(matchId);
   if (!matchData) {
     console.log(`No match data found for ${matchId} from FACEIT API.`);
     return;
@@ -52,7 +52,7 @@ export const startMatch = async (matchId: string) => {
   if (voiceChannelId && checkVoiceId(voiceChannelId)) {
     await updateVoiceChannelName(voiceChannelId, gamersVcName || "CS", true);
     const activeScoresChannelId = await createNewVoiceChannel(
-      `🚨 LIVE: (${gamersVcName?.replace("🟣", "")}) 0:0`,
+      `🟢 LIVE: (${gamersVcName}) 0:0`,
       config.VC_ACTIVE_SCORES_CATEGORY_ID
     );
     matchData = {
@@ -98,7 +98,7 @@ export const endMatch = async (matchId: string) => {
       return;
     }
 
-    const finalMatchDetails = await faceitApiClient.getMatchScore(
+    const finalMatchDetails = await FaceitService.getMatchScore(
       matchId,
       matchData?.teamId
     );
@@ -127,7 +127,7 @@ export const endMatch = async (matchId: string) => {
     if (voiceChannelId && checkVoiceId(voiceChannelId)) {
       await updateVoiceChannelName(
         voiceChannelId,
-        "🟣" + gamersVcName || "CS",
+        "🟠 " + gamersVcName || "CS",
         false
       );
     }
@@ -179,7 +179,7 @@ export const cancelMatch = async (matchId: string) => {
     try {
       // Create a new voice channel and get its ID
       const newChannelId = await createNewVoiceChannel(
-        `${matchData?.gamersVcName}` || "CS",
+        `🟠 ${matchData?.gamersVcName}` || "CS",
         config.VC_GAMES_CATEGORY_ID
       );
 

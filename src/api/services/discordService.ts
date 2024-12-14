@@ -10,7 +10,7 @@ import {
 } from "discord.js";
 import { MatchDetails } from "../../types/MatchDetails";
 import { SystemUser } from "../../types/SystemUser";
-import { faceitApiClient } from "./FaceitService";
+import { FaceitService } from "./FaceitService";
 import { FaceitPlayer } from "../../types/FaceitPlayer";
 import axios from "axios";
 import { PermissionFlagsBits } from "discord.js";
@@ -207,31 +207,13 @@ export const deleteVoiceChannel = async (voiceChannelId: string) => {
   }
 };
 
-// Function to get Elo difference
-const getEloDifference = async (previousElo: number, gamePlayerId: string) => {
-  const faceitPlayer: FaceitPlayer | null = await faceitApiClient.getPlayerData(
-    gamePlayerId
-  );
-
-  if (!faceitPlayer?.faceit_elo) {
-    return;
-  }
-  if (faceitPlayer.faceit_elo > previousElo) {
-    const eloChange = faceitPlayer.faceit_elo - previousElo;
-    return `${`**\+${eloChange}\** (${faceitPlayer.faceit_elo})`}`;
-  } else {
-    const eloChange = previousElo - faceitPlayer?.faceit_elo;
-    return `${`**\-${eloChange}\** (${faceitPlayer.faceit_elo})`}`;
-  }
-};
-
 export const sendMatchFinishNotification = async (
   matchDetails: MatchDetails
 ) => {
   try {
     const playerDetails = await Promise.all(
       matchDetails.matchingPlayers.map(async (player) => {
-        const eloDifference = await getEloDifference(
+        const eloDifference = await FaceitService.calculateEloDifference(
           player.previousElo,
           player.gamePlayerId
         );
@@ -347,8 +329,9 @@ export const runEloUpdate = async (users: SystemUser[]) => {
         const { discordUsername, previousElo, gamePlayerId } = user;
 
         try {
-          const player: FaceitPlayer | null =
-            await faceitApiClient.getPlayerData(gamePlayerId);
+          const player: FaceitPlayer | null = await FaceitService.getPlayerData(
+            gamePlayerId
+          );
 
           if (!player || player.faceit_elo === previousElo) return; // Skip unchanged users
 

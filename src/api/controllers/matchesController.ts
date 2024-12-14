@@ -1,11 +1,11 @@
 import { Request, Response } from "express";
-import { cancelMatch, endMatch, startMatch } from "../services/matchesService"; // Centralized match flow logic
+import { cancelMatch, endMatch, startMatch } from "../services/MatchesService"; // Centralized match flow logic
 import {
   createNewVoiceChannel,
   deleteVoiceChannel,
-} from "../services/discordService";
+} from "../services/DiscordService";
 import { randomUUID } from "crypto";
-import { faceitApiClient } from "../services/FaceitService";
+import { FaceitService } from "../services/FaceitService";
 import {
   checkMatchExists,
   getMatchDataFromDb,
@@ -20,7 +20,7 @@ enum AcceptedEventTypes {
 }
 
 // Main controller function to handle the webhook for match events
-export const handleWebhook = async (
+export const handleMatchesHook = async (
   req: Request,
   res: Response
 ): Promise<void> => {
@@ -81,13 +81,13 @@ export const updateLiveScores = async (
     return;
   }
 
-  let matchData = await faceitApiClient.getMatchDetails(matchId);
+  let matchData = await FaceitService.getMatchDetails(matchId);
   if (!matchData) {
     console.log(`No match data found for ${matchId} from FACEIT API.`);
     return;
   }
 
-  const activeMatchLiveScore = await faceitApiClient.getActiveMatchScore(
+  const activeMatchLiveScore = await FaceitService.getActiveMatchScore(
     matchId,
     matchData?.teamId
   );
@@ -107,7 +107,7 @@ export const updateLiveScores = async (
       await deleteVoiceChannel(matchFromDb?.activeScoresChannelId);
       const activeScore =
         activeMatchLiveScore != null ? activeMatchLiveScore : "0:0";
-      const newChannelName = `🚨 LIVE: (${matchFromDb?.gamersVcName}) ${activeScore}`;
+      const newChannelName = `🟢 ${matchFromDb?.gamersVcName}: ${activeScore}`;
 
       const newActiveScoresChannel = await createNewVoiceChannel(
         newChannelName,

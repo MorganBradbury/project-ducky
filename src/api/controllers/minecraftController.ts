@@ -1,6 +1,6 @@
 import { Request, Response } from "express";
-import { updateMinecraftVoiceChannel } from "../services/discordService";
-import { minecraftActivePlayers } from "../services/minecraftService";
+import { updateMinecraftVoiceChannel } from "../services/DiscordService";
+import { minecraftActivePlayers } from "../services/MinecraftService";
 
 export const getPlayerCount = async (
   req: Request,

@@ -1,9 +1,9 @@
 import { ChatInputCommandInteraction, GuildMember } from "discord.js"; // Use specific interaction type
-import { addUser } from "../../db/commands";
-import { updateNickname } from "../../utils/nicknameUtils";
-import { faceitApiClient } from "../../api/services/FaceitService";
-import { FaceitPlayer } from "../../types/FaceitPlayer";
-import { updateServerRoles } from "../../api/services/discordService";
+import { addUser } from "../../../db/commands";
+import { updateNickname } from "../../../utils/nicknameUtils";
+import { FaceitService } from "../../../api/services/FaceitService";
+import { FaceitPlayer } from "../../../types/FaceitPlayer";
+import { updateServerRoles } from "../../../api/services/DiscordService";
 
 export const registerTrackingCommand = {
   name: "ducky_track_elo",
@@ -21,7 +21,7 @@ export const registerTrackingCommand = {
     const faceitName = interaction.options.getString("faceit_username", true); // Now correctly typed
     const discordUsername = interaction.user.tag;
     try {
-      const player: FaceitPlayer | null = await faceitApiClient?.getPlayerData(
+      const player: FaceitPlayer | null = await FaceitService?.getPlayerData(
         faceitName
       );
 

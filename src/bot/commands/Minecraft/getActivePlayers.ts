@@ -1,9 +1,8 @@
 import { ChatInputCommandInteraction, EmbedBuilder } from "discord.js";
-import { getAllUsers } from "../../db/commands";
-import { minecraftActivePlayers } from "../../api/services/minecraftService";
+import { minecraftActivePlayers } from "../../../api/services/MinecraftService";
 
-export const getMinecraftActivePlayers = {
-  name: "list_minecraft_players_active",
+export const getActivePlayers = {
+  name: "active_mc_players",
   description: "List all users currently on the Minecraft server",
   options: [],
   execute: async (interaction: ChatInputCommandInteraction) => {

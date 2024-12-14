@@ -1,6 +1,6 @@
 import { ChatInputCommandInteraction } from "discord.js";
-import { deleteUser } from "../../db/commands";
-import { config } from "../../config";
+import { deleteUser } from "../../../db/commands";
+import { config } from "../../../config";
 
 export const deleteUserCommand = {
   name: "delete_user",
