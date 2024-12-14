@@ -478,9 +478,9 @@ export const updateMinecraftVoiceChannel = async (
     }
 
     // Create a new voice channel with the active player count
-    const channelName = `🟢 LIVE PLAYERS: ${playerCount}`;
+    const channelName = `🟢 ${playerCount}`;
     const existingActiveChannel = channelsInCategory.find(
-      (channel: any) => channel && channel.name.startsWith("🟢 LIVE PLAYERS")
+      (channel: any) => channel && channel.name.startsWith("🟢")
     );
 
     // If there's an existing ACTIVE channel and its name doesn't match the current player count
