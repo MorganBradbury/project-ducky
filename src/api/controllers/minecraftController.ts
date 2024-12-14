@@ -6,6 +6,7 @@ export const getPlayerCount = async (
   req: Request,
   res: Response
 ): Promise<void> => {
+  // Explicitly set return type as Promise<void>
   try {
     // Get the current player count from the Minecraft server
     const activePlayers = await minecraftActivePlayers();
@@ -13,27 +14,29 @@ export const getPlayerCount = async (
 
     if (
       activePlayers === null ||
-      activePlayers.length == 0 ||
-      activePlayers == undefined
+      activePlayers.length === 0 ||
+      activePlayers === undefined
     ) {
-      // Handle the error if player count is unavailable
+      // Handle the case where there are no active players
       res.status(200).json({
         status: "No active players",
         message: "No active players",
       });
+      return; // End the function after sending the response
     }
 
     // Update the Minecraft voice channel
-    if (activePlayers != undefined) {
-      await updateMinecraftVoiceChannel(activePlayers?.length);
-    }
+    await updateMinecraftVoiceChannel(activePlayers.length);
 
+    // Send the response
     res.status(200).json({
       status: "success",
       playersOnline: activePlayers,
       message: "Loaded users",
     });
+    return; // End the function after sending the response
   } catch (error: any) {
+    // Handle any errors that occur
     res.status(500).json({
       status: "error",
       message:
@@ -41,5 +44,6 @@ export const getPlayerCount = async (
         error.message,
       error: error.message,
     });
+    return; // End the function after sending the response
   }
 };
