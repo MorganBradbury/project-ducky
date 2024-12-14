@@ -8,7 +8,7 @@ import { updateServerRoles } from "../../../api/services/DiscordService";
 export const registerTrackingCommand = {
   name: "ducky_track_elo",
   description:
-    "Add yourself to the tracker. You only need to do this once. It is case sensitive.",
+    "Add yourself to the tracker. You only need to do this once. It is case sensitive",
   options: [
     {
       name: "faceit_username",
