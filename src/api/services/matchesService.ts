@@ -125,7 +125,11 @@ export const endMatch = async (matchId: string) => {
     }
 
     if (voiceChannelId && checkVoiceId(voiceChannelId)) {
-      await updateVoiceChannelName(voiceChannelId, gamersVcName || "CS", false);
+      await updateVoiceChannelName(
+        voiceChannelId,
+        "🟣" + gamersVcName || "CS",
+        false
+      );
     }
 
     await markMatchComplete(matchId);
