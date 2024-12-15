@@ -10,23 +10,8 @@ export const getPlayerCount = async (
   try {
     // Get the current player count from the Minecraft server
     const activePlayers = await minecraftActivePlayers();
-    console.log("activePlayers", activePlayers);
-
-    if (
-      activePlayers === null ||
-      activePlayers.length === 0 ||
-      activePlayers === undefined
-    ) {
-      // Handle the case where there are no active players
-      res.status(200).json({
-        status: "No active players",
-        message: "No active players",
-      });
-      return; // End the function after sending the response
-    }
-
     // Update the Minecraft voice channel
-    await updateMinecraftVoiceChannel(activePlayers.length);
+    await updateMinecraftVoiceChannel(activePlayers?.length || 0);
 
     // Send the response
     res.status(200).json({
