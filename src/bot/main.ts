@@ -3,6 +3,7 @@ import { config } from "../config";
 import "./events/ready";
 import "./events/interaction";
 import "./events/autoRole";
+import "./events/voiceChannelLive";
 
 // Login the bot
 client
