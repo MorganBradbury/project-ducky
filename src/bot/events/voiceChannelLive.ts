@@ -10,6 +10,11 @@ async function updateChannelName(
   retries = 3
 ): Promise<void> {
   try {
+    console.log(`Received request to update channel name.`, {
+      channel,
+      newName,
+      retries,
+    });
     await channel.setName(newName);
     console.log(`Updated channel name to: ${newName}`);
   } catch (error: any) {
@@ -20,7 +25,7 @@ async function updateChannelName(
 
     if (error.code === 20028) {
       // 20028 is the Discord rate limit error code
-      console.warn(
+      console.log(
         "Rate limited while renaming channel. Retrying in 10 minutes."
       );
       if (retries > 0) {
@@ -44,6 +49,7 @@ async function updateChannelName(
 client.on(
   "voiceStateUpdate",
   async (oldState: VoiceState, newState: VoiceState) => {
+    console.log("voice state request received");
     try {
       // Get the voice channel from the new or old state
       const channel = newState.channel || oldState.channel;
