@@ -56,6 +56,12 @@ client.on(
       // Get the channel's current name
       const currentName = channel.name;
 
+      // Skip if the channel name contains "AFK"
+      if (currentName.toLowerCase().includes("afk")) {
+        console.log(`Skipping update for AFK channel: ${currentName}`);
+        return;
+      }
+
       // Define the emoji replacements
       const activeEmoji = "🟢";
       const inactiveEmoji = "🟠";
