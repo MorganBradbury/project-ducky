@@ -46,7 +46,7 @@ async function updateChannelName(
           }
 
           const hasMembers = freshChannel.members.some(
-            (member) => !member.user.bot
+            (member: any) => !member.user.bot
           );
 
           const fallbackEmoji = "🟠"; // Set to inactive emoji if empty
