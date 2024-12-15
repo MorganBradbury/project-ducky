@@ -1,5 +1,5 @@
 import { client } from "../bot";
-import { VoiceState } from "discord.js";
+import { VoiceState, GuildChannel } from "discord.js";
 
 /**
  * Updates the channel name with rate limit handling.
@@ -11,7 +11,7 @@ async function updateChannelName(
 ): Promise<void> {
   try {
     console.log(`Received request to update channel name.`, {
-      channel,
+      channel: channel.name,
       newName,
       retries,
     });
@@ -23,15 +23,44 @@ async function updateChannelName(
       return;
     }
 
-    if (error.code === 20028) {
-      // 20028 is the Discord rate limit error code
-      console.log(
-        "Rate limited while renaming channel. Retrying in 10 minutes."
+    if (error.code === 20028 || error.code === 429) {
+      // 20028 or 429 indicate rate limiting
+      const retryAfter =
+        error?.retry_after || error?.response?.headers?.["retry-after"];
+      const retryDelay = retryAfter
+        ? parseFloat(retryAfter) * 1000
+        : 10 * 60 * 1000; // Fallback to 10 minutes if unavailable
+
+      console.warn(
+        `Rate limited while renaming channel. Retrying in ${
+          retryDelay / 1000
+        } seconds.`
       );
+
       if (retries > 0) {
-        setTimeout(() => {
-          updateChannelName(channel, newName, retries - 1);
-        }, 10 * 60 * 1000); // 10 minutes in milliseconds
+        setTimeout(async () => {
+          const freshChannel = await channel.guild.channels.fetch(channel.id); // Fetch the latest channel state
+          if (!freshChannel || freshChannel.type !== 2) {
+            console.warn("Channel no longer exists or is not a voice channel.");
+            return;
+          }
+
+          const hasMembers = freshChannel.members.some(
+            (member) => !member.user.bot
+          );
+
+          const fallbackEmoji = "🟠"; // Set to inactive emoji if empty
+          const updatedName = freshChannel.name
+            .replace(/^\p{Emoji_Presentation}/u, "")
+            .trimStart();
+          const finalName = hasMembers
+            ? newName
+            : `${fallbackEmoji} ${updatedName}`;
+
+          if (freshChannel.name !== finalName) {
+            await updateChannelName(freshChannel, finalName, retries - 1);
+          }
+        }, retryDelay);
       } else {
         console.error(
           "Failed to update channel name after retries due to rate limits."
@@ -49,7 +78,7 @@ async function updateChannelName(
 client.on(
   "voiceStateUpdate",
   async (oldState: VoiceState, newState: VoiceState) => {
-    console.log("voice state request received");
+    console.log("Voice state update received.");
     try {
       // Get the voice channel from the new or old state
       const channel = newState.channel || oldState.channel;
