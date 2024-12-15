@@ -140,7 +140,7 @@ export const updateVoiceChannelName = async (
     if (channel instanceof VoiceChannel) {
       const newName =
         matchOngoing && channel.members.size > 0
-          ? `${gamersVcName} [🟢 LIVE]`
+          ? `${gamersVcName} [LIVE]`
           : `${gamersVcName}`;
 
       const url = `https://discord.com/api/v10/channels/${voiceChannelId}`;

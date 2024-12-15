@@ -51,10 +51,15 @@ export const startMatch = async (matchId: string) => {
 
   if (voiceChannelId && checkVoiceId(voiceChannelId)) {
     await updateVoiceChannelName(voiceChannelId, gamersVcName || "CS", true);
+
+    // Remove both emojis from gamersVcName
+    const sanitizedGamersVcName = gamersVcName?.replace(/[🟢🟠]/g, "").trim();
+
     const activeScoresChannelId = await createNewVoiceChannel(
-      `🟢 LIVE: (${gamersVcName}) 0:0`,
+      `🟢 LIVE: (${sanitizedGamersVcName}) 0:0`,
       config.VC_ACTIVE_SCORES_CATEGORY_ID
     );
+
     matchData = {
       ...matchData,
       activeScoresChannelId: activeScoresChannelId || "",
