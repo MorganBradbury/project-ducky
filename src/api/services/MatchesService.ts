@@ -56,7 +56,7 @@ export const startMatch = async (matchId: string) => {
     const sanitizedGamersVcName = gamersVcName?.replace(/[🟢🟠]/g, "").trim();
 
     const activeScoresChannelId = await createNewVoiceChannel(
-      `🟢 LIVE: (${sanitizedGamersVcName}) 0:0`,
+      `🟢 (${sanitizedGamersVcName}) 0:0`,
       config.VC_ACTIVE_SCORES_CATEGORY_ID
     );
 

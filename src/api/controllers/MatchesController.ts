@@ -107,9 +107,9 @@ export const updateLiveScores = async (
       await deleteVoiceChannel(matchFromDb?.activeScoresChannelId);
       const activeScore =
         activeMatchLiveScore != null ? activeMatchLiveScore : "0:0";
-      const newChannelName = `🟢 ${matchFromDb?.gamersVcName
+      const newChannelName = `🟢 (${matchFromDb?.gamersVcName
         ?.replace(/[🟢🟠]/g, "")
-        .trim()}: ${activeScore}`;
+        .trim()}) ${activeScore}`;
 
       const newActiveScoresChannel = await createNewVoiceChannel(
         newChannelName,
