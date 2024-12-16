@@ -506,8 +506,8 @@ export async function resetVoiceChannelStates(): Promise<void> {
 
     // Define an ignore list for category IDs
     const ignoreCategoryIds: string[] = [
-      config.VC_ACTIVE_SCORES_CATEGORY_ID, // Replace with actual category IDs to ignore
-      config.VC_MINECRAFT_FEED_CATEGORY_ID,
+      "123456789012345678", // Replace with actual category IDs to ignore
+      "987654321098765432",
     ];
 
     // Group channels by category (parentId) and filter voice channels
@@ -537,10 +537,9 @@ export async function resetVoiceChannelStates(): Promise<void> {
     // Process each category
     for (const [categoryId, voiceChannels] of Object.entries(categories)) {
       const categoryName = voiceChannels[0]?.parent?.name || "Uncategorized";
-
       console.log(`Processing category: ${categoryName}`);
 
-      // Rename and sort channels in the current category
+      // Rename channels based on occupancy and emojis
       const updatedChannels = await Promise.all(
         voiceChannels.map(async (channel) => {
           if (channel.members.size > 0) {
@@ -567,12 +566,26 @@ export async function resetVoiceChannelStates(): Promise<void> {
         })
       );
 
-      // Sort and reorder channels within the category
-      const sortedChannels = updatedChannels.sort((a, b) =>
-        a.name.localeCompare(b.name)
-      );
+      // Sort channels by the number in the name (e.g., CS-1 -> 1, CS-2 -> 2)
+      const sortedChannels = updatedChannels.sort((a, b) => {
+        const aNumber = extractNumberFromName(a.name);
+        const bNumber = extractNumberFromName(b.name);
+
+        // Channels without a number will be pushed to the end
+        if (aNumber === null && bNumber === null) return 0;
+        if (aNumber === null) return 1;
+        if (bNumber === null) return -1;
+
+        return aNumber - bNumber;
+      });
+
+      // Set the positions based on the custom sorted order
       await Promise.all(
-        sortedChannels.map((channel, index) => channel.setPosition(index))
+        sortedChannels.map((channel, index) => {
+          if (channel.position !== index) {
+            return channel.setPosition(index);
+          }
+        })
       );
 
       console.log(
@@ -584,6 +597,12 @@ export async function resetVoiceChannelStates(): Promise<void> {
   } catch (error) {
     console.error("Error updating voice channels:", error);
   }
+}
+
+// Helper function to extract the number from the channel name
+function extractNumberFromName(channelName: string): number | null {
+  const match = channelName.match(/(\d+)/); // Match digits in the name
+  return match ? parseInt(match[0], 10) : null;
 }
 
 const loginBot = async () => {
