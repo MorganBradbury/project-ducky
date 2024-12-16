@@ -89,6 +89,14 @@ export const endMatch = async (matchId: string) => {
       return;
     }
 
+    // Stop the worker associated with this matchId
+    if (workers[matchId]) {
+      workers[matchId].postMessage({ type: "stop" });
+      workers[matchId].terminate(); // Clean up worker resources
+      delete workers[matchId]; // Remove worker from storage
+      console.log("Worker stopped for matchId:", matchId);
+    }
+
     let matchData = await getMatchDataFromDb(matchId);
 
     console.log(`Test querying DB Data: ${matchId}`, matchData);
@@ -134,14 +142,6 @@ export const endMatch = async (matchId: string) => {
     }
 
     await markMatchComplete(matchId);
-
-    // Stop the worker associated with this matchId
-    if (workers[matchId]) {
-      workers[matchId].postMessage({ type: "stop" });
-      workers[matchId].terminate(); // Clean up worker resources
-      delete workers[matchId]; // Remove worker from storage
-      console.log("Worker stopped for matchId:", matchId);
-    }
   }, 2500);
 };
 
@@ -180,7 +180,7 @@ export const cancelMatch = async (matchId: string) => {
     try {
       // Create a new voice channel and get its ID
       const newChannelId = await createNewVoiceChannel(
-        `🟠 ${matchData?.gamersVcName}` || "CS",
+        `${ChannelIcons.Inactive} ${matchData?.gamersVcName}` || "CS",
         config.VC_GAMES_CATEGORY_ID
       );
 

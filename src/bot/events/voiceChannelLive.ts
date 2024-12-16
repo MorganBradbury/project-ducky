@@ -49,7 +49,7 @@ async function updateChannelName(
             (member: any) => !member.user.bot
           );
 
-          const fallbackEmoji = "🟠"; // Set to inactive emoji if empty
+          const fallbackEmoji = ChannelIcons.Inactive; // Set to inactive emoji if empty
           const updatedName = freshChannel.name
             .replace(/^\p{Emoji_Presentation}/u, "")
             .trimStart();
@@ -98,8 +98,8 @@ client.on(
       }
 
       // Define the emoji replacements
-      const activeEmoji = "🟢";
-      const inactiveEmoji = "🟠";
+      const activeEmoji = ChannelIcons.Active;
+      const inactiveEmoji = ChannelIcons.Inactive;
 
       // Determine if the channel is active (has members excluding bots)
       const hasMembers = channel.members.some((member) => !member.user.bot);

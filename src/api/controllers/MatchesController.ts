@@ -87,6 +87,11 @@ export const updateLiveScores = async (
     return;
   }
 
+  if (matchData?.isComplete) {
+    console.log(`Match is finished. ${matchData}`);
+    return;
+  }
+
   const activeMatchLiveScore = await FaceitService.getActiveMatchScore(
     matchId,
     matchData?.teamId

@@ -85,7 +85,7 @@ class FaceitApiClient {
         return null;
       }
 
-      const { match_id, voting, teams } = matchData;
+      const { match_id, voting, teams, results } = matchData;
       const allUsers = await getAllUsers();
 
       // Combine the rosters of both factions
@@ -117,6 +117,11 @@ class FaceitApiClient {
         teamId = matchingTeam?.faction_id || "";
       }
 
+      let isComplete: boolean = false;
+      if (results?.winner != "") {
+        isComplete = true;
+      }
+
       return {
         matchId: match_id,
         mapName,
@@ -124,10 +129,13 @@ class FaceitApiClient {
         teamId,
         //@ts-ignore
         voiceChannelId: voiceChannelData?.channelId ?? "",
-        isComplete: false,
+        isComplete,
         currentResult: "0:0",
         //@ts-ignore
-        gamersVcName: String(voiceChannelData?.channelName).replace("🟠 ", ""),
+        gamersVcName: String(voiceChannelData?.channelName).replace(
+          `${ChannelIcons.Inactive} `,
+          ""
+        ),
       };
     } catch (error) {
       console.error(`Error fetching match details for ${matchId}:`, error);
