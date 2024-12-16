@@ -93,8 +93,9 @@ export const clearMessagesCommand = {
               if (error.code === 10008) {
                 console.log(`Message with ID ${msg.id} no longer exists.`);
               } else if (error.code === 429) {
-                // Handle rate limiting
-                const retryAfter = error.response?.headers?.get("retry-after"); // Access retry-after header via response
+                // Handle rate limiting by extracting retryAfter from the headers directly
+                //@ts-ignore
+                const retryAfter = error.headers?.get("retry-after"); // Time in milliseconds
                 if (retryAfter) {
                   console.log(
                     `Rate limited. Please retry after ${retryAfter}ms`
