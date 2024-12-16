@@ -490,6 +490,36 @@ export const updateMinecraftVoiceChannel = async (
  * Updates all voice channels in a Discord server to have the same emoji 🟠 in their names,
  * ignoring specified categories and skipping occupied channels. Channels are reordered alphabetically.
  */
+// Helper function to extract the number from the channel name
+function extractNumberFromName(channelName: string): number | null {
+  const match = channelName.match(/(\d+)/); // Match digits in the name
+  return match ? parseInt(match[0], 10) : null;
+}
+
+// Helper function to reorder voice channels by their name numbers
+async function reorderVoiceChannels(channels: VoiceChannel[]): Promise<void> {
+  const sortedChannels = channels.sort((a, b) => {
+    const aNumber = extractNumberFromName(a.name);
+    const bNumber = extractNumberFromName(b.name);
+
+    // Channels without a number will be pushed to the end
+    if (aNumber === null && bNumber === null) return 0;
+    if (aNumber === null) return 1;
+    if (bNumber === null) return -1;
+
+    return aNumber - bNumber;
+  });
+
+  // Set the positions based on the custom sorted order
+  await Promise.all(
+    sortedChannels.map((channel, index) => {
+      if (channel.position !== index) {
+        return channel.setPosition(index);
+      }
+    })
+  );
+}
+
 export async function resetVoiceChannelStates(): Promise<void> {
   try {
     const guildId = process.env.GUILD_ID;
@@ -542,51 +572,29 @@ export async function resetVoiceChannelStates(): Promise<void> {
       // Rename channels based on occupancy and emojis
       const updatedChannels = await Promise.all(
         voiceChannels.map(async (channel) => {
+          let newName: string;
           if (channel.members.size > 0) {
             // Occupied channels: Ensure 🟢 is set
-            const newName = `🟢 ${channel.name.replace(/^🟠 |^🟢 /, "")}`; // Replace 🟠 or 🟢 with 🟢
-            if (channel.name !== newName) {
-              console.log(
-                `Renaming occupied channel: ${channel.name} -> ${newName}`
-              );
-              await channel.setName(newName);
-            }
-            return channel;
+            newName = `🟢 ${channel.name.replace(/^🟠 |^🟢 /, "")}`; // Replace 🟠 or 🟢 with 🟢
+          } else {
+            // Empty channels: Ensure 🟠 is set
+            newName = `🟠 ${channel.name.replace(/^🟠 |^🟢 /, "")}`; // Replace 🟠 or 🟢 with 🟠
           }
 
-          // Empty channels: Ensure 🟠 is set
-          const newName = `🟠 ${channel.name.replace(/^🟠 |^🟢 /, "")}`; // Replace 🟠 or 🟢 with 🟠
+          // If the name is different, update it
           if (channel.name !== newName) {
-            console.log(
-              `Renaming empty channel: ${channel.name} -> ${newName}`
-            );
+            console.log(`Renaming channel: ${channel.name} -> ${newName}`);
             await channel.setName(newName);
+          } else {
+            console.log(`Channel name is already correct: ${channel.name}`);
           }
+
           return channel;
         })
       );
 
-      // Sort channels by the number in the name (e.g., CS-1 -> 1, CS-2 -> 2)
-      const sortedChannels = updatedChannels.sort((a, b) => {
-        const aNumber = extractNumberFromName(a.name);
-        const bNumber = extractNumberFromName(b.name);
-
-        // Channels without a number will be pushed to the end
-        if (aNumber === null && bNumber === null) return 0;
-        if (aNumber === null) return 1;
-        if (bNumber === null) return -1;
-
-        return aNumber - bNumber;
-      });
-
-      // Set the positions based on the custom sorted order
-      await Promise.all(
-        sortedChannels.map((channel, index) => {
-          if (channel.position !== index) {
-            return channel.setPosition(index);
-          }
-        })
-      );
+      // Reorder the channels based on their numbers in the names
+      await reorderVoiceChannels(updatedChannels);
 
       console.log(
         `Updated and reordered channels in category: ${categoryName}`
@@ -597,12 +605,6 @@ export async function resetVoiceChannelStates(): Promise<void> {
   } catch (error) {
     console.error("Error updating voice channels:", error);
   }
-}
-
-// Helper function to extract the number from the channel name
-function extractNumberFromName(channelName: string): number | null {
-  const match = channelName.match(/(\d+)/); // Match digits in the name
-  return match ? parseInt(match[0], 10) : null;
 }
 
 const loginBot = async () => {
