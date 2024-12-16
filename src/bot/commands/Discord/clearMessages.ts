@@ -1,4 +1,9 @@
-import { ChatInputCommandInteraction, Collection, Message } from "discord.js";
+import {
+  ChatInputCommandInteraction,
+  Collection,
+  Message,
+  DiscordAPIError,
+} from "discord.js";
 
 export const clearMessagesCommand = {
   name: "clearmessages",
@@ -76,9 +81,43 @@ export const clearMessagesCommand = {
         return;
       }
 
+      // Delete messages and handle errors for messages that may no longer exist
       await Promise.all(
         messagesToDelete.map(async (msg: Message) => {
-          await msg.delete();
+          try {
+            await msg.delete();
+          } catch (error) {
+            // Check if the error is a DiscordAPIError
+            if (error instanceof DiscordAPIError) {
+              // If the message is unknown or already deleted, log the error but continue
+              if (error.code === 10008) {
+                console.log(`Message with ID ${msg.id} no longer exists.`);
+              } else if (error.code === 429) {
+                // Handle rate limiting
+                const retryAfter = error.response?.headers?.get("retry-after"); // Access retry-after header via response
+                if (retryAfter) {
+                  console.log(
+                    `Rate limited. Please retry after ${retryAfter}ms`
+                  );
+                  await interaction.followUp({
+                    content: `Rate limit exceeded. Please try again in ${Math.ceil(
+                      Number(retryAfter) / 1000
+                    )} seconds.`,
+                    ephemeral: true,
+                  });
+                }
+                return;
+              } else {
+                console.error(
+                  `Error deleting message with ID ${msg.id}:`,
+                  error
+                );
+              }
+            } else {
+              // For other errors, log them
+              console.error("Error deleting message:", error);
+            }
+          }
         })
       );
 
