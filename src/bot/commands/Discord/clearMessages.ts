@@ -13,6 +13,17 @@ export const clearMessagesCommand = {
     },
   ],
   execute: async (interaction: ChatInputCommandInteraction) => {
+    // Check if the user is the server owner
+    const isServerOwner = interaction.guild?.ownerId === interaction.user.id;
+
+    if (!isServerOwner) {
+      await interaction.reply({
+        content: "You must be the server owner to run this command.",
+        ephemeral: true,
+      });
+      return;
+    }
+
     const wordToSearch = interaction.options.getString("word");
 
     if (!wordToSearch) {
