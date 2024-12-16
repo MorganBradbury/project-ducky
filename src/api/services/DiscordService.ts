@@ -506,8 +506,8 @@ export async function resetVoiceChannelStates(): Promise<void> {
 
     // Define an ignore list for category IDs
     const ignoreCategoryIds: string[] = [
-      "123456789012345678", // Replace with actual category IDs to ignore
-      "987654321098765432",
+      config.VC_ACTIVE_SCORES_CATEGORY_ID, // Replace with actual category IDs to ignore
+      config.VC_MINECRAFT_FEED_CATEGORY_ID,
     ];
 
     // Group channels by category (parentId) and filter voice channels
