@@ -7,6 +7,7 @@ import {
   VoiceChannel,
   GuildMember,
   Role,
+  ChannelType,
 } from "discord.js";
 import { MatchDetails } from "../../types/MatchDetails";
 import { SystemUser } from "../../types/SystemUser";
@@ -484,6 +485,93 @@ export const updateMinecraftVoiceChannel = async (
     return { message: error.message };
   }
 };
+
+/**
+ * Updates all voice channels in a Discord server to have the same emoji 🟠 in their names,
+ * ignoring specified categories and skipping occupied channels. Channels are reordered alphabetically.
+ */
+export async function resetVoiceChannelStates(): Promise<void> {
+  try {
+    const guildId = process.env.GUILD_ID;
+    if (!guildId)
+      throw new Error("GUILD_ID is not set in environment variables.");
+
+    const guild = await client.guilds.fetch(guildId);
+    if (!guild) throw new Error(`Guild with ID ${guildId} not found.`);
+
+    const channels = await guild.channels.fetch();
+
+    // Define an ignore list for categories
+    const ignoreCategories: string[] = [
+      "Category-To-Skip-1",
+      "Category-To-Skip-2",
+    ];
+
+    // Group channels by category (parentId) and filter voice channels
+    const categories: Record<string, VoiceChannel[]> = {};
+
+    channels.forEach((channel) => {
+      if (
+        channel?.type === ChannelType.GuildVoice &&
+        channel.id !== guild.afkChannelId
+      ) {
+        const categoryId = channel.parentId || "no-category";
+
+        // Skip channels in ignored categories
+        const categoryName = channel.parent?.name;
+        if (categoryName && ignoreCategories.includes(categoryName)) {
+          console.log(`Skipping category: ${categoryName}`);
+          return;
+        }
+
+        if (!categories[categoryId]) categories[categoryId] = [];
+        categories[categoryId].push(channel as VoiceChannel);
+      }
+    });
+
+    // Process each category
+    for (const [categoryId, voiceChannels] of Object.entries(categories)) {
+      const categoryName = voiceChannels[0]?.parent?.name || "Uncategorized";
+
+      console.log(`Processing category: ${categoryName}`);
+
+      // Rename and sort channels in the current category
+      const updatedChannels = await Promise.all(
+        voiceChannels.map(async (channel) => {
+          if (channel.members.size > 0) {
+            console.log(`Skipping channel ${channel.name} as it is occupied.`);
+            return channel;
+          }
+
+          const newName = `🟠 ${channel.name.replace(/^🟠 /, "")}`; // Avoid duplicate emojis
+          if (channel.name !== newName) {
+            console.log(
+              `Renaming empty channel: ${channel.name} -> ${newName}`
+            );
+            await channel.setName(newName);
+          }
+          return channel;
+        })
+      );
+
+      // Sort and reorder channels within the category
+      const sortedChannels = updatedChannels.sort((a, b) =>
+        a.name.localeCompare(b.name)
+      );
+      await Promise.all(
+        sortedChannels.map((channel, index) => channel.setPosition(index))
+      );
+
+      console.log(
+        `Updated and reordered channels in category: ${categoryName}`
+      );
+    }
+
+    console.log("Voice channels updated and reordered successfully.");
+  } catch (error) {
+    console.error("Error updating voice channels:", error);
+  }
+}
 
 const loginBot = async () => {
   try {
