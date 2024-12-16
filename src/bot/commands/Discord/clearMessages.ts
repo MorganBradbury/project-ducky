@@ -1,4 +1,4 @@
-import { ChatInputCommandInteraction, EmbedBuilder } from "discord.js";
+import { ChatInputCommandInteraction, Collection, Message } from "discord.js";
 
 export const clearMessagesCommand = {
   name: "clearmessages",
@@ -18,78 +18,68 @@ export const clearMessagesCommand = {
     if (!wordToSearch) {
       await interaction.reply({
         content: "Please provide a word to search for.",
+        ephemeral: true,
       });
       return;
     }
 
-    // Send a loading message as an ephemeral message
-    const loadingMessage = await interaction.reply({
-      content: "Processing your request... Please wait.",
-    });
+    // Defer the reply to avoid 'InteractionAlreadyReplied' error
+    await interaction.deferReply({ ephemeral: true });
 
     try {
-      let messagesToDelete = [];
+      let messagesToDelete: Message[] = [];
       let lastMessageId: string | undefined = undefined;
       let fetchMore = true;
 
-      // Loop through the history in chunks of 100 messages
       while (fetchMore) {
-        const messages: any = await interaction.channel?.messages.fetch({
-          limit: 100,
-          before: lastMessageId,
-        });
+        const messages: Collection<string, Message> =
+          (await interaction.channel?.messages.fetch({
+            limit: 100,
+            before: lastMessageId,
+          })) || new Collection(); // Default to empty collection if null
 
-        if (messages?.size === 0) {
+        if (messages.size === 0) {
           fetchMore = false;
           break;
         }
 
         // Filter messages containing the specified word (case-insensitive)
-        const matchingMessages = messages.filter((msg: any) =>
-          msg.content.toLowerCase().includes(wordToSearch.toLowerCase())
+        const matchingMessages = Array.from(
+          messages
+            .filter((msg: Message) =>
+              msg.content.toLowerCase().includes(wordToSearch.toLowerCase())
+            )
+            .values()
         );
 
-        messagesToDelete.push(...matchingMessages.array());
+        messagesToDelete.push(...matchingMessages);
 
-        // Update the ID of the last message to fetch the next set
         lastMessageId = messages.last()?.id;
       }
 
-      // If no messages are found
       if (messagesToDelete.length === 0) {
-        await interaction.reply({
+        await interaction.followUp({
           content: `No messages found containing the word "${wordToSearch}".`,
+          ephemeral: true,
         });
         return;
       }
 
-      // Delete each matching message
       await Promise.all(
-        messagesToDelete.map(async (msg) => {
+        messagesToDelete.map(async (msg: Message) => {
           await msg.delete();
         })
       );
 
-      // Reply with the number of deleted messages
       await interaction.followUp({
         content: `${messagesToDelete.length} messages containing the word "${wordToSearch}" have been deleted.`,
       });
-
-      // Optionally delete the loading message after completion
-      setTimeout(() => {
-        loadingMessage.delete();
-      }, 5000); // Delete after 5 seconds or adjust as necessary
     } catch (error) {
       console.error("Error clearing messages:", error);
-      await interaction.reply({
+      await interaction.followUp({
         content: "An error occurred while trying to clear messages.",
         ephemeral: true,
       });
-
-      // Optionally delete the loading message in case of error
-      setTimeout(() => {
-        loadingMessage.delete();
-      }, 5000); // Delete after 5 seconds
     }
   },
 };
