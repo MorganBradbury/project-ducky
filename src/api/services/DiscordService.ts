@@ -493,18 +493,21 @@ export const updateMinecraftVoiceChannel = async (
 export async function resetVoiceChannelStates(): Promise<void> {
   try {
     const guildId = process.env.GUILD_ID;
-    if (!guildId)
+    if (!guildId) {
       throw new Error("GUILD_ID is not set in environment variables.");
+    }
 
     const guild = await client.guilds.fetch(guildId);
-    if (!guild) throw new Error(`Guild with ID ${guildId} not found.`);
+    if (!guild) {
+      throw new Error(`Guild with ID ${guildId} not found.`);
+    }
 
     const channels = await guild.channels.fetch();
 
-    // Define an ignore list for categories
-    const ignoreCategories: string[] = [
-      "Category-To-Skip-1",
-      "Category-To-Skip-2",
+    // Define an ignore list for category IDs
+    const ignoreCategoryIds: string[] = [
+      config.VC_ACTIVE_SCORES_CATEGORY_ID, // Replace with actual category IDs to ignore
+      config.VC_MINECRAFT_FEED_CATEGORY_ID,
     ];
 
     // Group channels by category (parentId) and filter voice channels
@@ -518,9 +521,11 @@ export async function resetVoiceChannelStates(): Promise<void> {
         const categoryId = channel.parentId || "no-category";
 
         // Skip channels in ignored categories
-        const categoryName = channel.parent?.name;
-        if (categoryName && ignoreCategories.includes(categoryName)) {
-          console.log(`Skipping category: ${categoryName}`);
+        if (
+          categoryId !== "no-category" &&
+          ignoreCategoryIds.includes(categoryId)
+        ) {
+          console.log(`Skipping category with ID: ${categoryId}`);
           return;
         }
 
@@ -539,11 +544,19 @@ export async function resetVoiceChannelStates(): Promise<void> {
       const updatedChannels = await Promise.all(
         voiceChannels.map(async (channel) => {
           if (channel.members.size > 0) {
-            console.log(`Skipping channel ${channel.name} as it is occupied.`);
+            // Occupied channels: Ensure 🟢 is set
+            const newName = `🟢 ${channel.name.replace(/^🟠 |^🟢 /, "")}`; // Replace 🟠 or 🟢 with 🟢
+            if (channel.name !== newName) {
+              console.log(
+                `Renaming occupied channel: ${channel.name} -> ${newName}`
+              );
+              await channel.setName(newName);
+            }
             return channel;
           }
 
-          const newName = `🟠 ${channel.name.replace(/^🟠 /, "")}`; // Avoid duplicate emojis
+          // Empty channels: Ensure 🟠 is set
+          const newName = `🟠 ${channel.name.replace(/^🟠 |^🟢 /, "")}`; // Replace 🟠 or 🟢 with 🟠
           if (channel.name !== newName) {
             console.log(
               `Renaming empty channel: ${channel.name} -> ${newName}`
