@@ -569,7 +569,7 @@ export async function resetVoiceChannelStates(): Promise<void> {
       const categoryName = voiceChannels[0]?.parent?.name || "Uncategorized";
       console.log(`Processing category: ${categoryName}`);
 
-      // Rename channels based on occupancy and emojis
+      // Rename channels based on occupancy and emojis.
       const updatedChannels = await Promise.all(
         voiceChannels.map(async (channel) => {
           let newName: string;
