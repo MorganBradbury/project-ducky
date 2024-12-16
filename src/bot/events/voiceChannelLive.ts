@@ -1,5 +1,6 @@
 import { client } from "../bot";
 import { VoiceState, GuildChannel } from "discord.js";
+import { ChannelIcons } from "../../constants";
 
 /**
  * Updates the channel name with rate limit handling.

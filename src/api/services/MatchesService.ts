@@ -17,6 +17,7 @@ import {
 } from "./DiscordService";
 import { FaceitService } from "./FaceitService";
 import { config } from "../../config";
+import { ChannelIcons } from "../../constants";
 
 let workers: Record<string, Worker> = {};
 

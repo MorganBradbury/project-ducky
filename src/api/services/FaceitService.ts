@@ -6,6 +6,7 @@ import { MatchDetails, MatchFinishedDetails } from "../../types/MatchDetails";
 import { getApplicableVoiceChannel } from "./DiscordService";
 import { isNickname } from "../../utils/nicknameUtils";
 import { fetchData } from "../../utils/apiRequestUtil";
+import { ChannelIcons } from "../../constants";
 
 // Enum to store API endpoints
 enum FaceitApiEndpoints {

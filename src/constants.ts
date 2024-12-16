@@ -1,4 +1,4 @@
-enum ChannelIcons {
+export enum ChannelIcons {
   Active = "🟢",
   Inactive = "🟠",
   Disabled = "🔴",
