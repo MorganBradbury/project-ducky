@@ -25,7 +25,7 @@ client.on("messageCreate", async (message: Message) => {
     try {
       // Call OpenAI API
       const response = await openai.chat.completions.create({
-        model: "gpt-4",
+        model: "gpt-4o",
         max_tokens: 350,
         messages: [
           {
