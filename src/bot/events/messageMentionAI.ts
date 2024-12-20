@@ -7,12 +7,20 @@ import { config } from "../../config"; // Adjust the path as needed
 const openai = new OpenAI({ apiKey: config.OPENAI_API_KEY });
 
 client.on("messageCreate", async (message: Message) => {
-  if (client.user && message.mentions.has(client.user) && !message.author.bot) {
+  // Check if the message is in the specified channel and the bot is mentioned
+  const targetChannelId = "1319737613871218861"; // Replace with your channel ID
+  if (
+    message.channel.id === targetChannelId && // Ensure the channel matches
+    client.user && // Check if the bot is logged in
+    message.mentions.has(client.user) && // Check if the bot is mentioned
+    !message.author.bot // Ignore bot messages
+  ) {
     const userMessage = message.content
       .replace(`<@${client.user.id}>`, "")
       .trim();
 
     try {
+      // Call OpenAI API
       const response = await openai.chat.completions.create({
         model: "gpt-4",
         messages: [{ role: "user", content: userMessage }],
