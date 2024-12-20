@@ -26,7 +26,7 @@ client.on("messageCreate", async (message: Message) => {
       // Call OpenAI API
       const response = await openai.chat.completions.create({
         model: "gpt-3.5-turbo",
-        max_tokens: 200,
+        max_tokens: 350,
         messages: [
           {
             role: "system",
