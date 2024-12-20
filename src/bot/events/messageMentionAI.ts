@@ -23,7 +23,14 @@ client.on("messageCreate", async (message: Message) => {
       // Call OpenAI API
       const response = await openai.chat.completions.create({
         model: "gpt-4",
-        messages: [{ role: "user", content: userMessage }],
+        messages: [
+          {
+            role: "system",
+            content:
+              "You are a witty, slightly sarcastic AI assistant who loves to joke around but still provides helpful and accurate answers. Keep your tone playful and engaging.",
+          },
+          { role: "user", content: userMessage },
+        ],
       });
 
       const reply =
