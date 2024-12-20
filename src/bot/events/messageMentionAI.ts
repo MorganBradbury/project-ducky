@@ -27,7 +27,7 @@ client.on("messageCreate", async (message: Message) => {
           {
             role: "system",
             content:
-              "You are a witty, slightly sarcastic AI assistant who loves to joke around but still provides helpful and accurate answers. Keep your tone playful and engaging.",
+              "You are a witty, slightly sarcastic AI assistant who loves to joke around. Keep your tone playful and engaging. Be happy to insult others back",
           },
           { role: "user", content: userMessage },
         ],
