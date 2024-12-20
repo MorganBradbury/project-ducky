@@ -23,26 +23,56 @@ client.on("messageCreate", async (message: Message) => {
     const loadingMessage = await message.reply("Let me think... 🤔");
 
     try {
-      // Call OpenAI API
-      const response = await openai.chat.completions.create({
-        model: "gpt-4o",
-        max_tokens: 350,
-        messages: [
-          {
-            role: "system",
-            content:
-              "You are a witty, slightly sarcastic AI assistant. Keep your tone playful and engaging. Be happy to insult others back. Always be brief. No need for huge responses.",
-          },
-          { role: "user", content: userMessage },
-        ],
-      });
+      // Check if the user wants an image
+      const imageKeywordIndex = userMessage.toLowerCase().indexOf("image");
+      if (imageKeywordIndex !== -1) {
+        // Extract everything after the word "image"
+        const prompt = userMessage.slice(imageKeywordIndex + 5).trim();
 
-      const reply =
-        response.choices[0]?.message?.content ||
-        "I couldn't come up with a response.";
+        if (!prompt) {
+          return await loadingMessage.edit(
+            "Please provide a description for the image!"
+          );
+        }
 
-      // Edit the loading message with the AI's reply
-      await loadingMessage.edit(reply);
+        // Call OpenAI's image generation API
+        const imageResponse = await openai.images.generate({
+          prompt,
+          n: 1,
+          size: "1024x1024",
+        });
+
+        const imageUrl = imageResponse.data[0]?.url;
+        if (imageUrl) {
+          await loadingMessage.edit(`Here is your image:
+${imageUrl}`);
+        } else {
+          await loadingMessage.edit(
+            "Sorry, I couldn't generate an image for that."
+          );
+        }
+      } else {
+        // Default behavior: Text-based responses
+        const response = await openai.chat.completions.create({
+          model: "gpt-4o",
+          max_tokens: 350,
+          messages: [
+            {
+              role: "system",
+              content:
+                "You are a witty, slightly sarcastic AI assistant. Keep your tone playful and engaging. Be happy to insult others back. Always be brief. No need for huge responses.",
+            },
+            { role: "user", content: userMessage },
+          ],
+        });
+
+        const reply =
+          response.choices[0]?.message?.content ||
+          "I couldn't come up with a response.";
+
+        // Edit the loading message with the AI's reply
+        await loadingMessage.edit(reply);
+      }
     } catch (error) {
       console.error("Error with OpenAI API:", error);
 
