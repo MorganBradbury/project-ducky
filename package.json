@@ -19,7 +19,8 @@
     "dotenv": "^16.4.5",
     "express": "^4.21.1",
     "minecraft-server-util": "^5.4.4",
-    "mysql2": "^3.11.4"
+    "mysql2": "^3.11.4",
+    "openai": "^4.77.0"
   },
   "devDependencies": {
     "@types/body-parser": "^1.19.5",

@@ -4,6 +4,7 @@ import "./events/ready";
 import "./events/interaction";
 import "./events/autoRole";
 import "./events/voiceChannelLive";
+import "./events/messageMention"; // Add this line
 
 // Login the bot
 client
