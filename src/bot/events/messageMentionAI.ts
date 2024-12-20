@@ -19,6 +19,9 @@ client.on("messageCreate", async (message: Message) => {
       .replace(`<@${client.user.id}>`, "")
       .trim();
 
+    // Send a loading message
+    const loadingMessage = await message.reply("Let me think... 🤔");
+
     try {
       // Call OpenAI API
       const response = await openai.chat.completions.create({
@@ -36,10 +39,14 @@ client.on("messageCreate", async (message: Message) => {
       const reply =
         response.choices[0]?.message?.content ||
         "I couldn't come up with a response.";
-      await message.reply(reply);
+
+      // Edit the loading message with the AI's reply
+      await loadingMessage.edit(reply);
     } catch (error) {
       console.error("Error with OpenAI API:", error);
-      await message.reply(
+
+      // Edit the loading message to indicate an error
+      await loadingMessage.edit(
         "Sorry, I had trouble processing that. Please try again later!"
       );
     }
