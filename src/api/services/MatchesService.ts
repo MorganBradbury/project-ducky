@@ -71,40 +71,37 @@ export const startMatch = async (matchId: string) => {
 };
 
 export const endMatch = async (matchId: string) => {
-  setTimeout(async () => {
-    console.log("Processing endMatch()", matchId);
+  console.log("Processing endMatch()", matchId);
 
-    // Stop the worker associated with this matchId
-    if (workers[matchId]) {
-      workers[matchId].postMessage({ type: "stop" });
-      workers[matchId].terminate(); // Clean up worker resources
-      delete workers[matchId]; // Remove worker from storage
-      console.log("Worker stopped for matchId:", matchId);
-    }
+  // Stop the worker associated with this matchId
+  if (workers[matchId]) {
+    workers[matchId].postMessage({ type: "stop" });
+    workers[matchId].terminate(); // Clean up worker resources
+    delete workers[matchId]; // Remove worker from storage
+    console.log("Worker stopped for matchId:", matchId);
+  }
 
-    let match = await getMatchDataFromDb(matchId);
+  let match = await getMatchDataFromDb(matchId);
 
-    if (!match) {
-      console.log("No match data found from DB", match);
-      return;
-    }
+  if (!match) {
+    console.log("No match data found from DB", match);
+    return;
+  }
 
-    await sendMatchFinishNotification(match);
-    await runEloUpdate(match.trackedTeam.trackedPlayers);
+  if (match.voiceChannel?.id) {
+    await updateVoiceChannelName(
+      match.voiceChannel.id,
+      `${ChannelIcons.Active} ${match.voiceChannel.name}`
+    );
+  }
 
-    if (match.voiceChannel?.liveScoresChannelId) {
-      await deleteVoiceChannel(match.voiceChannel?.liveScoresChannelId);
-    }
+  if (match.voiceChannel?.liveScoresChannelId) {
+    await deleteVoiceChannel(match.voiceChannel?.liveScoresChannelId);
+  }
 
-    if (match.voiceChannel?.id) {
-      await updateVoiceChannelName(
-        match.voiceChannel.id,
-        `${ChannelIcons.Active} ${match.voiceChannel.name}`
-      );
-    }
-
-    await markMatchComplete(matchId);
-  }, 2500);
+  await sendMatchFinishNotification(match);
+  await runEloUpdate(match.trackedTeam.trackedPlayers);
+  await markMatchComplete(matchId);
 };
 
 export const cancelMatch = async (matchId: string) => {
