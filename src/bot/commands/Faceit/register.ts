@@ -29,7 +29,7 @@ export const registerTrackingCommand = {
           faceitName,
           player.faceitElo,
           player.gamePlayerId,
-          player.faceitId
+          player.id
         ).then(async () => {
           //@ts-ignore
           await updateNickname(interaction.member, player);

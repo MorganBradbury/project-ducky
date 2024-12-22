@@ -36,7 +36,6 @@ class FaceitApiClient {
       gamePlayerId: response.data.games.cs2.game_player_id,
       skillLevel: response.data.games.cs2.skill_level,
       id: response.data.player_id,
-      faceitId: response.data.faceit_id,
     };
   }
 
