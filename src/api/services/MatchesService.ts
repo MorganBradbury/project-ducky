@@ -21,74 +21,57 @@ import { ChannelIcons } from "../../constants";
 
 let workers: Record<string, Worker> = {};
 
-const checkVoiceId = (voiceChannelId: string) =>
-  voiceChannelId != undefined &&
-  voiceChannelId != "No channel found" &&
-  voiceChannelId != "Error finding channel" &&
-  voiceChannelId != null;
-
 export const startMatch = async (matchId: string) => {
   console.log("Processing startMatch()", matchId);
 
-  const matchAlreadyExists = await checkMatchExists(matchId);
-  if (matchAlreadyExists) {
+  const doesMatchExist = await checkMatchExists(matchId);
+  if (doesMatchExist) {
     console.log(`Match ${matchId} already exists in DB.`);
     return;
   }
+
   // Retrieve initial match data from FACEIT API.
-  let matchData = await FaceitService.getMatchDetails(matchId);
-  if (!matchData) {
-    console.log(`No match data found for ${matchId} from FACEIT API.`);
+  let match = await FaceitService.getMatch(matchId);
+
+  if (!match) {
+    console.log(`No Match or players found for ${matchId}`);
     return;
   }
 
-  const { matchingPlayers, voiceChannelId, gamersVcName } = matchData;
-  if (matchingPlayers.length == 0) {
-    console.log(
-      `No matching players found for match: ${matchId} from FACEIT API.`
+  // Stack is in the discord. Change discord to live state.
+  if (match?.voiceChannel) {
+    await updateVoiceChannelName(
+      match.voiceChannel.id,
+      `${ChannelIcons.Active} ${match.voiceChannel.name} [LIVE]`
     );
-    return;
-  }
 
-  if (voiceChannelId && checkVoiceId(voiceChannelId)) {
-    await updateVoiceChannelName(voiceChannelId, gamersVcName || "CS", true);
-
-    // Remove both emojis from gamersVcName
-    const sanitizedGamersVcName = gamersVcName?.replace(/[🟢🟠]/g, "").trim();
-
-    const activeScoresChannelId = await createNewVoiceChannel(
-      `🟢 (${sanitizedGamersVcName}) 0:0`,
+    const liveScoresChannelId = await createNewVoiceChannel(
+      `${ChannelIcons.Active} (${match.voiceChannel.name}) 0:0`,
       config.VC_ACTIVE_SCORES_CATEGORY_ID
     );
 
-    matchData = {
-      ...matchData,
-      activeScoresChannelId: activeScoresChannelId || "",
-      currentResult: "0:0",
-    };
-
-    // Determine the absolute path to the worker file
-    const workerPath = path.resolve(__dirname, "../worker.js");
-    console.log(`Starting worker at path: ${workerPath}`);
+    if (liveScoresChannelId) {
+      match = {
+        ...match,
+        voiceChannel: {
+          ...match.voiceChannel,
+          liveScoresChannelId: liveScoresChannelId,
+        },
+      };
+    }
 
     // Start the worker after creating the active scores channel
-    const worker = new Worker(workerPath);
+    const worker = new Worker(path.resolve(__dirname, "../worker.js"));
     worker.postMessage({ type: "start", matchId: matchId });
     workers[matchId] = worker; // Store worker by matchId
   }
 
-  await insertMatch(matchData);
+  await insertMatch(match);
 };
 
 export const endMatch = async (matchId: string) => {
   setTimeout(async () => {
     console.log("Processing endMatch()", matchId);
-
-    const matchAlreadyExists = await checkMatchExists(matchId);
-    if (!matchAlreadyExists) {
-      console.log(`No match found for ${matchId} from the DB`);
-      return;
-    }
 
     // Stop the worker associated with this matchId
     if (workers[matchId]) {
@@ -98,48 +81,25 @@ export const endMatch = async (matchId: string) => {
       console.log("Worker stopped for matchId:", matchId);
     }
 
-    let matchData = await getMatchDataFromDb(matchId);
+    let match = await getMatchDataFromDb(matchId);
 
-    console.log(`Test querying DB Data: ${matchId}`, matchData);
-
-    if (!matchData) {
-      console.log("No match data found from DB", matchData);
+    if (!match) {
+      console.log("No match data found from DB", match);
       return;
     }
 
-    if (matchData?.isComplete == true) {
-      console.log("Match is already finished: ", matchData);
-      return;
+    await sendMatchFinishNotification(match);
+    await runEloUpdate(match.trackedTeam.trackedPlayers);
+
+    if (match.voiceChannel?.liveScoresChannelId) {
+      await deleteVoiceChannel(match.voiceChannel?.liveScoresChannelId);
     }
 
-    const finalMatchDetails = await FaceitService.getMatchScore(
-      matchId,
-      matchData?.teamId
-    );
-
-    if (finalMatchDetails) {
-      matchData = {
-        ...matchData,
-        results: finalMatchDetails,
-      };
-    }
-
-    const {
-      matchingPlayers,
-      voiceChannelId,
-      activeScoresChannelId,
-      gamersVcName,
-    } = matchData;
-
-    await sendMatchFinishNotification(matchData);
-    await runEloUpdate(matchingPlayers);
-
-    if (activeScoresChannelId) {
-      await deleteVoiceChannel(activeScoresChannelId);
-    }
-
-    if (voiceChannelId && checkVoiceId(voiceChannelId)) {
-      await updateVoiceChannelName(voiceChannelId, gamersVcName || "CS", false);
+    if (match.voiceChannel?.id) {
+      await updateVoiceChannelName(
+        match.voiceChannel.id,
+        `${ChannelIcons.Active} ${match.voiceChannel.name}`
+      );
     }
 
     await markMatchComplete(matchId);
@@ -149,39 +109,26 @@ export const endMatch = async (matchId: string) => {
 export const cancelMatch = async (matchId: string) => {
   console.log("Processing cancelMatch()", matchId);
 
-  const matchAlreadyExists = await checkMatchExists(matchId);
-  if (!matchAlreadyExists) {
-    console.log(`No match found for ${matchId} from the DB`);
+  let match = await getMatchDataFromDb(matchId);
+
+  console.log(`Test querying DB Data: ${matchId}`, match);
+
+  if (!match) {
+    console.log("No match data found from DB", match);
     return;
   }
-
-  let matchData = await getMatchDataFromDb(matchId);
-
-  console.log(`Test querying DB Data: ${matchId}`, matchData);
-
-  if (!matchData) {
-    console.log("No match data found from DB", matchData);
-    return;
-  }
-
-  if (matchData?.isComplete === true) {
-    console.log("Match is already finished: ", matchData);
-    return;
-  }
-
-  const { voiceChannelId, activeScoresChannelId } = matchData;
 
   // Delete the scores channel if it exists
-  if (activeScoresChannelId) {
-    await deleteVoiceChannel(activeScoresChannelId);
+  if (match.voiceChannel?.liveScoresChannelId) {
+    await deleteVoiceChannel(match.voiceChannel?.liveScoresChannelId);
   }
 
   // Handle moving users from the old voice channel to a new one
-  if (voiceChannelId && checkVoiceId(voiceChannelId)) {
+  if (match.voiceChannel?.id) {
     try {
       // Create a new voice channel and get its ID
       const newChannelId = await createNewVoiceChannel(
-        `${ChannelIcons.Inactive} ${matchData?.gamersVcName}` || "CS",
+        `${ChannelIcons.Active} ${match.voiceChannel.name}`,
         config.VC_GAMES_CATEGORY_ID
       );
 
@@ -191,10 +138,14 @@ export const cancelMatch = async (matchId: string) => {
       }
 
       // Get the list of users in the old voice channel
-      const membersInChannel = await getUsersInVoiceChannel(voiceChannelId);
+      const membersInChannel = await getUsersInVoiceChannel(
+        match.voiceChannel.id
+      );
 
       if (membersInChannel.length === 0) {
-        console.log(`No members in the voiceChannelId: ${voiceChannelId}`);
+        console.log(
+          `No members in the voiceChannelId: ${match.voiceChannel.id}`
+        );
       }
 
       // Move each user to the new voice channel
@@ -203,10 +154,10 @@ export const cancelMatch = async (matchId: string) => {
       }
 
       // Delete the old voice channel
-      await deleteVoiceChannel(voiceChannelId);
+      await deleteVoiceChannel(match.voiceChannel.id);
 
       console.log(
-        `Moved users from voiceChannelId: ${voiceChannelId} to newChannelId: ${newChannelId}`
+        `Moved users from voiceChannelId: ${match.voiceChannel.id} to newChannelId: ${newChannelId}`
       );
     } catch (error) {
       console.error("Error while moving users to a new channel:", error);

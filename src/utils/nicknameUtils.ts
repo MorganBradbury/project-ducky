@@ -1,5 +1,5 @@
 import { GuildMember } from "discord.js";
-import { FaceitPlayer } from "../types/FaceitPlayer";
+import { Player } from "../types/Faceit/Player";
 
 /**
  * Removes any existing FACEIT level or ELO tag (e.g., "[...]" patterns) from a nickname.
@@ -26,7 +26,7 @@ export function isNickname(identifier: string | number): identifier is string {
  */
 export async function updateNickname(
   member: GuildMember,
-  player: FaceitPlayer | null
+  player: Player | null
 ): Promise<void> {
   if (!player) return;
 
@@ -34,7 +34,7 @@ export async function updateNickname(
   const cleanName = removeExistingTag(currentName);
 
   // Calculate the length of the clean name and the ELO to check if the total exceeds 32 characters
-  const eloTag = `[${player.faceit_elo}]`;
+  const eloTag = `[${player.faceitElo}]`;
   const potentialNickname = `${cleanName} ${eloTag}`;
 
   // If the nickname exceeds 32 characters, use the Discord username instead of the nickname

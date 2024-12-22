@@ -2,8 +2,8 @@ import { ChatInputCommandInteraction, GuildMember } from "discord.js"; // Use sp
 import { addUser } from "../../../db/commands";
 import { updateNickname } from "../../../utils/nicknameUtils";
 import { FaceitService } from "../../../api/services/FaceitService";
-import { FaceitPlayer } from "../../../types/FaceitPlayer";
 import { updateServerRoles } from "../../../api/services/DiscordService";
+import { Player } from "../../../types/Faceit/Player";
 
 export const registerTrackingCommand = {
   name: "ducky_track_elo",
@@ -21,17 +21,15 @@ export const registerTrackingCommand = {
     const faceitName = interaction.options.getString("faceit_username", true); // Now correctly typed
     const discordUsername = interaction.user.tag;
     try {
-      const player: FaceitPlayer | null = await FaceitService?.getPlayerData(
-        faceitName
-      );
+      const player: Player | null = await FaceitService?.getPlayer(faceitName);
 
       if (player) {
         await addUser(
           discordUsername,
           faceitName,
-          player.faceit_elo,
-          player.game_player_id,
-          player.player_id
+          player.faceitElo,
+          player.gamePlayerId,
+          player.gamePlayerId
         ).then(async () => {
           //@ts-ignore
           await updateNickname(interaction.member, player);

@@ -9,15 +9,16 @@ import {
   Role,
   ChannelType,
 } from "discord.js";
-import { MatchDetails } from "../../types/MatchDetails";
 import { SystemUser } from "../../types/SystemUser";
 import { FaceitService } from "./FaceitService";
-import { FaceitPlayer } from "../../types/FaceitPlayer";
 import axios from "axios";
 import { PermissionFlagsBits } from "discord.js";
 import { config } from "../../config";
 import { updateNickname } from "../../utils/nicknameUtils";
 import { updateUserElo } from "../../db/commands";
+import { Player } from "../../types/Faceit/Player";
+import { calculateEloDifference } from "../../utils/faceitHelper";
+import { Match } from "../../types/Faceit/Match";
 
 // Initialize the Discord client
 const client = new Client({
@@ -100,52 +101,49 @@ const sendEmbedMessage = async (embed: EmbedBuilder) => {
 };
 
 // Function to get the applicable voice channel based on matching players' usernames
-export const getApplicableVoiceChannel = async (
+export const getMatchVoiceChannel = async (
   matchingPlayers: SystemUser[]
-): Promise<{ channelId: string; channelName: string } | string> => {
-  try {
-    const guild = await client.guilds.fetch(config.GUILD_ID);
-    const channels = await guild.channels.fetch();
+): Promise<{
+  voiceChannel: { id: string; name: string; liveScoresChannelId: string };
+} | null> => {
+  const guild = await client.guilds.fetch(config.GUILD_ID);
+  const channels = await guild.channels.fetch();
 
-    for (const [channelId, channel] of channels) {
-      if (channel instanceof VoiceChannel) {
-        for (const member of channel.members.values()) {
-          if (
-            matchingPlayers.some(
-              (player) => player.discordUsername === member.user.username
-            )
-          ) {
-            return { channelId, channelName: channel.name };
-          }
+  for (const [channelId, channel] of channels) {
+    if (channel instanceof VoiceChannel) {
+      for (const member of channel.members.values()) {
+        if (
+          matchingPlayers.some(
+            (player) => player.discordUsername === member.user.username
+          )
+        ) {
+          return {
+            voiceChannel: {
+              id: channelId,
+              name: channel.name.replace(/[🟢🟠]/g, "").trim(),
+              liveScoresChannelId: "N/A",
+            },
+          };
         }
       }
     }
-
-    return "No channel found";
-  } catch (error) {
-    console.error("Error finding applicable voice channel:", error);
-    return "Error finding channel";
   }
+
+  return null;
 };
 
 // Function to update voice channel name with rate-limit checking
 export const updateVoiceChannelName = async (
   voiceChannelId: string,
-  gamersVcName: string,
-  matchOngoing: boolean
+  voiceChannelName: string
 ) => {
   try {
     const guild = await client.guilds.fetch(config.GUILD_ID);
     const channel = await guild.channels.fetch(voiceChannelId);
 
     if (channel instanceof VoiceChannel) {
-      const newName =
-        matchOngoing && channel.members.size > 0
-          ? `${gamersVcName} [LIVE]`
-          : `${gamersVcName}`;
-
       const url = `https://discord.com/api/v10/channels/${voiceChannelId}`;
-      const payload = { name: newName };
+      const payload = { name: voiceChannelName };
 
       try {
         const response = await axios.patch(url, payload, {
@@ -154,7 +152,7 @@ export const updateVoiceChannelName = async (
             "Content-Type": "application/json",
           },
         });
-        console.log(`Updated voice channel name to: ${newName}`);
+        console.log(`Updated voice channel name to: ${voiceChannelName}`);
       } catch (error: any) {
         if (error.response?.status === 429) {
           const retryAfter = error.response.headers["retry-after"];
@@ -208,39 +206,41 @@ export const deleteVoiceChannel = async (voiceChannelId: string) => {
   }
 };
 
-export const sendMatchFinishNotification = async (
-  matchDetails: MatchDetails
-) => {
+export const sendMatchFinishNotification = async (match: Match) => {
   try {
     const playerDetails = await Promise.all(
-      matchDetails.matchingPlayers.map(async (player) => {
-        const eloDifference = await FaceitService.calculateEloDifference(
+      match.trackedTeam.trackedPlayers.map(async (player) => {
+        const elo = await calculateEloDifference(
           player.previousElo,
           player.gamePlayerId
         );
-        return `**${player.faceitUsername}**: ${eloDifference || ""}`;
+        return `**${player.faceitUsername}**: **${elo?.operator}${elo?.difference}** (${elo?.newElo})`;
       })
     );
 
     // Determine win/loss based on finalScore or eloDifference
-    const finalScore = matchDetails.results?.finalScore;
-    const isWin =
-      finalScore !== undefined
-        ? matchDetails.results?.win
-        : playerDetails.some((detail) => detail.includes("+"));
+    const finalScore = await FaceitService.getMatchScore(
+      match.matchId,
+      match.trackedTeam.faction,
+      true
+    );
+    const didTeamWin = await FaceitService.getMatchResult(
+      match.matchId,
+      match.trackedTeam.faction
+    );
 
     const embed = new EmbedBuilder()
-      .setTitle(`🚨  Match finished update (${isWin ? "WIN" : "LOSS"})`)
-      .setColor(isWin ? "#00FF00" : "#FF0000")
+      .setTitle(`🚨  Match finished update (${didTeamWin ? "WIN" : "LOSS"})`)
+      .setColor(didTeamWin ? "#00FF00" : "#FF0000")
       .addFields(
-        { name: "Map", value: matchDetails.mapName },
+        { name: "Map", value: match.mapName },
         {
           name: "Match Link",
-          value: `[Click here](https://www.faceit.com/en/cs2/room/${matchDetails?.matchId})`,
+          value: `[Click here](https://www.faceit.com/en/cs2/room/${match?.matchId})`,
         },
         {
           name: "Match Result",
-          value: `${finalScore || "N/A"} (${isWin ? "WIN" : "LOSS"})`,
+          value: `${finalScore || "N/A"} (${didTeamWin ? "WIN" : "LOSS"})`,
         },
         {
           name: "Players",
@@ -330,11 +330,11 @@ export const runEloUpdate = async (users: SystemUser[]) => {
         const { discordUsername, previousElo, gamePlayerId } = user;
 
         try {
-          const player: FaceitPlayer | null = await FaceitService.getPlayerData(
+          const player: Player | null = await FaceitService.getPlayer(
             gamePlayerId
           );
 
-          if (!player || player.faceit_elo === previousElo) return; // Skip unchanged users
+          if (!player || player.faceitElo === previousElo) return; // Skip unchanged users
 
           const member =
             guild.members.cache.find((m) => m.user.tag === discordUsername) ??
@@ -346,7 +346,7 @@ export const runEloUpdate = async (users: SystemUser[]) => {
 
           await Promise.all([
             updateNickname(member, player),
-            updateUserElo(user.userId, player.faceit_elo),
+            updateUserElo(user.userId, player.faceitElo),
             updateServerRoles(member, player),
           ]);
         } catch (error) {
@@ -361,16 +361,9 @@ export const runEloUpdate = async (users: SystemUser[]) => {
   }
 };
 
-/**
- * Updates a member's roles based on their Faceit skill level.
- * Removes any roles containing "Level" and assigns the appropriate "Level [skill_level]" role.
- *
- * @param {GuildMember} member - The Discord guild member to update.
- * @param {FaceitPlayer} player - The Faceit player data containing the skill level.
- */
 export const updateServerRoles = async (
   member: GuildMember,
-  player: FaceitPlayer
+  player: Player
 ) => {
   try {
     if (!member || !player) {
@@ -379,7 +372,7 @@ export const updateServerRoles = async (
     }
 
     const guild = await client.guilds.fetch(config.GUILD_ID); // Cache the guild object
-    const skillLevelRoleName = `Level ${player.skill_level}`;
+    const skillLevelRoleName = `Level ${player.skillLevel}`;
 
     // Fetch all roles in the guild
     const roles = await guild.roles.fetch();
@@ -606,6 +599,23 @@ export async function resetVoiceChannelStates(): Promise<void> {
     console.error("Error updating voice channels:", error);
   }
 }
+
+export const getChannelNameById = async (
+  channelId: string
+): Promise<string | null> => {
+  try {
+    const guild = await client.guilds.fetch(config.GUILD_ID);
+    const channel = await guild.channels.fetch(channelId);
+    if (channel) {
+      return channel.name;
+    }
+
+    return null;
+  } catch (error) {
+    console.error("Error fetching channel name by ID:", error);
+    return null;
+  }
+};
 
 const loginBot = async () => {
   try {

@@ -2,7 +2,7 @@ import { config } from "../config";
 import { SystemUser } from "../types/SystemUser";
 import mysql, { RowDataPacket } from "mysql2/promise";
 import { SQL_QUERIES } from "./queries";
-import { MatchDetails } from "../types/MatchDetails";
+import { Match } from "../types/Faceit/Match";
 
 // Create a connection pool
 const pool = mysql.createPool({ ...config.MYSQL });
@@ -84,55 +84,27 @@ export const deleteUser = async (discordUsername: string): Promise<boolean> => {
   });
 };
 
-export const insertMatch = async (
-  matchDetails: MatchDetails
-): Promise<void> => {
-  // Extract values from the matchDetails object
-  const {
-    matchId,
-    matchingPlayers,
-    mapName,
-    teamId,
-    voiceChannelId,
-    activeScoresChannelId,
-    currentResult,
-    gamersVcName,
-  } = matchDetails;
-
+export const insertMatch = async (match: Match): Promise<void> => {
   try {
     // Perform the database insert
     await pool.query(SQL_QUERIES.INSERT_MATCH, [
-      matchId,
-      JSON.stringify(matchingPlayers), // Store gamePlayerIds as JSON string
-      false, // Assuming this is a placeholder for whether the match was finished or not
-      mapName, // Map selected for the match
-      teamId, // Store teamId
-      voiceChannelId,
-      activeScoresChannelId,
-      currentResult,
-      gamersVcName,
+      match.matchId,
+      JSON.stringify(match.trackedTeam.trackedPlayers), // Store gamePlayerIds as JSON string
+      match.mapName, // Map selected for the match
+      match.trackedTeam.teamId, // Store teamId
+      match.trackedTeam.faction,
+      match.voiceChannel?.id,
+      match.voiceChannel?.name,
+      match.voiceChannel?.liveScoresChannelId,
     ]);
-    console.log(`Match ${matchId} inserted successfully.`);
+    console.log(`Match ${match.matchId} inserted successfully.`);
   } catch (error) {
-    console.error(`Error inserting match ${matchId}:`, error);
+    console.error(`Error inserting match ${match.matchId}:`, error);
   }
 };
 
 export const markMatchComplete = async (matchId: string): Promise<void> => {
   await pool.query(SQL_QUERIES.DELETE_MATCH, [matchId]);
-};
-
-export const isMatchComplete = async (matchId: string): Promise<boolean> => {
-  return useConnection(async (connection) => {
-    const [rows] = await connection.query<any[]>(
-      SQL_QUERIES.GET_MATCH_COMPLETE_STATUS,
-      [matchId]
-    );
-    if (!rows) {
-      return false;
-    }
-    return rows[0]?.is_complete === 1; // Returns true if a record is found
-  });
 };
 
 export const checkMatchExists = async (matchId: string): Promise<boolean> => {
@@ -147,7 +119,7 @@ export const checkMatchExists = async (matchId: string): Promise<boolean> => {
 
 export const getMatchDataFromDb = async (
   matchId: string
-): Promise<MatchDetails | null> => {
+): Promise<Match | null> => {
   return useConnection(async (connection) => {
     const [rows] = await connection.query<RowDataPacket[]>(
       SQL_QUERIES.SELECT_MATCH_DETAILS, // Use the query from SQL_QUERIES
@@ -155,33 +127,38 @@ export const getMatchDataFromDb = async (
     );
 
     if (rows.length > 0) {
-      const selectedRow = rows[0];
-      return {
-        matchId: selectedRow?.match_id,
-        mapName: selectedRow?.map_name,
-        teamId: selectedRow?.teamId,
-        voiceChannelId: selectedRow?.voiceChannelId,
-        matchingPlayers: selectedRow?.game_player_ids,
-        activeScoresChannelId: selectedRow?.active_scores_channel_id,
-        isComplete: selectedRow?.is_complete,
-        currentResult: selectedRow?.current_score_live,
-        gamersVcName: selectedRow?.gamers_vc_name,
+      const match = rows[0];
+      //matchId, trackedPlayers, mapName, teamId, faction, voiceChannelId, voiceChannelName, liveScoresChannelId
+
+      const returnedMatch: Match = {
+        matchId: match?.matchId,
+        mapName: match?.mapName,
+        trackedTeam: {
+          teamId: match?.teamId,
+          faction: match?.faction,
+          trackedPlayers: match?.trackedPlayers,
+        },
+        voiceChannel: {
+          id: match?.voiceChannelId,
+          name: match?.voiceChannelName,
+          liveScoresChannelId: match?.liveScoresChannelId,
+        },
       };
+      return returnedMatch;
     }
 
     return null; // Return null if no match is found
   });
 };
 
-export const updateActiveScoresChannelId = async (
+export const updateLiveScoresChannelIdForMatch = async (
   matchId: string,
-  newChannelId: string,
-  activeMatchLiveScore: string
+  newChannelId: string
 ): Promise<void> => {
   return useConnection(async (connection) => {
     const [result] = await connection.query<RowDataPacket[]>(
       SQL_QUERIES.UPDATE_ACTIVE_SCORES_CHANNEL_ID,
-      [newChannelId, activeMatchLiveScore, matchId]
+      [newChannelId, matchId]
     );
 
     if ((result as any).affectedRows > 0) {
@@ -193,3 +170,28 @@ export const updateActiveScoresChannelId = async (
     }
   });
 };
+
+export const recreateMatchesTable = async () => {
+  const pool = mysql.createPool({ ...config.MYSQL });
+
+  const query = `
+    DROP TABLE IF EXISTS matches;
+    CREATE TABLE matches (
+      matchId VARCHAR(255) NOT NULL PRIMARY KEY,
+      trackedPlayers JSON NOT NULL,
+      mapName VARCHAR(255) NOT NULL,
+      teamId VARCHAR(255) NOT NULL,
+      faction VARCHAR(255) NOT NULL,
+      voiceChannelId VARCHAR(255),
+      voiceChannelName VARCHAR(255),
+      liveScoresChannelId VARCHAR(255)
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+  `;
+
+  await pool.query(query);
+  console.log("Matches table recreated successfully.");
+};
+
+recreateMatchesTable().catch((err) => {
+  console.error("Error recreating matches table:", err);
+});

@@ -17,34 +17,29 @@ export const SQL_QUERIES = {
     WHERE discordUsername = ?
   `,
   INSERT_MATCH: `
-  INSERT INTO matches_played (match_id, game_player_ids, is_complete, map_name, teamId, voiceChannelId, active_scores_channel_id, current_score_live, gamers_vc_name)
-  VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
-  ON DUPLICATE KEY UPDATE match_id = match_id
+  INSERT INTO matches (matchId, trackedPlayers, mapName, teamId, faction, voiceChannelId, voiceChannelName, liveScoresChannelId)
+  VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+  ON DUPLICATE KEY UPDATE matchId = matchId
 `,
   DELETE_MATCH: `
-  DELETE FROM matches_played
-  WHERE match_id = ?
+  DELETE FROM matches
+  WHERE matchId = ?
   `,
 
-  GET_MATCH_COMPLETE_STATUS: `
-  SELECT is_complete
-  FROM matches_played
-  WHERE match_id = ?;
-`,
   CHECK_MATCH_EXISTS: `
   SELECT 1
-  FROM matches_played
-  WHERE match_id = ?
+  FROM matches
+  WHERE matchId = ?
   LIMIT 1
 `,
   SELECT_MATCH_DETAILS: `
-  SELECT * FROM matches_played
-  WHERE match_id = ?
+  SELECT * FROM matches
+  WHERE matchId = ?
   LIMIT 1
 `,
   UPDATE_ACTIVE_SCORES_CHANNEL_ID: `
-    UPDATE matches_played
-    SET active_scores_channel_id = ?, current_score_live = ?
-    WHERE match_id = ?
+    UPDATE matches
+    SET liveScoresChannelId = ?
+    WHERE matchId = ?
   `,
 };
