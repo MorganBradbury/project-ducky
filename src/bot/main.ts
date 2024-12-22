@@ -5,11 +5,13 @@ import "./events/interaction";
 import "./events/autoRole";
 import "./events/voiceChannelLive";
 import "./events/messageMentionAI"; // Add this line
+import { recreateMatchesTable } from "../db/commands";
 
 // Login the bot
 client
   .login(config.DISCORD_BOT_TOKEN)
   .then(() => {
+    recreateMatchesTable();
     console.log("Bot logged in and running!");
   })
   .catch((error) => {

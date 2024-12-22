@@ -3,15 +3,15 @@ import { cancelMatch, endMatch, startMatch } from "../services/MatchesService"; 
 import {
   createNewVoiceChannel,
   deleteVoiceChannel,
+  getChannelNameById,
 } from "../services/DiscordService";
-import { randomUUID } from "crypto";
 import { FaceitService } from "../services/FaceitService";
 import {
-  checkMatchExists,
   getMatchDataFromDb,
-  updateActiveScoresChannelId,
+  updateLiveScoresChannelIdForMatch,
 } from "../../db/commands";
 import { config } from "../../config";
+import { ChannelIcons } from "../../constants";
 
 enum AcceptedEventTypes {
   match_ready = "match_status_ready",
@@ -75,59 +75,40 @@ export const updateLiveScores = async (
 ): Promise<void> => {
   const matchId = req?.body?.matchId;
 
-  const doesMatchExist = await checkMatchExists(matchId);
-  if (!doesMatchExist) {
-    console.log(`No match found for ${matchId} from the DB`);
+  const match = await getMatchDataFromDb(matchId);
+  if (!match || !match.voiceChannel?.liveScoresChannelId) {
+    console.log(
+      `No match data found for ${matchId} in DB or no live scores channel ID exists.`
+    );
     return;
   }
 
-  let matchData = await FaceitService.getMatchDetails(matchId);
-  if (!matchData) {
-    console.log(`No match data found for ${matchId} from FACEIT API.`);
-    return;
-  }
-
-  if (matchData?.isComplete) {
-    console.log(`Match is finished. ${matchData}`);
-    return;
-  }
-
-  const activeMatchLiveScore = await FaceitService.getActiveMatchScore(
+  const activeMatchLiveScore = await FaceitService.getMatchScore(
     matchId,
-    matchData?.teamId
+    match?.trackedTeam.faction,
+    false
   );
 
-  const matchFromDb = await getMatchDataFromDb(matchId);
+  const scoresChannelName = await getChannelNameById(
+    match.voiceChannel.liveScoresChannelId
+  );
+  const currentScore = scoresChannelName?.split(" ")[2];
+  const actualScore = activeMatchLiveScore.join(":");
 
-  if (
-    !matchFromDb ||
-    !matchFromDb?.activeScoresChannelId ||
-    !activeMatchLiveScore
-  ) {
-    console.log("No match data found for", matchId);
-  }
+  if (currentScore !== actualScore) {
+    await deleteVoiceChannel(match.voiceChannel?.liveScoresChannelId);
 
-  if (activeMatchLiveScore != matchFromDb?.currentResult) {
-    if (matchFromDb?.activeScoresChannelId) {
-      await deleteVoiceChannel(matchFromDb?.activeScoresChannelId);
-      const activeScore =
-        activeMatchLiveScore != null ? activeMatchLiveScore : "0:0";
-      const newChannelName = `🟢 (${matchFromDb?.gamersVcName
-        ?.replace(/[🟢🟠]/g, "")
-        .trim()}) ${activeScore}`;
+    const newChannelName = `${ChannelIcons.Active} (${
+      match.voiceChannel.name
+    }) ${actualScore || "0:0"}`;
+    const newLiveScoresChannel = await createNewVoiceChannel(
+      newChannelName,
+      config.VC_ACTIVE_SCORES_CATEGORY_ID,
+      true
+    );
 
-      const newActiveScoresChannel = await createNewVoiceChannel(
-        newChannelName,
-        config.VC_ACTIVE_SCORES_CATEGORY_ID,
-        true
-      );
-
-      await updateActiveScoresChannelId(
-        matchId,
-        //@ts-ignore
-        newActiveScoresChannel,
-        activeMatchLiveScore
-      );
+    if (newLiveScoresChannel) {
+      await updateLiveScoresChannelIdForMatch(matchId, newLiveScoresChannel);
     }
   }
 
