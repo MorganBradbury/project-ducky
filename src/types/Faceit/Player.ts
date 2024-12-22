@@ -4,4 +4,5 @@ export type Player = {
   faceitElo: number;
   skillLevel: number;
   id: string;
+  faceitId: string;
 };
