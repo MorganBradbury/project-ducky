@@ -94,8 +94,8 @@ class FaceitApiClient {
           "/"
         )
       : [
-          response.data.results.score.faction1,
-          response.data.results.score.faction2,
+          response.data.results?.score?.faction1,
+          response.data.results?.score?.faction2,
         ];
 
     return teamFaction === "faction2" ? scores.reverse() : scores;
