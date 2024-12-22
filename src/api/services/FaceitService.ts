@@ -33,7 +33,7 @@ class FaceitApiClient {
     return {
       faceitName: response.data.nickname,
       faceitElo: response.data.games.cs2.faceit_elo,
-      gamePlayerId: response.data.cs2.game_player_id,
+      gamePlayerId: response.data.games.cs2.game_player_id,
       skillLevel: response.data.games.cs2.skill_level,
       id: response.data.player_id,
     };
