@@ -57,6 +57,8 @@ class FaceitApiClient {
 
       const trackedTeamFaction = await getTeamFaction(response.data.teams);
       const trackedTeamPlayers = await getTrackedPlayers(response.data.teams);
+      console.log("trackedTeamFaction", trackedTeamFaction);
+      console.log("trackedTeamPlayers", trackedTeamPlayers);
 
       if (trackedTeamPlayers.length === 0) {
         return null;

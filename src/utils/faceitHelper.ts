@@ -3,15 +3,12 @@ import { getAllUsers } from "../db/commands";
 import { FaceitService } from "../api/services/FaceitService";
 
 export const getTrackedPlayers = async (teams: any): Promise<SystemUser[]> => {
-  console.log("teams", teams);
   const allTrackedUsers = await getAllUsers();
-  console.log("alltrackedusers", allTrackedUsers);
   const allMatchPlayers = [...teams.faction1.roster, ...teams.faction2.roster];
-  console.log("allmatchplayers", allMatchPlayers);
   const trackedPlayers = allTrackedUsers.filter((user: SystemUser) =>
-    allMatchPlayers.some(
-      (matchPlayer) => user.faceitId === matchPlayer.player_id
-    )
+    allMatchPlayers.some((matchPlayer) => {
+      user.faceitId === matchPlayer.player_id;
+    })
   );
 
   return trackedPlayers;
