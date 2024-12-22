@@ -6,9 +6,9 @@ export const getTrackedPlayers = async (teams: any): Promise<SystemUser[]> => {
   const allTrackedUsers = await getAllUsers();
   const allMatchPlayers = [...teams.faction1.roster, ...teams.faction2.roster];
   const trackedPlayers = allTrackedUsers.filter((user: SystemUser) =>
-    allMatchPlayers.some((matchPlayer) => {
-      user.faceitId === matchPlayer.player_id;
-    })
+    allMatchPlayers.some(
+      (matchPlayer) => user.faceitId === matchPlayer.player_id
+    )
   );
 
   return trackedPlayers;
