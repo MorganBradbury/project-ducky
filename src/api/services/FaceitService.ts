@@ -97,6 +97,9 @@ class FaceitApiClient {
         ];
 
     console.log("Log for when match starts", scores);
+    if (scores.length === 0) {
+      return [0, 0];
+    }
 
     return teamFaction === "faction2" ? scores.reverse() : scores;
   }
