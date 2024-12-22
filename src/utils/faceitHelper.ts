@@ -4,7 +4,9 @@ import { FaceitService } from "../api/services/FaceitService";
 
 export const getTrackedPlayers = async (teams: any): Promise<SystemUser[]> => {
   const allTrackedUsers = await getAllUsers();
+  console.log("ALL TRACKED USERS", allTrackedUsers);
   const allMatchPlayers = [...teams.faction1.roster, ...teams.faction2.roster];
+  console.log("ALL MATCH PLAYERS", allMatchPlayers);
   const trackedPlayers = allTrackedUsers.filter((user: SystemUser) =>
     allMatchPlayers.some(
       (matchPlayer) => user.faceitId === matchPlayer.player_id
