@@ -170,37 +170,3 @@ export const updateLiveScoresChannelIdForMatch = async (
     }
   });
 };
-
-export const recreateMatchesTable = async () => {
-  const pool = mysql.createPool({ ...config.MYSQL });
-
-  // Separate the DROP and CREATE queries
-  const dropTableQuery = `
-    DROP TABLE IF EXISTS matches;
-  `;
-
-  const createTableQuery = `
-    CREATE TABLE matches (
-      matchId VARCHAR(255) NOT NULL PRIMARY KEY,
-      trackedPlayers JSON NOT NULL,
-      mapName VARCHAR(255) NOT NULL,
-      teamId VARCHAR(255) NOT NULL,
-      faction VARCHAR(255) NOT NULL,
-      voiceChannelId VARCHAR(255),
-      voiceChannelName VARCHAR(255),
-      liveScoresChannelId VARCHAR(255)
-    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
-  `;
-
-  try {
-    // Execute DROP TABLE first
-    await pool.query(dropTableQuery);
-    console.log("Dropped existing matches table.");
-
-    // Execute CREATE TABLE next
-    await pool.query(createTableQuery);
-    console.log("Matches table recreated successfully.");
-  } catch (err) {
-    console.error("Error recreating matches table:", err);
-  }
-};
