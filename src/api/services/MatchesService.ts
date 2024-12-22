@@ -32,7 +32,7 @@ export const startMatch = async (matchId: string) => {
 
   // Retrieve initial match data from FACEIT API.
   let match = await FaceitService.getMatch(matchId);
-
+  console.log("match loaded in from api", match);
   if (!match) {
     console.log(`No Match or players found for ${matchId}`);
     return;
