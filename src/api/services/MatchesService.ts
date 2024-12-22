@@ -11,6 +11,7 @@ import {
   deleteVoiceChannel,
   getUsersInVoiceChannel,
   moveUserToChannel,
+  resetVoiceChannelStates,
   runEloUpdate,
   sendMatchFinishNotification,
   updateVoiceChannelName,
@@ -155,6 +156,8 @@ export const cancelMatch = async (matchId: string) => {
 
       // Delete the old voice channel
       await deleteVoiceChannel(match.voiceChannel.id);
+
+      await resetVoiceChannelStates();
 
       console.log(
         `Moved users from voiceChannelId: ${match.voiceChannel.id} to newChannelId: ${newChannelId}`
