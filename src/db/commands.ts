@@ -174,8 +174,12 @@ export const updateLiveScoresChannelIdForMatch = async (
 export const recreateMatchesTable = async () => {
   const pool = mysql.createPool({ ...config.MYSQL });
 
-  const query = `
+  // Separate the DROP and CREATE queries
+  const dropTableQuery = `
     DROP TABLE IF EXISTS matches;
+  `;
+
+  const createTableQuery = `
     CREATE TABLE matches (
       matchId VARCHAR(255) NOT NULL PRIMARY KEY,
       trackedPlayers JSON NOT NULL,
@@ -188,10 +192,15 @@ export const recreateMatchesTable = async () => {
     ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
   `;
 
-  await pool.query(query);
-  console.log("Matches table recreated successfully.");
-};
+  try {
+    // Execute DROP TABLE first
+    await pool.query(dropTableQuery);
+    console.log("Dropped existing matches table.");
 
-recreateMatchesTable().catch((err) => {
-  console.error("Error recreating matches table:", err);
-});
+    // Execute CREATE TABLE next
+    await pool.query(createTableQuery);
+    console.log("Matches table recreated successfully.");
+  } catch (err) {
+    console.error("Error recreating matches table:", err);
+  }
+};
