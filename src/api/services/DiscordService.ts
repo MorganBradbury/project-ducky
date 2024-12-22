@@ -240,7 +240,7 @@ export const sendMatchFinishNotification = async (match: Match) => {
         },
         {
           name: "Match Result",
-          value: `${finalScore.join("/") || "N/A"} (${
+          value: `${finalScore.join(" / ") || "N/A"} (${
             didTeamWin ? "WIN" : "LOSS"
           })`,
         },
