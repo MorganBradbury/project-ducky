@@ -32,14 +32,15 @@ client.on("guildMemberAdd", async (member: GuildMember) => {
     // Public welcome message
     const totalUsers = member.guild.memberCount;
     await generalChannel.send(
-      `Welcome, <@${member.user.id}>. You are duck #${totalUsers}.`
+      `Welcome, <@${member.user.id}>. You are duck #${totalUsers} 👋`
     );
 
     // Private welcome message with tagging the user
     await member.send(
-      `Welcome <@${member.user.id}>, I'm Duckybot. \n\n To ensure your elo is tracked in your username, please type **/ducky_track_elo [FACEIT NAME]** into the counter-strike chat in Duckclub. Please ensure you put it correctly. It is **CASE SENSITIVE**.\n\n` +
-        `If you need to use any other commands such as /leaderboard, please type /help and you will receive a summary of all commands available.\n\n` +
-        `If you need anything, please contact a VIP 🙂`
+      `Hello <@${member.user.id}>! I'm Duckybot 👋\n\n` +
+        `To track your elo in your username, type **/ducky_track_elo [FACEIT NAME]** in the Counter-Strike chat in Duckclub. Remember, it's **CASE SENSITIVE**, so please enter it exactly.\n\n` +
+        `For other commands like /leaderboard, type **/help** to get a list of available commands.\n\n` +
+        `If you need any assistance, feel free to reach out to a VIP! 🙂`
     );
   } catch (error) {
     console.error(
