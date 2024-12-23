@@ -216,7 +216,7 @@ export const sendMatchFinishNotification = async (match: Match) => {
 
     // Format player stats (K/D/A/ADR)
     const playerStats = getPlayerStatsData.map((stat) => {
-      return `${stat.kills}/${stat.deaths}/${stat.assists}/ ${stat.ADR} ${stat.hsPercentage}`; // Format as K/D/A/ADR
+      return `${stat.kills}/${stat.deaths}/${stat.assists}/ ${stat.ADR} (${stat.hsPercentage})`; // Format as K/D/A/ADR
     });
 
     // Player details (you may still want to calculate Elo as per your existing logic)
