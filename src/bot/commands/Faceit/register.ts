@@ -26,7 +26,7 @@ export const registerTrackingCommand = {
       if (player) {
         await addUser(
           discordUsername,
-          faceitName,
+          player.faceitName,
           player.faceitElo,
           player.gamePlayerId,
           player.id
