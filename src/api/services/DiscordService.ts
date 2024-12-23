@@ -214,24 +214,9 @@ export const sendMatchFinishNotification = async (match: Match) => {
       match.trackedTeam.trackedPlayers.map((player) => player.faceitId)
     );
 
-    // Map the player stats and match them with the player's faceitId (sort by player_id)
-    const sortedPlayerStats = getPlayerStatsData.sort((a: any, b: any) => {
-      const playerIdA = a.player_id;
-      const playerIdB = b.player_id;
-
-      const playerIndexA = match.trackedTeam.trackedPlayers.findIndex(
-        (player) => player.faceitId === playerIdA
-      );
-      const playerIndexB = match.trackedTeam.trackedPlayers.findIndex(
-        (player) => player.faceitId === playerIdB
-      );
-
-      return playerIndexA - playerIndexB; // Sort by the index in trackedPlayers
-    });
-
-    // Format player stats (K/D/A/ADR/HS%)
-    const playerStats = sortedPlayerStats.map((stat) => {
-      return `${stat.kills}/${stat.deaths}/${stat.assists}/  ${stat.ADR}  ${stat.hsPercentage}`; // Format as K/D/A/ADR
+    // Format player stats (K/D/A/ADR)
+    const playerStats = getPlayerStatsData.map((stat) => {
+      return `${stat.kills}/${stat.deaths}/${stat.assists}/ ${stat.ADR} ${stat.hsPercentage}`; // Format as K/D/A/ADR
     });
 
     // Player details (you may still want to calculate Elo as per your existing logic)
@@ -243,16 +228,6 @@ export const sendMatchFinishNotification = async (match: Match) => {
         );
         return `**${player.faceitUsername}**: **${elo?.operator}${elo?.difference}** (${elo?.newElo})`;
       })
-    );
-
-    // Sort player details to match the order of stats (same as playerStats)
-    const sortedPlayerDetails = match.trackedTeam.trackedPlayers.map(
-      (player) => {
-        const playerIndex = match.trackedTeam.trackedPlayers.findIndex(
-          (p) => p.faceitId === player.faceitId
-        );
-        return playerDetails[playerIndex]; // Reorder based on player faceitId
-      }
     );
 
     // Determine win/loss based on finalScore or eloDifference
@@ -283,7 +258,7 @@ export const sendMatchFinishNotification = async (match: Match) => {
         },
         {
           name: "Players",
-          value: sortedPlayerDetails.join("\n"),
+          value: playerDetails.join("\n"),
           inline: true, // Make it inline to appear next to the "Stats" column
         },
         {

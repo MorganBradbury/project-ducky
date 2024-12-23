@@ -162,7 +162,7 @@ class FaceitApiClient {
       const response = await this.client.get(queryUrl);
       const rounds = response.data.rounds;
 
-      // Flatten all player stats into an array and keep the values as strings
+      // Flatten all player stats into an array
       const allPlayerStats: PlayerStats[] = rounds.flatMap((round: any) =>
         round.teams.flatMap((team: any) =>
           team.players.map((player: any) => ({
@@ -176,12 +176,18 @@ class FaceitApiClient {
         )
       );
 
-      // Filter the stats for the given player_ids and return the result
-      const filteredPlayerStats = allPlayerStats.filter(
-        (playerStat: PlayerStats) => playerIds.includes(playerStat.playerId)
-      );
+      // Loop through trackedPlayers and match them with the corresponding stats
+      const playerStatsInOrder: PlayerStats[] = playerIds
+        .map((playerId) => {
+          // Find the player's stats from allPlayerStats
+          const playerStats = allPlayerStats.find(
+            (stat) => stat.playerId === playerId
+          );
+          return playerStats ? playerStats : null;
+        })
+        .filter((stats) => stats !== null); // Filter out any null results
 
-      return filteredPlayerStats;
+      return playerStatsInOrder;
     } catch (error) {
       console.error("Error fetching player stats:", error);
       throw new Error("Failed to fetch player stats");
