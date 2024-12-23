@@ -19,11 +19,9 @@ client.on("guildMemberRemove", async (member) => {
       return;
     }
 
-    const embed = {
-      description: `Goodbye <@${member.user.id}> 👋 You will be missed (or not).`,
-    };
-
-    await generalChannel.send({ embeds: [embed] });
+    await generalChannel.send(
+      `Goodbye, <@${member.user.id}> 👋 You will be missed (or not).`
+    );
   } catch (error) {
     console.error(
       `Error processing guildMemberRemove event for ${member.user.tag}:`,
