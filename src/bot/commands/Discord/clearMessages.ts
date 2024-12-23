@@ -3,10 +3,11 @@ import {
   Collection,
   Message,
   DiscordAPIError,
+  TextChannel,
 } from "discord.js";
 
 export const clearMessagesCommand = {
-  name: "clear",
+  name: "clearmessages",
   description: "Clears the last X messages in the channel.",
   options: [
     {
@@ -42,51 +43,73 @@ export const clearMessagesCommand = {
     await interaction.deferReply({ ephemeral: true });
 
     try {
-      // Fetch the specified number of messages
-      const messages: Collection<string, Message> =
-        (await interaction.channel?.messages.fetch({
-          limit: amount,
-        })) || new Collection();
+      const channel = interaction.channel;
 
-      if (messages.size === 0) {
+      // Ensure the channel is a TextChannel
+      if (!channel || !(channel instanceof TextChannel)) {
         await interaction.followUp({
-          content: "No messages found to delete.",
+          content: "This command can only be used in text channels.",
           ephemeral: true,
         });
         return;
       }
 
-      // Delete messages and handle potential errors
-      await Promise.all(
-        messages.map(async (msg: Message) => {
-          try {
-            await msg.delete();
-          } catch (error) {
-            if (error instanceof DiscordAPIError) {
-              if (error.code === 10008) {
-                console.log(`Message with ID ${msg.id} no longer exists.`);
-              } else {
-                console.error(
-                  `Error deleting message with ID ${msg.id}:`,
-                  error
-                );
-              }
-            } else {
-              console.error("Error deleting message:", error);
-            }
-          }
-        })
-      );
+      let remainingAmount = amount;
+      let lastMessageId = undefined;
+
+      while (remainingAmount > 0) {
+        // Fetch messages in batches of up to 100
+        const messages: any = await channel.messages.fetch({
+          limit: Math.min(remainingAmount, 100),
+          before: lastMessageId,
+        });
+
+        if (messages.size === 0) break;
+
+        // Separate messages into those that can and cannot be bulk deleted
+        const bulkDeletable = messages.filter(
+          (msg: any) =>
+            Date.now() - msg.createdTimestamp < 14 * 24 * 60 * 60 * 1000
+        );
+        const nonBulkDeletable = messages.filter(
+          (msg: any) =>
+            Date.now() - msg.createdTimestamp >= 14 * 24 * 60 * 60 * 1000
+        );
+
+        // Bulk delete eligible messages
+        if (bulkDeletable.size > 0) {
+          await channel.bulkDelete(bulkDeletable, true);
+          remainingAmount -= bulkDeletable.size;
+        }
+
+        // Delete older messages one by one
+        for (const msg of nonBulkDeletable.values()) {
+          await msg.delete();
+          remainingAmount--;
+          if (remainingAmount <= 0) break;
+        }
+
+        // Update the lastMessageId for the next batch
+        lastMessageId = messages.last()?.id;
+      }
 
       await interaction.followUp({
-        content: `${messages.size} messages have been deleted.`,
+        content: `${amount - remainingAmount} messages have been deleted.`,
       });
     } catch (error) {
       console.error("Error clearing messages:", error);
-      await interaction.followUp({
-        content: "An error occurred while trying to clear messages.",
-        ephemeral: true,
-      });
+
+      if (error instanceof DiscordAPIError && error.code === 50034) {
+        await interaction.followUp({
+          content: "Messages older than 14 days cannot be bulk deleted.",
+          ephemeral: true,
+        });
+      } else {
+        await interaction.followUp({
+          content: "An error occurred while trying to clear messages.",
+          ephemeral: true,
+        });
+      }
     }
   },
 };
