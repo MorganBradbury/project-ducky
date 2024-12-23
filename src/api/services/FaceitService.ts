@@ -92,8 +92,8 @@ class FaceitApiClient {
           "/"
         )
       : [
-          response.data.results?.score?.faction1,
-          response.data.results?.score?.faction2,
+          response.data.results?.score?.faction1 || 0,
+          response.data.results?.score?.faction2 || 0,
         ];
 
     console.log("Log for when match starts", scores);
