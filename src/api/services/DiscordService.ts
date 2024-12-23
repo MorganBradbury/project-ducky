@@ -256,7 +256,8 @@ export const sendMatchFinishNotification = async (match: Match) => {
         },
         {
           name: "Stats",
-          value: playerStats.join("\n"),
+          // value: playerStats.join("\n"),
+          value: `[Coming soon]`,
         }
       )
       .setTimestamp();
