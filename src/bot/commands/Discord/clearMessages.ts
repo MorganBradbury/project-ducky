@@ -6,14 +6,13 @@ import {
 } from "discord.js";
 
 export const clearMessagesCommand = {
-  name: "clearmessages",
-  description:
-    "Clears all messages containing a specified word in the channel.",
+  name: "clear",
+  description: "Clears the last X messages in the channel.",
   options: [
     {
-      name: "word",
-      description: "The word to search for in messages.",
-      type: 3, // STRING type
+      name: "amount",
+      description: "The number of messages to delete (max 100).",
+      type: 4, // INTEGER type
       required: true,
     },
   ],
@@ -29,11 +28,11 @@ export const clearMessagesCommand = {
       return;
     }
 
-    const wordToSearch = interaction.options.getString("word");
+    const amount = interaction.options.getInteger("amount");
 
-    if (!wordToSearch) {
+    if (!amount || amount < 1 || amount > 100) {
       await interaction.reply({
-        content: "Please provide a word to search for.",
+        content: "Please provide a valid number of messages to delete (1-100).",
         ephemeral: true,
       });
       return;
@@ -43,71 +42,29 @@ export const clearMessagesCommand = {
     await interaction.deferReply({ ephemeral: true });
 
     try {
-      let messagesToDelete: Message[] = [];
-      let lastMessageId: string | undefined = undefined;
-      let fetchMore = true;
+      // Fetch the specified number of messages
+      const messages: Collection<string, Message> =
+        (await interaction.channel?.messages.fetch({
+          limit: amount,
+        })) || new Collection();
 
-      while (fetchMore) {
-        const messages: Collection<string, Message> =
-          (await interaction.channel?.messages.fetch({
-            limit: 100,
-            before: lastMessageId,
-          })) || new Collection(); // Default to empty collection if null
-
-        if (messages.size === 0) {
-          fetchMore = false;
-          break;
-        }
-
-        // Filter messages containing the specified word (case-insensitive)
-        const matchingMessages = Array.from(
-          messages
-            .filter((msg: Message) =>
-              msg.content.toLowerCase().includes(wordToSearch.toLowerCase())
-            )
-            .values()
-        );
-
-        messagesToDelete.push(...matchingMessages);
-
-        lastMessageId = messages.last()?.id;
-      }
-
-      if (messagesToDelete.length === 0) {
+      if (messages.size === 0) {
         await interaction.followUp({
-          content: `No messages found containing the word "${wordToSearch}".`,
+          content: "No messages found to delete.",
           ephemeral: true,
         });
         return;
       }
 
-      // Delete messages and handle errors for messages that may no longer exist
+      // Delete messages and handle potential errors
       await Promise.all(
-        messagesToDelete.map(async (msg: Message) => {
+        messages.map(async (msg: Message) => {
           try {
             await msg.delete();
           } catch (error) {
-            // Check if the error is a DiscordAPIError
             if (error instanceof DiscordAPIError) {
-              // If the message is unknown or already deleted, log the error but continue
               if (error.code === 10008) {
                 console.log(`Message with ID ${msg.id} no longer exists.`);
-              } else if (error.code === 429) {
-                // Handle rate limiting by extracting retryAfter from the headers directly
-                //@ts-ignore
-                const retryAfter = error.headers?.get("retry-after"); // Time in milliseconds
-                if (retryAfter) {
-                  console.log(
-                    `Rate limited. Please retry after ${retryAfter}ms`
-                  );
-                  await interaction.followUp({
-                    content: `Rate limit exceeded. Please try again in ${Math.ceil(
-                      Number(retryAfter) / 1000
-                    )} seconds.`,
-                    ephemeral: true,
-                  });
-                }
-                return;
               } else {
                 console.error(
                   `Error deleting message with ID ${msg.id}:`,
@@ -115,7 +72,6 @@ export const clearMessagesCommand = {
                 );
               }
             } else {
-              // For other errors, log them
               console.error("Error deleting message:", error);
             }
           }
@@ -123,7 +79,7 @@ export const clearMessagesCommand = {
       );
 
       await interaction.followUp({
-        content: `${messagesToDelete.length} messages containing the word "${wordToSearch}" have been deleted.`,
+        content: `${messages.size} messages have been deleted.`,
       });
     } catch (error) {
       console.error("Error clearing messages:", error);
