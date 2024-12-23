@@ -22,26 +22,29 @@ class FaceitApiClient {
   async getPlayer(faceitId: string | number): Promise<Player | null> {
     const isPlayerId = /^\d+$/.test(String(faceitId));
 
-    const urlParams = isPlayerId
-      ? `game_player_id=${faceitId}&game=cs2`
-      : `nickname=${faceitId}`;
-    const queryUrl = `/players?${urlParams}`;
+    if (isPlayerId) {
+      // If the input is numeric, search by game_player_id and game=cs2
+      const urlParams = `game_player_id=${faceitId}&game=cs2`;
+      const queryUrl = `/players?${urlParams}`;
 
-    const response = await this.client.get(queryUrl);
+      try {
+        const response = await this.client.get(queryUrl);
 
-    if (response.status === 200 && response.data) {
-      return {
-        faceitName: response.data.nickname,
-        faceitElo: response.data.games.cs2.faceit_elo,
-        gamePlayerId: response.data.games.cs2.game_player_id,
-        skillLevel: response.data.games.cs2.skill_level,
-        id: response.data.player_id,
-      };
+        if (response.status === 200 && response.data) {
+          return {
+            faceitName: response.data.nickname,
+            faceitElo: response.data.games.cs2.faceit_elo,
+            gamePlayerId: response.data.games.cs2.game_player_id,
+            skillLevel: response.data.games.cs2.skill_level,
+            id: response.data.player_id,
+          };
+        }
+      } catch (error: any) {
+        console.log("Error searching by game_player_id", error);
+      }
     }
 
-    console.log("Could not find player by identifier", faceitId);
-
-    // If no player found, generate optimized case variations for the nickname
+    // If it's not numeric, generate optimized case variations for the nickname
     if (typeof faceitId === "string") {
       const variations = generateOptimizedCaseVariations(faceitId);
 
@@ -64,7 +67,7 @@ class FaceitApiClient {
             };
           }
         } catch (error: any) {
-          // Log the error and continue with the next variation
+          // Log the error and continue with the next variation if 404
           if (error.response?.status === 404) {
             console.log(`Player not found for variation: ${variation}`);
           } else {
