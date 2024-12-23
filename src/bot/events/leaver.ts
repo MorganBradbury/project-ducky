@@ -19,10 +19,11 @@ client.on("guildMemberRemove", async (member) => {
       return;
     }
 
-    // Message when a user leaves
-    await generalChannel.send(
-      `Goodbye <@${member.user.tag}>. You will be missed (or not)`
-    );
+    const embed = {
+      description: `Goodbye <@${member.user.id}> 👋 You will be missed (or not).`,
+    };
+
+    await generalChannel.send({ embeds: [embed] });
   } catch (error) {
     console.error(
       `Error processing guildMemberRemove event for ${member.user.tag}:`,

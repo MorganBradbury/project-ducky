@@ -29,11 +29,14 @@ client.on("guildMemberAdd", async (member: GuildMember) => {
       return;
     }
 
+    console.log(`User ID: ${member.user.id}`);
     // Public welcome message
     const totalUsers = member.guild.memberCount;
-    await generalChannel.send(
-      `Welcome, <@${member.user.id}>. You are duck #${totalUsers} 👋`
-    );
+    const embed = {
+      description: `Welcome, <@${member.user.id}> 👋 You are duck #${totalUsers}.`,
+    };
+
+    await generalChannel.send({ embeds: [embed] });
 
     // Private welcome message with tagging the user
     await member.send(
