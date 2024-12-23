@@ -256,7 +256,7 @@ export const sendMatchFinishNotification = async (match: Match) => {
           inline: true, // Make it inline to appear next to the "Stats" column
         },
         {
-          name: "Stats (K/D/A/ADR)",
+          name: "(K/D/A/ADR)",
           value: playerStats.join("\n"),
           inline: true, // Make it inline to appear next to the "Players" column
         }
