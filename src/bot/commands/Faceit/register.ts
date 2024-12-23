@@ -36,11 +36,11 @@ export const registerTrackingCommand = {
           await updateServerRoles(interaction.member as GuildMember, player);
           await interaction.reply({
             content:
-              "☑️ Your elo will now be tracked and updated automatically.",
+              "👋 Hey, thanks. I've now added you to the tracker. Your elo will be updated automatically.",
             ephemeral: true, // This ensures the message is only visible to the user
           });
           console.log(
-            `☑️ Your elo will now be tracked and updated automatically! ${discordUsername} ${faceitName}`
+            `User added to tracker: ${discordUsername} ${faceitName}`
           );
         });
       } else {

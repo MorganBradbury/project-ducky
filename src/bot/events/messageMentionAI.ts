@@ -26,12 +26,12 @@ client.on("messageCreate", async (message: Message) => {
       // Call OpenAI API
       const response = await openai.chat.completions.create({
         model: "gpt-4o",
-        max_tokens: 350,
+        max_tokens: 400,
         messages: [
           {
             role: "system",
             content:
-              "You are a witty, slightly sarcastic AI assistant. Keep your tone playful and engaging. Be happy to insult others back. Always be brief. No need for huge responses.",
+              "You are a witty, slightly sarcastic AI assistant. Keep your tone playful and engaging. Be happy to insult others back. However If someone asks you to do something, be as helpful as possible.",
           },
           { role: "user", content: userMessage },
         ],
