@@ -214,19 +214,27 @@ export const sendMatchFinishNotification = async (match: Match) => {
       match.trackedTeam.trackedPlayers.map((player) => player.faceitId)
     );
 
+    // Sort the player stats by ADR in descending order
+    const sortedPlayerStats = getPlayerStatsData.sort(
+      (a, b) => parseFloat(b.ADR) - parseFloat(a.ADR)
+    );
+
     // Format player stats (K/D/A/ADR)
-    const playerStats = getPlayerStatsData.map((stat) => {
+    const playerStats = sortedPlayerStats.map((stat) => {
       return `${stat.kills}/${stat.deaths}/${stat.assists}/ ${stat.ADR} (${stat.hsPercentage})`; // Format as K/D/A/ADR
     });
 
     // Player details (you may still want to calculate Elo as per your existing logic)
     const playerDetails = await Promise.all(
-      match.trackedTeam.trackedPlayers.map(async (player) => {
-        const elo = await calculateEloDifference(
-          player.previousElo,
-          player.gamePlayerId
+      sortedPlayerStats.map(async (stat) => {
+        const player = match.trackedTeam.trackedPlayers.find(
+          (player) => player.faceitId === stat.playerId
         );
-        return `**${player.faceitUsername}**: **${elo?.operator}${elo?.difference}** (${elo?.newElo})`;
+        const elo = await calculateEloDifference(
+          player?.previousElo || 0,
+          player?.gamePlayerId || ""
+        );
+        return `**${player?.faceitUsername}**: **${elo?.operator}${elo?.difference}** (${elo?.newElo})`;
       })
     );
 
