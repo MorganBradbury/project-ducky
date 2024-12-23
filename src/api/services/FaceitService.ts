@@ -151,6 +151,42 @@ class FaceitApiClient {
 
     return response.data.results.winner === teamFaction ? true : false;
   }
+
+  async getPlayerStats(
+    matchId: string,
+    playerIds: string[]
+  ): Promise<PlayerStats[]> {
+    try {
+      // Call the Faceit API to get the match stats
+      const queryUrl = `/matches/${matchId}/stats`;
+      const response = await this.client.get(queryUrl);
+      const rounds = response.data.rounds;
+
+      // Flatten all player stats into an array and keep the values as strings
+      const allPlayerStats: PlayerStats[] = rounds.flatMap((round: any) =>
+        round.teams.flatMap((team: any) =>
+          team.players.map((player: any) => ({
+            playerId: player.player_id,
+            kills: player.player_stats.Kills,
+            deaths: player.player_stats.Deaths,
+            assists: player.player_stats.Assists,
+            ADR: player.player_stats.ADR,
+            hsPercentage: player.player_stats["Headshots %"],
+          }))
+        )
+      );
+
+      // Filter the stats for the given player_ids and return the result
+      const filteredPlayerStats = allPlayerStats.filter(
+        (playerStat: PlayerStats) => playerIds.includes(playerStat.playerId)
+      );
+
+      return filteredPlayerStats;
+    } catch (error) {
+      console.error("Error fetching player stats:", error);
+      throw new Error("Failed to fetch player stats");
+    }
+  }
 }
 
 export const FaceitService = new FaceitApiClient();

@@ -208,9 +208,15 @@ export const deleteVoiceChannel = async (voiceChannelId: string) => {
 
 export const sendMatchFinishNotification = async (match: Match) => {
   try {
-    // Hardcoded stats for demonstration purposes
-    const playerStats = match.trackedTeam.trackedPlayers.map((player) => {
-      return `20/10/4/ 85.2`; // Example stats
+    // Get player stats using the getPlayerStats function
+    const getPlayerStatsData = await FaceitService.getPlayerStats(
+      match.matchId,
+      match.trackedTeam.trackedPlayers.map((player) => player.faceitId)
+    );
+
+    // Format player stats (K/D/A/ADR)
+    const playerStats = getPlayerStatsData.map((stat) => {
+      return `${stat.kills}/${stat.deaths}/${stat.assists}/ ${stat.ADR} ${stat.hsPercentage}`; // Format as K/D/A/ADR
     });
 
     // Player details (you may still want to calculate Elo as per your existing logic)
@@ -256,7 +262,7 @@ export const sendMatchFinishNotification = async (match: Match) => {
           inline: true, // Make it inline to appear next to the "Stats" column
         },
         {
-          name: "(K/D/A/ADR)",
+          name: "(K/D/A/ADR/HS%)",
           value: playerStats.join("\n"),
           inline: true, // Make it inline to appear next to the "Players" column
         }
