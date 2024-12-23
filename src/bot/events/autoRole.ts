@@ -32,12 +32,12 @@ client.on("guildMemberAdd", async (member: GuildMember) => {
     // Public welcome message
     const totalUsers = member.guild.memberCount;
     await generalChannel.send(
-      `Welcome to Duckblub, <@${member.user.id}>! You are Duck #${totalUsers}.`
+      `Welcome, <@${member.user.id}>. You are duck #${totalUsers}.`
     );
 
     // Private welcome message
     await member.send(
-      `Welcome ${member.user.username}. I'm Duckybot. To ensure your elo is tracked in your username, please type /ducky_track_elo [FACEIT NAME]. Please ensure you put it correctly. It is **CASE SENSITIVE**.\n\n` +
+      `Welcome ${member.user.username}. I'm Duckybot. To ensure your elo is tracked in your username, please type **/ducky_track_elo [FACEIT NAME]** into the counter-strike chat in Duckclub. Please ensure you put it correctly. It is **CASE SENSITIVE**.\n\n` +
         `If you need to use any other commands such as /leaderboard, please type /help and you will receive a summary of all commands available.\n\n` +
         `If you need anything, please contact a VIP 🙂`
     );
