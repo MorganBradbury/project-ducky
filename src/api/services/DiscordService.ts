@@ -556,8 +556,6 @@ export async function resetVoiceChannelStates(): Promise<void> {
           if (channel.name !== newName) {
             console.log(`Renaming channel: ${channel.name} -> ${newName}`);
             await channel.setName(newName);
-          } else {
-            console.log(`Channel name is already correct: ${channel.name}`);
           }
 
           return channel;
