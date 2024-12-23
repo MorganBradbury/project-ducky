@@ -94,7 +94,9 @@ const sendEmbedMessage = async (embed: EmbedBuilder) => {
       );
       return;
     }
-    await channel.send({ embeds: [embed] });
+
+    // Send the embed message and return the message object
+    return await channel.send({ embeds: [embed] });
   } catch (error) {
     console.error("Error sending message to Discord channel:", error);
   }
@@ -214,31 +216,16 @@ export const sendMatchFinishNotification = async (match: Match) => {
       match.trackedTeam.trackedPlayers.map((player) => player.faceitId)
     );
 
-    // Sort the player stats by ADR in descending order
-    const sortedPlayerStats = getPlayerStatsData.sort(
+    // Sort player stats by ADR (highest first)
+    const sortedStats = getPlayerStatsData.sort(
       (a, b) => parseFloat(b.ADR) - parseFloat(a.ADR)
     );
 
-    // Format player stats (K/D/A/ADR)
-    const playerStats = sortedPlayerStats.map((stat) => {
-      return `${stat.kills} / ${stat.deaths} / ${stat.assists} / ${stat.ADR} (${stat.hsPercentage})`; // Format as K/D/A/ADR
-    });
+    // Define the number of players per "page"
+    const playersPerPage = 5;
+    const totalPages = Math.ceil(sortedStats.length / playersPerPage);
 
-    // Player details (you may still want to calculate Elo as per your existing logic)
-    const playerDetails = await Promise.all(
-      sortedPlayerStats.map(async (stat) => {
-        const player = match.trackedTeam.trackedPlayers.find(
-          (player) => player.faceitId === stat.playerId
-        );
-        const elo = await calculateEloDifference(
-          player?.previousElo || 0,
-          player?.gamePlayerId || ""
-        );
-        return `**${player?.faceitUsername}**: **${elo?.operator}${elo?.difference}** (${elo?.newElo})`;
-      })
-    );
-
-    // Determine win/loss based on finalScore or eloDifference
+    // Get match result and final score before creating the embed
     const finalScore = await FaceitService.getMatchScore(
       match.matchId,
       match.trackedTeam.faction,
@@ -249,35 +236,84 @@ export const sendMatchFinishNotification = async (match: Match) => {
       match.trackedTeam.faction
     );
 
-    const embed = new EmbedBuilder()
-      .setTitle(`New match result`)
-      .setColor(didTeamWin ? "#00FF00" : "#FF0000")
-      .addFields(
-        { name: "Map", value: match.mapName },
-        {
-          name: "Match Link",
-          value: `[Click here](https://www.faceit.com/en/cs2/room/${match?.matchId})`,
-        },
-        {
-          name: "Match Result",
-          value: `${finalScore.join(" / ") || "N/A"} (${
-            didTeamWin ? "WIN" : "LOSS"
-          })`,
-        },
-        {
-          name: "Players",
-          value: playerDetails.join("\n"),
-          inline: true, // Make it inline to appear next to the "Stats" column
-        },
-        {
-          name: "K / D / A / ADR (HS%)",
-          value: playerStats.join("\n"),
-          inline: true, // Make it inline to appear next to the "Players" column
-        }
-      )
-      .setTimestamp();
+    // Function to create a page embed
+    const createEmbedForPage = async (pageNumber: number) => {
+      const start = (pageNumber - 1) * playersPerPage;
+      const end = start + playersPerPage;
+      const currentStats = sortedStats.slice(start, end);
 
-    await sendEmbedMessage(embed);
+      const playerStats = currentStats.map((stat) => {
+        return `${stat.kills}/${stat.deaths}/${stat.assists} / ${stat.ADR} (${stat.hsPercentage})`; // Format as K/D/A/ADR
+      });
+
+      const playerDetails = await Promise.all(
+        match.trackedTeam.trackedPlayers.map(async (player) => {
+          const elo = await calculateEloDifference(
+            player.previousElo,
+            player.gamePlayerId
+          );
+          return `**${player.faceitUsername}**: **${elo?.operator}${elo?.difference}** (${elo?.newElo})`;
+        })
+      );
+
+      return new EmbedBuilder()
+        .setTitle(`Match Result: ${match.mapName}`)
+        .setColor(didTeamWin ? "#00FF00" : "#FF0000")
+        .addFields(
+          {
+            name: "Match Result",
+            value: `${finalScore.join(" / ")} (${didTeamWin ? "WIN" : "LOSS"})`,
+          },
+          {
+            name: "Match Link",
+            value: `[Click here](https://www.faceit.com/en/cs2/room/${match.matchId})`,
+          },
+          { name: "Players", value: playerDetails.join("\n"), inline: true },
+          {
+            name: "(Page 1)",
+            value: playerStats.join("\n"),
+          }
+        );
+    };
+
+    let currentPage = 1;
+    const embed = await createEmbedForPage(currentPage);
+
+    const message = await sendEmbedMessage(embed); // Send the message to Discord
+
+    if (!message) {
+      console.error("Failed to send message to Discord.");
+      return;
+    }
+
+    // Pagination logic
+    if (totalPages > 1) {
+      const filter = (reaction: any, user: any) =>
+        ["⬅️", "➡️"].includes(reaction.emoji.name);
+      const collector = message.createReactionCollector({
+        filter,
+        time: 3600000, // 1 hour in milliseconds
+      });
+
+      collector.on("collect", async (reaction: any, user: any) => {
+        reaction.users.remove(user);
+
+        if (reaction.emoji.name === "➡️") {
+          currentPage++;
+        } else if (reaction.emoji.name === "⬅️") {
+          currentPage--;
+        }
+
+        if (currentPage < 1) currentPage = 1;
+        if (currentPage > totalPages) currentPage = totalPages;
+
+        const updatedEmbed = await createEmbedForPage(currentPage);
+        await message.edit({ embeds: [updatedEmbed] });
+      });
+
+      message.react("⬅️");
+      message.react("➡️");
+    }
   } catch (error) {
     console.error("Error sending match finish notification:", error);
   }
