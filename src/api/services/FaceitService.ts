@@ -50,16 +50,27 @@ class FaceitApiClient {
         const retryUrlParams = `nickname=${variation}`;
         const retryQueryUrl = `/players?${retryUrlParams}`;
 
-        const retryResponse = await this.client.get(retryQueryUrl);
+        try {
+          const retryResponse = await this.client.get(retryQueryUrl);
 
-        if (retryResponse.status === 200 && retryResponse.data) {
-          return {
-            faceitName: retryResponse.data.nickname,
-            faceitElo: retryResponse.data.games.cs2.faceit_elo,
-            gamePlayerId: retryResponse.data.games.cs2.game_player_id,
-            skillLevel: retryResponse.data.games.cs2.skill_level,
-            id: retryResponse.data.player_id,
-          };
+          // Check if response is successful
+          if (retryResponse.status === 200 && retryResponse.data) {
+            return {
+              faceitName: retryResponse.data.nickname,
+              faceitElo: retryResponse.data.games.cs2.faceit_elo,
+              gamePlayerId: retryResponse.data.games.cs2.game_player_id,
+              skillLevel: retryResponse.data.games.cs2.skill_level,
+              id: retryResponse.data.player_id,
+            };
+          }
+        } catch (error: any) {
+          // Log the error and continue with the next variation
+          if (error.response?.status === 404) {
+            console.log(`Player not found for variation: ${variation}`);
+          } else {
+            // Handle other types of errors
+            console.error(`Error with variation ${variation}:`, error);
+          }
         }
       }
     }
