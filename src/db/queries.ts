@@ -42,4 +42,15 @@ export const SQL_QUERIES = {
     SET liveScoresChannelId = ?
     WHERE matchId = ?
   `,
+  UPDATE_MATCH_PROCESSED: `
+  UPDATE matches
+  SET processed = ?
+  WHERE matchId = ?
+`,
+  CHECK_MATCH_PROCESSED: `
+  SELECT processed
+  FROM matches
+  WHERE matchId = ?
+  LIMIT 1
+`,
 };

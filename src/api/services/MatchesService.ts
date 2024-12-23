@@ -4,7 +4,9 @@ import {
   checkMatchExists,
   getMatchDataFromDb,
   insertMatch,
+  isMatchProcessed,
   markMatchComplete,
+  updateMatchProcessed,
 } from "../../db/commands";
 import {
   createNewVoiceChannel,
@@ -72,6 +74,18 @@ export const startMatch = async (matchId: string) => {
 export const endMatch = async (matchId: string) => {
   console.log("Processing endMatch()", matchId);
 
+  const isMatchAlreadyProcessed = await isMatchProcessed(matchId);
+  if (isMatchAlreadyProcessed) {
+    return;
+  }
+
+  let match = await getMatchDataFromDb(matchId);
+
+  if (!match) {
+    return;
+  }
+
+  await updateMatchProcessed(matchId);
   // Stop the worker associated with this matchId
   if (workers[matchId]) {
     workers[matchId].postMessage({ type: "stop" });
@@ -80,12 +94,8 @@ export const endMatch = async (matchId: string) => {
     console.log("Worker stopped for matchId:", matchId);
   }
 
-  let match = await getMatchDataFromDb(matchId);
-
-  if (!match) {
-    console.log("No match data found from DB", match);
-    return;
-  }
+  // deletes record from DB.
+  await markMatchComplete(matchId);
 
   if (match.voiceChannel?.id) {
     await updateVoiceChannelName(
@@ -100,7 +110,6 @@ export const endMatch = async (matchId: string) => {
 
   await sendMatchFinishNotification(match);
   await runEloUpdate(match.trackedTeam.trackedPlayers);
-  await markMatchComplete(matchId);
 };
 
 export const cancelMatch = async (matchId: string) => {

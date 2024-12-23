@@ -170,3 +170,30 @@ export const updateLiveScoresChannelIdForMatch = async (
     }
   });
 };
+
+// Update the 'processed' column for a match
+export const updateMatchProcessed = async (
+  matchId: string
+): Promise<boolean> => {
+  return useConnection(async (connection) => {
+    const [result] = await connection.query(
+      SQL_QUERIES.UPDATE_MATCH_PROCESSED,
+      [true, matchId]
+    );
+    if ((result as any).affectedRows === 0) {
+      throw new Error(`Match ${matchId} not found or already processed.`);
+    }
+    return true;
+  });
+};
+
+// Check if a match has already been processed
+export const isMatchProcessed = async (matchId: string): Promise<boolean> => {
+  return useConnection(async (connection) => {
+    const [rows] = await connection.query<RowDataPacket[]>(
+      SQL_QUERIES.CHECK_MATCH_PROCESSED,
+      [matchId]
+    );
+    return rows.length > 0 && rows[0]?.processed === 1; // Returns true if processed
+  });
+};
