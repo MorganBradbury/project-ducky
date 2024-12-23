@@ -9,8 +9,6 @@ import {
 import {
   createNewVoiceChannel,
   deleteVoiceChannel,
-  getUsersInVoiceChannel,
-  moveUserToChannel,
   resetVoiceChannelStates,
   runEloUpdate,
   sendMatchFinishNotification,
