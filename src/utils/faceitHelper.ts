@@ -54,3 +54,13 @@ export const calculateEloDifference = async (
     newElo: player.faceitElo,
   };
 };
+
+// Optimized case variations generator
+export const generateOptimizedCaseVariations = (str: string): string[] => [
+  str.toLowerCase(),
+  str.toUpperCase(),
+  str.charAt(0).toUpperCase() + str.slice(1).toLowerCase(),
+  str.length > 1
+    ? str.slice(0, -1) + str.charAt(str.length - 1).toUpperCase()
+    : str,
+];

@@ -1,7 +1,11 @@
 import axios, { AxiosInstance } from "axios";
 import { config } from "../../config";
 import { getMatchVoiceChannel } from "./DiscordService";
-import { getTeamFaction, getTrackedPlayers } from "../../utils/faceitHelper";
+import {
+  generateOptimizedCaseVariations,
+  getTeamFaction,
+  getTrackedPlayers,
+} from "../../utils/faceitHelper";
 import { Player } from "../../types/Faceit/Player";
 import { Match } from "../../types/Faceit/Match";
 
@@ -25,18 +29,42 @@ class FaceitApiClient {
 
     const response = await this.client.get(queryUrl);
 
-    if (response.status !== 200 || !response) {
-      console.log("Could not find player by identifier", faceitId);
-      return null;
+    if (response.status === 200 && response.data) {
+      return {
+        faceitName: response.data.nickname,
+        faceitElo: response.data.games.cs2.faceit_elo,
+        gamePlayerId: response.data.games.cs2.game_player_id,
+        skillLevel: response.data.games.cs2.skill_level,
+        id: response.data.player_id,
+      };
     }
 
-    return {
-      faceitName: response.data.nickname,
-      faceitElo: response.data.games.cs2.faceit_elo,
-      gamePlayerId: response.data.games.cs2.game_player_id,
-      skillLevel: response.data.games.cs2.skill_level,
-      id: response.data.player_id,
-    };
+    console.log("Could not find player by identifier", faceitId);
+
+    // If no player found, generate optimized case variations for the nickname
+    if (typeof faceitId === "string") {
+      const variations = generateOptimizedCaseVariations(faceitId);
+
+      // Retry with each variation
+      for (const variation of variations) {
+        const retryUrlParams = `nickname=${variation}`;
+        const retryQueryUrl = `/players?${retryUrlParams}`;
+
+        const retryResponse = await this.client.get(retryQueryUrl);
+
+        if (retryResponse.status === 200 && retryResponse.data) {
+          return {
+            faceitName: retryResponse.data.nickname,
+            faceitElo: retryResponse.data.games.cs2.faceit_elo,
+            gamePlayerId: retryResponse.data.games.cs2.game_player_id,
+            skillLevel: retryResponse.data.games.cs2.skill_level,
+            id: retryResponse.data.player_id,
+          };
+        }
+      }
+    }
+
+    return null;
   }
 
   async getMatch(matchId: string): Promise<Match | null> {
