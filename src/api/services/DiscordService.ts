@@ -208,6 +208,12 @@ export const deleteVoiceChannel = async (voiceChannelId: string) => {
 
 export const sendMatchFinishNotification = async (match: Match) => {
   try {
+    // Hardcoded stats for demonstration purposes
+    const playerStats = match.trackedTeam.trackedPlayers.map((player) => {
+      return `20 K / 10 D / 85.2 ADR / 45% HS`; // Example stats
+    });
+
+    // Player details (you may still want to calculate Elo as per your existing logic)
     const playerDetails = await Promise.all(
       match.trackedTeam.trackedPlayers.map(async (player) => {
         const elo = await calculateEloDifference(
@@ -247,6 +253,12 @@ export const sendMatchFinishNotification = async (match: Match) => {
         {
           name: "Players",
           value: playerDetails.join("\n"),
+          inline: true, // Make it inline to appear next to the "Stats" column
+        },
+        {
+          name: "Stats",
+          value: playerStats.join("\n"),
+          inline: true, // Make it inline to appear next to the "Players" column
         }
       )
       .setTimestamp();
