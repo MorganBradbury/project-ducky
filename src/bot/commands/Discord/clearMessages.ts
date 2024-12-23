@@ -7,7 +7,7 @@ import {
 } from "discord.js";
 
 export const clearMessagesCommand = {
-  name: "clearmessages",
+  name: "clear",
   description: "Clears the last X messages in the channel.",
   options: [
     {
