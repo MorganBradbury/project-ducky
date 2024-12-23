@@ -171,7 +171,7 @@ class FaceitApiClient {
             deaths: player.player_stats.Deaths,
             assists: player.player_stats.Assists,
             ADR: player.player_stats.ADR,
-            hsPercentage: player.player_stats["Headshots %"],
+            hsPercentage: player.player_stats["Headshots %"] + "%",
           }))
         )
       );
