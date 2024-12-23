@@ -14,6 +14,7 @@ import {
   resetVoiceChannelStates,
   runEloUpdate,
   sendMatchFinishNotification,
+  transferUsersToNewChannel,
   updateVoiceChannelName,
 } from "./DiscordService";
 import { FaceitService } from "./FaceitService";
@@ -108,22 +109,19 @@ export const cancelMatch = async (matchId: string) => {
   console.log("Processing cancelMatch()", matchId);
 
   let match = await getMatchDataFromDb(matchId);
-
-  console.log(`Test querying DB Data: ${matchId}`, match);
-
   if (!match) {
     console.log("No match data found from DB", match);
     return;
   }
 
-  // Delete the scores channel if it exists
-  if (match.voiceChannel?.liveScoresChannelId) {
-    await deleteVoiceChannel(match.voiceChannel?.liveScoresChannelId);
-  }
-
   // Handle moving users from the old voice channel to a new one
   if (match.voiceChannel?.id) {
     try {
+      // Delete the scores channel if it exists
+      if (match.voiceChannel?.liveScoresChannelId) {
+        await deleteVoiceChannel(match.voiceChannel?.liveScoresChannelId);
+      }
+
       // Create a new voice channel and get its ID
       const newChannelId = await createNewVoiceChannel(
         `${ChannelIcons.Active} ${match.voiceChannel.name}`,
@@ -135,32 +133,15 @@ export const cancelMatch = async (matchId: string) => {
         return;
       }
 
-      // Get the list of users in the old voice channel
-      const membersInChannel = await getUsersInVoiceChannel(
-        match.voiceChannel.id
-      );
-
-      if (membersInChannel.length === 0) {
-        console.log(
-          `No members in the voiceChannelId: ${match.voiceChannel.id}`
-        );
-      }
-
-      // Move each user to the new voice channel
-      for (const member of membersInChannel) {
-        await moveUserToChannel(member.id, newChannelId);
-      }
-
-      // Delete the old voice channel
+      await transferUsersToNewChannel(match.voiceChannel.id, newChannelId);
       await deleteVoiceChannel(match.voiceChannel.id);
-
       await resetVoiceChannelStates();
 
       console.log(
         `Moved users from voiceChannelId: ${match.voiceChannel.id} to newChannelId: ${newChannelId}`
       );
     } catch (error) {
-      console.error("Error while moving users to a new channel:", error);
+      console.error("Error when cancelling match", error);
     }
   }
 

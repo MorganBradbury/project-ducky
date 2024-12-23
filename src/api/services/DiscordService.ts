@@ -258,7 +258,10 @@ export const sendMatchFinishNotification = async (match: Match) => {
 };
 
 // Helper function to get all users in a voice channel
-export const getUsersInVoiceChannel = async (voiceChannelId: string) => {
+export const transferUsersToNewChannel = async (
+  voiceChannelId: string,
+  newChannelId: string
+) => {
   try {
     const guild = await client.guilds.fetch(config.GUILD_ID);
     if (!guild) {
@@ -275,45 +278,18 @@ export const getUsersInVoiceChannel = async (voiceChannelId: string) => {
     }
 
     // Fetch and return members in the voice channel
-    return Array.from(channel.members.values());
+    const membersInChannel = Array.from(channel.members.values());
+
+    // Move each user to the new voice channel
+    for (const member of membersInChannel) {
+      await member.voice.setChannel(newChannelId);
+    }
   } catch (error) {
     console.error(
       `Error fetching users from voice channel ${voiceChannelId}:`,
       error
     );
     return [];
-  }
-};
-
-// Helper function to move a user to a specific voice channel
-export const moveUserToChannel = async (
-  userId: string,
-  newChannelId: string
-) => {
-  try {
-    const guild = await client.guilds.fetch(config.GUILD_ID);
-    const member = await guild.members.fetch(userId);
-
-    if (!member.voice.channelId) {
-      console.log(
-        `User ${userId} is not currently in a voice channel. Skipping move.`
-      );
-      return;
-    }
-
-    console.log(
-      `User ${userId} is in channel ${member.voice.channelId}. Moving to ${newChannelId}`
-    );
-
-    // Use Discord.js method to move the user
-    await member.voice.setChannel(newChannelId);
-
-    console.log(`Moved user ${userId} to channel ${newChannelId}`);
-  } catch (error) {
-    console.error(
-      `Error moving user ${userId} to channel ${newChannelId}:`,
-      error
-    );
   }
 };
 
