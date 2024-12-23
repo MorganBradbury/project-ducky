@@ -210,7 +210,7 @@ export const sendMatchFinishNotification = async (match: Match) => {
   try {
     // Hardcoded stats for demonstration purposes
     const playerStats = match.trackedTeam.trackedPlayers.map((player) => {
-      return `**${player.faceitUsername}:** 20/ 10/ 85.2 ADR/ 45% HS`; // Example stats
+      return `20/10/4/ 85.2`; // Example stats
     });
 
     // Player details (you may still want to calculate Elo as per your existing logic)
@@ -253,11 +253,12 @@ export const sendMatchFinishNotification = async (match: Match) => {
         {
           name: "Players",
           value: playerDetails.join("\n"),
+          inline: true, // Make it inline to appear next to the "Stats" column
         },
         {
-          name: "Stats",
-          // value: playerStats.join("\n"),
-          value: `[Coming soon]`,
+          name: "Stats (K/D/A/ADR)",
+          value: playerStats.join("\n"),
+          inline: true, // Make it inline to appear next to the "Players" column
         }
       )
       .setTimestamp();
