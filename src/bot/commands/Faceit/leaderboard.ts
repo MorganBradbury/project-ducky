@@ -49,7 +49,7 @@ export const leaderboardCommand = {
 
       // Create embed with two fields for columns
       const embed = new EmbedBuilder()
-        .setTitle("FACEIT Leaderboard standings for Duckclub")
+        .setTitle("Leaderboard standings")
         .setColor("#FFD700")
         .addFields(
           {
