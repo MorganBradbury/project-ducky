@@ -10,8 +10,6 @@ export const SQL_QUERIES = {
   `,
   SELECT_ALL_USERS: `
     DROP TABLE matches_played;
-    SELECT userId, discordUsername, faceitUsername, previousElo, gamePlayerId, faceitId
-    FROM users
   `,
   DELETE_USER: `
     DELETE FROM users
