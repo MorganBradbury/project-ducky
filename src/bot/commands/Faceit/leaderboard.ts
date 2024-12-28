@@ -58,7 +58,7 @@ export const leaderboardCommand = {
             inline: true,
           },
           {
-            name: "Leaderboard",
+            name: "...",
             value: rightColumnText,
             inline: true,
           }
