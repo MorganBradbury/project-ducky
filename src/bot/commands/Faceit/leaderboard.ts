@@ -54,11 +54,11 @@ export const leaderboardCommand = {
         .addFields(
           {
             name: "Leaderboard",
-            value: leftColumnText,
+            value: leftColumnText || "No players",
             inline: true,
           },
           {
-            name: "",
+            name: "Leaderboard",
             value: rightColumnText,
             inline: true,
           }
