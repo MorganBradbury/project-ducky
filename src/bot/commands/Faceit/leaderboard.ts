@@ -37,7 +37,7 @@ export const leaderboardCommand = {
         column
           .map((user, index) => {
             const rank = index + offset + 1;
-            return `${getRankEmoji(rank)} **${user.faceitUsername}** - ${
+            return `${getRankEmoji(rank)} **${user.faceitUsername}**: ${
               user.previousElo
             } ELO`;
           })
@@ -53,13 +53,13 @@ export const leaderboardCommand = {
         .setColor("#FFD700")
         .addFields(
           {
-            name: "Leaderboard - Left",
-            value: leftColumnText || "No players",
+            name: "Leaderboard",
+            value: leftColumnText,
             inline: true,
           },
           {
-            name: "Leaderboard - Right",
-            value: rightColumnText || "No players",
+            name: "",
+            value: rightColumnText,
             inline: true,
           }
         );
