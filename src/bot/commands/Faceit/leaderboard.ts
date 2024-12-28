@@ -17,30 +17,52 @@ export const leaderboardCommand = {
       // Sort users by ELO in descending order
       const sortedUsers = users.sort((a, b) => b.previousElo - a.previousElo);
 
-      // Map users into leaderboard format
-      const leaderboard = sortedUsers
-        .map((user, index) => {
-          const rankEmoji =
-            index === 0
-              ? "1️⃣"
-              : index === 1
-              ? "2️⃣"
-              : index === 2
-              ? "3️⃣"
-              : `${index + 1}.`;
+      // Helper function to get rank emoji
+      const getRankEmoji = (rank: number) => {
+        const emojiMap: { [key: number]: string } = {
+          1: "1️⃣",
+          2: "2️⃣",
+          3: "3️⃣",
+        };
+        return emojiMap[rank] || `${rank}.`;
+      };
 
-          const line = `${rankEmoji} **${user.faceitUsername}** > ${user.previousElo} ELO`;
+      // Split the leaderboard into two columns
+      const halfwayIndex = Math.ceil(sortedUsers.length / 2);
+      const leftColumn = sortedUsers.slice(0, halfwayIndex);
+      const rightColumn = sortedUsers.slice(halfwayIndex);
 
-          // Add spacing for the top 3 only
-          return index < 3 ? `${line}` : line;
-        })
-        .join("\n"); // Regular spacing for lines beyond the top 3
+      // Helper function to format a column
+      const formatColumn = (column: typeof sortedUsers, offset: number) =>
+        column
+          .map((user, index) => {
+            const rank = index + offset + 1;
+            return `${getRankEmoji(rank)} **${user.faceitUsername}** - ${
+              user.previousElo
+            } ELO`;
+          })
+          .join("\n");
 
-      // Create embed
+      // Format both columns
+      const leftColumnText = formatColumn(leftColumn, 0);
+      const rightColumnText = formatColumn(rightColumn, halfwayIndex);
+
+      // Create embed with two fields for columns
       const embed = new EmbedBuilder()
         .setTitle("FACEIT Leaderboard standings for Duckclub")
         .setColor("#FFD700")
-        .setDescription(leaderboard);
+        .addFields(
+          {
+            name: "Leaderboard - Left",
+            value: leftColumnText || "No players",
+            inline: true,
+          },
+          {
+            name: "Leaderboard - Right",
+            value: rightColumnText || "No players",
+            inline: true,
+          }
+        );
 
       await interaction.reply({ embeds: [embed], ephemeral: true });
     } catch (error) {
