@@ -22,17 +22,17 @@ export const leaderboardCommand = {
         .map((user, index) => {
           const rankEmoji =
             index === 0
-              ? "🏆"
+              ? "1️⃣"
               : index === 1
-              ? "🥈"
+              ? "2️⃣"
               : index === 2
-              ? "🥉"
+              ? "3️⃣"
               : `${index + 1}.`;
 
           const line = `${rankEmoji} **${user.faceitUsername}** > ${user.previousElo} ELO`;
 
           // Add spacing for the top 3 only
-          return index < 3 ? `${line}\n\u200B` : line;
+          return index < 3 ? `${line}` : line;
         })
         .join("\n"); // Regular spacing for lines beyond the top 3
 
