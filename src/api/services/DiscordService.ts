@@ -17,6 +17,7 @@ import { config } from "../../config";
 import {
   removeExistingTag,
   removeUnicodeChars,
+  toUnicodeStr,
   updateNickname,
 } from "../../utils/nicknameUtils";
 import { getAllUsers, updateUserElo } from "../../db/commands";
@@ -631,7 +632,8 @@ export const removeAllUnicodeNicknames = async () => {
       // You can now modify the nickname if needed
       // Example: modify the nickname and update it
       if (nickname) {
-        const newNickname = removeUnicodeChars(nickname); // Assuming `removeExistingTag` is your function to modify the nickname
+        // const newNickname = removeUnicodeChars(nickname); // Assuming `removeExistingTag` is your function to modify the nickname
+        const newNickname = removeExistingTag(nickname); // Assuming `removeExistingTag` is your function to modify the nickname
 
         // If the nickname has changed, update it
         if (newNickname !== nickname) {
@@ -664,7 +666,7 @@ export const updateAllUnicodeNicknames = async () => {
       // You can now modify the nickname if needed
       // Example: modify the nickname and update it
       if (nickname) {
-        const newNickname = `${member.nickname} ${toUnicode(
+        const newNickname = `${member.nickname} ${toUnicodeStr(
           `[${user?.previousElo}]`
         )}`;
 

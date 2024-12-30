@@ -33,13 +33,32 @@ export const removeUnicodeChars = (value: string): string => {
   return result;
 };
 
-export function toEloUnicode(input: string): string {
-  // Map each character in the string to its eloNumbers equivalent, if it exists
-  return input
-    .split("")
-    .map((char) => eloNumbers[char] || char)
-    .join("");
-}
+// Function to replace numbers and square brackets with their Unicode equivalents
+export const toUnicodeStr = (value: string): string => {
+  // Define a mapping of characters to replace
+  const unicodeMap: Record<string, string> = {
+    "0": "⁰",
+    "1": "¹",
+    "2": "²",
+    "3": "³",
+    "4": "⁴",
+    "5": "⁵",
+    "6": "⁶",
+    "7": "⁷",
+    "8": "⁸",
+    "9": "⁹",
+    "[": "⁽",
+    "]": "⁾",
+  };
+
+  // Loop through each character in the value and replace it if a match exists
+  let result = value;
+  for (const [char, unicode] of Object.entries(unicodeMap)) {
+    result = result.split(char).join(unicode);
+  }
+
+  return result;
+};
 
 export function isNickname(identifier: string | number): identifier is string {
   return typeof identifier === "string";
