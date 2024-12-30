@@ -1,6 +1,6 @@
 import { ChatInputCommandInteraction, EmbedBuilder } from "discord.js";
 import { getAllUsers } from "../../../db/commands";
-import { replaceAllNicknames } from "../../../api/services/DiscordService";
+import { updateAllUnicodeNicknames } from "../../../api/services/DiscordService";
 
 export const leaderboardCommand = {
   name: "leaderboard",
@@ -8,7 +8,7 @@ export const leaderboardCommand = {
   options: [],
   execute: async (interaction: ChatInputCommandInteraction) => {
     try {
-      replaceAllNicknames();
+      updateAllUnicodeNicknames();
       const users = await getAllUsers();
 
       if (users.length === 0) {
