@@ -17,7 +17,6 @@ import { config } from "../../config";
 import {
   removeExistingTag,
   removeUnicodeChars,
-  toEloUnicode,
   updateNickname,
 } from "../../utils/nicknameUtils";
 import { getAllUsers, updateUserElo } from "../../db/commands";
@@ -627,10 +626,6 @@ export const replaceAllNicknames = async () => {
     members.forEach(async (member) => {
       const nickname = member.nickname;
       console.log(`${member.user.tag} has the nickname: ${nickname}`);
-      const findUser = await getAllUsers();
-      const user = findUser.find(
-        (user) => user.discordUsername == member.user.tag
-      );
 
       // You can now modify the nickname if needed
       // Example: modify the nickname and update it
@@ -638,10 +633,12 @@ export const replaceAllNicknames = async () => {
         const newNickname = removeUnicodeChars(nickname); // Assuming `removeExistingTag` is your function to modify the nickname
 
         // If the nickname has changed, update it
-        member.setNickname(
-          `${newNickname} ${toEloUnicode(String(user?.previousElo))}`
-        );
-        console.log(`Updated ${member.user.tag}'s nickname to: ${newNickname}`);
+        if (newNickname !== nickname) {
+          member.setNickname(newNickname);
+          console.log(
+            `Updated ${member.user.tag}'s nickname to: ${newNickname}`
+          );
+        }
       }
     });
   } catch (error) {

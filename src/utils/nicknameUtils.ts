@@ -6,13 +6,32 @@ export function removeExistingTag(nickname: string): string {
   return nickname.replace(/\s?\[.*?\]/, "").trim();
 }
 
-export function removeUnicodeChars(input: string): string {
-  // Regular expression to match Unicode superscript digits (U+2070 to U+209F) and brackets (U+207D, U+207E)
-  const pattern = /[\u2070-\u209F\u207D\u207E]/g;
+// Function to remove specific Unicode characters from a string
+export const removeUnicodeChars = (value: string): string => {
+  // Define the characters to remove
+  const charactersToRemove = [
+    "⁰",
+    "¹",
+    "²",
+    "³",
+    "⁴",
+    "⁵",
+    "⁶",
+    "⁷",
+    "⁸",
+    "⁹",
+    "⁽",
+    "⁾",
+  ];
 
-  // Replace any character matching the pattern with an empty string
-  return input.replace(pattern, "");
-}
+  // Loop through the characters and remove each from the string
+  let result = value;
+  charactersToRemove.forEach((char) => {
+    result = result.split(char).join("");
+  });
+
+  return result;
+};
 
 export function toEloUnicode(input: string): string {
   // Map each character in the string to its eloNumbers equivalent, if it exists
