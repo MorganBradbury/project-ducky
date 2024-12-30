@@ -136,11 +136,7 @@ export const getMatchDataFromDb = async (
           faction: match?.faction,
           trackedPlayers: match?.trackedPlayers,
         },
-        voiceChannel: {
-          id: match?.voiceChannelId,
-          name: match?.voiceChannelName,
-          liveScoresChannelId: match?.liveScoresChannelId,
-        },
+        voiceChannelId: match?.voiceChannelId,
       };
       return returnedMatch;
     }
