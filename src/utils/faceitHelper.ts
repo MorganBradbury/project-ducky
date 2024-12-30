@@ -63,6 +63,7 @@ export const generateOptimizedCaseVariations = (str: string): string[] => [
   str.length > 1
     ? str.slice(0, -1) + str.charAt(str.length - 1).toUpperCase()
     : str,
+  str,
 ];
 
 export const getScoreStatusText = (mapName: string, score: string = "0:0") =>
