@@ -387,7 +387,7 @@ export const updateMinecraftVoiceChannel = async (
     const allChannels = await guild.channels.fetch(); // Fetches all channels directly from Discord
 
     // Ensure we are working with the correct category ID
-    const categoryId = config.VC_MINECRAFT_FEED_CATEGORY_ID;
+    const categoryId = config.MC_CATEGORY_ID;
 
     // Filter channels that belong to the specified category and are voice channels
     const channelsInCategory = allChannels.filter(
@@ -423,7 +423,7 @@ export const updateMinecraftVoiceChannel = async (
     }
 
     // Create a new voice channel with the active player count
-    const channelName = `🟢 ${playerCount}`;
+    const channelName = `🟢 ${playerCount} PLAYERS`;
     const existingActiveChannel = channelsInCategory.find(
       (channel: any) => channel && channel.name.startsWith("🟢")
     );
@@ -495,12 +495,6 @@ export async function resetVoiceChannelStates(): Promise<void> {
 
     const channels = await guild.channels.fetch();
 
-    // Define an ignore list for category IDs
-    const ignoreCategoryIds: string[] = [
-      config.VC_ACTIVE_SCORES_CATEGORY_ID, // Replace with actual category IDs to ignore
-      config.VC_MINECRAFT_FEED_CATEGORY_ID,
-    ];
-
     // Group channels by category (parentId) and filter voice channels
     const categories: Record<string, VoiceChannel[]> = {};
 
@@ -512,10 +506,7 @@ export async function resetVoiceChannelStates(): Promise<void> {
         const categoryId = channel.parentId || "no-category";
 
         // Skip channels in ignored categories
-        if (
-          categoryId !== "no-category" &&
-          ignoreCategoryIds.includes(categoryId)
-        ) {
+        if (categoryId !== "no-category") {
           console.log(`Skipping category with ID: ${categoryId}`);
           return;
         }
