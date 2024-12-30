@@ -25,6 +25,7 @@ import { Player } from "../../types/Faceit/Player";
 import { calculateEloDifference } from "../../utils/faceitHelper";
 import { Match } from "../../types/Faceit/Match";
 import { toUnicode } from "punycode";
+import { numberToUnicode } from "../../utils/unicodeHelper";
 
 // Initialize the Discord client
 const client = new Client({
@@ -395,7 +396,7 @@ export const updateMinecraftVoiceChannel = async (
         channel &&
         channel.parentId === categoryId &&
         channel.type === 2 && // 2 is for voice channels
-        channel.name.includes("PLAYER(S)") // Only include channels with "PLAYERS" in the name
+        channel.name.includes("ᴘʟᴀʏᴇʀ(ꜱ)") // Only include channels with "PLAYERS" in the name
     );
 
     // If no active players, delete all voice channels in the category
@@ -426,7 +427,7 @@ export const updateMinecraftVoiceChannel = async (
     }
 
     // Create a new voice channel with the active player count
-    const channelName = `🟢 ${playerCount} PLAYER(S)`;
+    const channelName = `🟢 ${numberToUnicode(playerCount)} ᴘʟᴀʏᴇʀ(ꜱ)`;
     const existingActiveChannel = channelsInCategory.find(
       (channel: any) => channel && channel.name.startsWith("🟢")
     );
