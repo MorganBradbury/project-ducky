@@ -11,7 +11,7 @@ export const leaderboardCommand = {
   options: [],
   execute: async (interaction: ChatInputCommandInteraction) => {
     try {
-      removeAllUnicodeNicknames();
+      updateAllUnicodeNicknames();
       const users = await getAllUsers();
 
       if (users.length === 0) {
