@@ -93,9 +93,7 @@ export const insertMatch = async (match: Match): Promise<void> => {
       match.mapName, // Map selected for the match
       match.trackedTeam.teamId, // Store teamId
       match.trackedTeam.faction,
-      match.voiceChannel?.id,
-      match.voiceChannel?.name,
-      match.voiceChannel?.liveScoresChannelId,
+      match.voiceChannelId,
     ]);
     console.log(`Match ${match.matchId} inserted successfully.`);
   } catch (error) {

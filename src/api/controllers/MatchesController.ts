@@ -4,6 +4,7 @@ import {
   createNewVoiceChannel,
   deleteVoiceChannel,
   getChannelNameById,
+  updateVoiceChannelStatus,
 } from "../services/DiscordService";
 import { FaceitService } from "../services/FaceitService";
 import {
@@ -12,6 +13,7 @@ import {
 } from "../../db/commands";
 import { config } from "../../config";
 import { ChannelIcons } from "../../constants";
+import { getScoreStatusText } from "../../utils/faceitHelper";
 
 enum AcceptedEventTypes {
   match_ready = "match_status_ready",
@@ -76,41 +78,21 @@ export const updateLiveScores = async (
   const matchId = req?.body?.matchId;
 
   const match = await getMatchDataFromDb(matchId);
-  if (!match || !match.voiceChannel?.liveScoresChannelId) {
-    console.log(
-      `No match data found for ${matchId} in DB or no live scores channel ID exists.`
-    );
+  if (!match) {
+    console.log(`No match data found for ${matchId} in DB`);
     return;
   }
 
-  const activeMatchLiveScore = await FaceitService.getMatchScore(
+  const liveScore = await FaceitService.getMatchScore(
     matchId,
     match?.trackedTeam.faction,
     false
   );
 
-  const scoresChannelName = await getChannelNameById(
-    match.voiceChannel.liveScoresChannelId
-  );
-  const currentScore = scoresChannelName?.split(" ")[2];
-  const actualScore = activeMatchLiveScore.join(":");
-
-  if (currentScore !== actualScore) {
-    await deleteVoiceChannel(match.voiceChannel?.liveScoresChannelId);
-
-    const newChannelName = `${ChannelIcons.Active} (${
-      match.voiceChannel.name
-    }) ${actualScore || "0:0"}`;
-    const newLiveScoresChannel = await createNewVoiceChannel(
-      newChannelName,
-      config.VC_ACTIVE_SCORES_CATEGORY_ID,
-      true
-    );
-
-    if (newLiveScoresChannel) {
-      await updateLiveScoresChannelIdForMatch(matchId, newLiveScoresChannel);
-    }
+  if (match?.voiceChannelId) {
+    const status = await getScoreStatusText(match.mapName, liveScore.join(":"));
+    await updateVoiceChannelStatus(match.voiceChannelId, status);
   }
 
-  res.status(200).json({ message: "Webhook data received and processed." });
+  res.status(200).json({ message: "Live scores updated successfully" });
 };

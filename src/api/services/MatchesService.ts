@@ -16,10 +16,12 @@ import {
   sendMatchFinishNotification,
   transferUsersToNewChannel,
   updateVoiceChannelName,
+  updateVoiceChannelStatus,
 } from "./DiscordService";
 import { FaceitService } from "./FaceitService";
 import { config } from "../../config";
 import { ChannelIcons } from "../../constants";
+import { getScoreStatusText } from "../../utils/faceitHelper";
 
 let workers: Record<string, Worker> = {};
 
@@ -40,32 +42,13 @@ export const startMatch = async (matchId: string) => {
     return;
   }
 
-  // Stack is in the discord. Change discord to live state.
-  if (match?.voiceChannel) {
-    await updateVoiceChannelName(
-      match.voiceChannel.id,
-      `${ChannelIcons.Active} ${match.voiceChannel.name} [LIVE]`
-    );
-
-    const liveScoresChannelId = await createNewVoiceChannel(
-      `${ChannelIcons.Active} (${match.voiceChannel.name}) 0:0`,
-      config.VC_ACTIVE_SCORES_CATEGORY_ID
-    );
-
-    if (liveScoresChannelId) {
-      match = {
-        ...match,
-        voiceChannel: {
-          ...match.voiceChannel,
-          liveScoresChannelId: liveScoresChannelId,
-        },
-      };
-    }
-
-    // Start the worker after creating the active scores channel
+  // If the players are in a voice channel. Create a JS Worker to update the live score in the status of the channel.
+  if (match?.voiceChannelId) {
+    const scoreStatus = await getScoreStatusText(match.mapName);
+    await updateVoiceChannelStatus(match.voiceChannelId, scoreStatus);
     const worker = new Worker(path.resolve(__dirname, "../worker.js"));
     worker.postMessage({ type: "start", matchId: matchId });
-    workers[matchId] = worker; // Store worker by matchId
+    workers[matchId] = worker;
   }
 
   await insertMatch(match);
@@ -96,20 +79,12 @@ export const endMatch = async (matchId: string) => {
 
   // deletes record from DB.
   await markMatchComplete(matchId);
-
-  if (match.voiceChannel?.id) {
-    await updateVoiceChannelName(
-      match.voiceChannel.id,
-      `${ChannelIcons.Active} ${match.voiceChannel.name}`
-    );
-  }
-
-  if (match.voiceChannel?.liveScoresChannelId) {
-    await deleteVoiceChannel(match.voiceChannel?.liveScoresChannelId);
-  }
-
   await sendMatchFinishNotification(match);
   await runEloUpdate(match.trackedTeam.trackedPlayers);
+
+  if (match?.voiceChannelId) {
+    await updateVoiceChannelStatus(match.voiceChannelId, "");
+  }
 };
 
 export const cancelMatch = async (matchId: string) => {
@@ -121,37 +96,6 @@ export const cancelMatch = async (matchId: string) => {
     return;
   }
 
-  // Handle moving users from the old voice channel to a new one
-  if (match.voiceChannel?.id) {
-    try {
-      // Delete the scores channel if it exists
-      if (match.voiceChannel?.liveScoresChannelId) {
-        await deleteVoiceChannel(match.voiceChannel?.liveScoresChannelId);
-      }
-
-      // Create a new voice channel and get its ID
-      const newChannelId = await createNewVoiceChannel(
-        `${ChannelIcons.Active} ${match.voiceChannel.name}`,
-        config.VC_GAMES_CATEGORY_ID
-      );
-
-      if (!newChannelId) {
-        console.error("Failed to create a new voice channel.");
-        return;
-      }
-
-      await transferUsersToNewChannel(match.voiceChannel.id, newChannelId);
-      await deleteVoiceChannel(match.voiceChannel.id);
-      await resetVoiceChannelStates();
-
-      console.log(
-        `Moved users from voiceChannelId: ${match.voiceChannel.id} to newChannelId: ${newChannelId}`
-      );
-    } catch (error) {
-      console.error("Error when cancelling match", error);
-    }
-  }
-
   // Mark match as complete in the database
   await markMatchComplete(matchId);
 
@@ -161,5 +105,9 @@ export const cancelMatch = async (matchId: string) => {
     workers[matchId].terminate(); // Clean up worker resources
     delete workers[matchId]; // Remove worker from storage
     console.log("Worker stopped for matchId:", matchId);
+  }
+
+  if (match?.voiceChannelId) {
+    await updateVoiceChannelStatus(match.voiceChannelId, "");
   }
 };

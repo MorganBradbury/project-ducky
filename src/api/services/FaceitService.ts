@@ -1,6 +1,6 @@
 import axios, { AxiosInstance } from "axios";
 import { config } from "../../config";
-import { getMatchVoiceChannel } from "./DiscordService";
+import { getMatchVoiceChannelId } from "./DiscordService";
 import {
   generateOptimizedCaseVariations,
   getTeamFaction,
@@ -101,8 +101,6 @@ class FaceitApiClient {
         return null;
       }
 
-      const voiceChannel = await getMatchVoiceChannel(trackedTeamPlayers);
-
       return {
         matchId: matchId,
         mapName: response.data.voting.map.pick,
@@ -111,7 +109,8 @@ class FaceitApiClient {
           faction: trackedTeamFaction.faction,
           trackedPlayers: trackedTeamPlayers,
         },
-        ...voiceChannel,
+        voiceChannelId:
+          (await getMatchVoiceChannelId(trackedTeamPlayers)) || undefined,
       };
     } catch (error) {
       console.error(`Error fetching match details for ${matchId}:`, error);

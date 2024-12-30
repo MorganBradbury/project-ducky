@@ -8,9 +8,5 @@ export type Match = {
     faction: string;
     trackedPlayers: SystemUser[];
   };
-  voiceChannel?: {
-    id: string;
-    name: string;
-    liveScoresChannelId: string;
-  };
+  voiceChannelId?: string;
 };

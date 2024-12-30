@@ -101,11 +101,9 @@ const sendEmbedMessage = async (embed: EmbedBuilder) => {
 };
 
 // Function to get the applicable voice channel based on matching players' usernames
-export const getMatchVoiceChannel = async (
+export const getMatchVoiceChannelId = async (
   matchingPlayers: SystemUser[]
-): Promise<{
-  voiceChannel: { id: string; name: string; liveScoresChannelId: string };
-} | null> => {
+): Promise<string | null> => {
   const guild = await client.guilds.fetch(config.GUILD_ID);
   const channels = await guild.channels.fetch();
 
@@ -117,13 +115,9 @@ export const getMatchVoiceChannel = async (
             (player) => player.discordUsername === member.user.username
           )
         ) {
-          return {
-            voiceChannel: {
-              id: channelId,
-              name: channel.name.replace(/[🟢🟠]/g, "").trim(),
-              liveScoresChannelId: "N/A",
-            },
-          };
+          return channelId;
+        } else {
+          return null;
         }
       }
     }
@@ -616,6 +610,49 @@ export const getChannelNameById = async (
   } catch (error) {
     console.error("Error fetching channel name by ID:", error);
     return null;
+  }
+};
+
+export const updateVoiceChannelStatus = async (
+  voiceChannelId: string,
+  status: string
+) => {
+  try {
+    const guild = await client.guilds.fetch(config.GUILD_ID);
+    const channel = await guild.channels.fetch(voiceChannelId);
+
+    if (channel instanceof VoiceChannel) {
+      const url = `https://discord.com/api/v10/channels/${voiceChannelId}/voice-status`;
+      const payload = { status };
+
+      try {
+        const response = await axios.put(url, payload, {
+          headers: {
+            Authorization: `Bot ${config.DISCORD_BOT_TOKEN}`,
+            "Content-Type": "application/json",
+          },
+        });
+        if (response.status === 204) {
+          console.log(`Updated voice channel name to: ${status}`);
+        } else {
+          console.log(
+            `Failed to update voice channel status: ${response.status}`
+          );
+        }
+      } catch (error: any) {
+        if (error.response?.status === 429) {
+          const retryAfter = error.response.headers["retry-after"];
+          console.error(`Rate limit hit! Retry after ${retryAfter} seconds.`);
+        } else {
+          throw error;
+        }
+      }
+    } else {
+      console.log("The specified channel is not a VoiceChannel.");
+    }
+  } catch (error) {
+    console.error("Error updating voice channel status:", error);
+    return;
   }
 };
 
