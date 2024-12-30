@@ -619,21 +619,33 @@ export const updateVoiceChannelStatus = async (
   }
 };
 
-export const removeAllUnicodeNicknames = async () => {
+export const updateAllUnicodeNicknames = async () => {
   try {
     const guild = await client.guilds.fetch(config.GUILD_ID); // Fetch the guild
     const members = await guild.members.fetch(); // Fetch all members
 
+    const ownerId = guild.ownerId; // Get the server owner's ID
+
     // Loop through all members and get their server nickname
     members.forEach(async (member) => {
+      // Skip the server owner
+      if (member.id === ownerId) {
+        return;
+      }
+
       const nickname = member.nickname;
       console.log(`${member.user.tag} has the nickname: ${nickname}`);
+      const findUser = await getAllUsers();
+      const user = findUser.find(
+        (user) => user.discordUsername === member.user.tag
+      );
 
       // You can now modify the nickname if needed
       // Example: modify the nickname and update it
       if (nickname) {
-        // const newNickname = removeUnicodeChars(nickname); // Assuming `removeExistingTag` is your function to modify the nickname
-        const newNickname = removeExistingTag(nickname); // Assuming `removeExistingTag` is your function to modify the nickname
+        const newNickname = `${member.nickname} ${toUnicodeStr(
+          `[${user?.previousElo}]`
+        )}`;
 
         // If the nickname has changed, update it
         if (newNickname !== nickname) {
@@ -648,27 +660,27 @@ export const removeAllUnicodeNicknames = async () => {
     console.error("Error fetching members or updating nicknames:", error);
   }
 };
-
-export const updateAllUnicodeNicknames = async () => {
+export const removeAllUnicodeNicknames = async () => {
   try {
     const guild = await client.guilds.fetch(config.GUILD_ID); // Fetch the guild
     const members = await guild.members.fetch(); // Fetch all members
 
+    const ownerId = guild.ownerId; // Get the server owner's ID
+
     // Loop through all members and get their server nickname
     members.forEach(async (member) => {
+      // Skip the server owner
+      if (member.id === ownerId) {
+        return;
+      }
+
       const nickname = member.nickname;
       console.log(`${member.user.tag} has the nickname: ${nickname}`);
-      const findUser = await getAllUsers();
-      const user = findUser.find(
-        (user) => user.discordUsername === member.user.tag
-      );
 
       // You can now modify the nickname if needed
       // Example: modify the nickname and update it
       if (nickname) {
-        const newNickname = `${member.nickname} ${toUnicodeStr(
-          `[${user?.previousElo}]`
-        )}`;
+        const newNickname = removeExistingTag(nickname); // Assuming `removeExistingTag` is your function to modify the nickname
 
         // If the nickname has changed, update it
         if (newNickname !== nickname) {
