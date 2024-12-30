@@ -632,9 +632,7 @@ export const updateVoiceChannelStatus = async (
             "Content-Type": "application/json",
           },
         });
-        if (response.status === 204) {
-          console.log(`Updated voice channel name to: ${status}`);
-        } else {
+        if (response.status !== 204) {
           console.log(
             `Failed to update voice channel status: ${response.status}`
           );

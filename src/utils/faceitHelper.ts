@@ -67,6 +67,5 @@ export const generateOptimizedCaseVariations = (str: string): string[] => [
 ];
 
 export const getScoreStatusText = (mapName: string, score: string = "0:0") => {
-  console.log("status mapname", mapName);
   return `LIVE: ${mapName.replace("de_", "").toUpperCase()} (${score})`;
 };
