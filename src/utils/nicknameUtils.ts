@@ -1,14 +1,8 @@
 import { GuildMember } from "discord.js";
 import { Player } from "../types/Faceit/Player";
-import { eloNumbers } from "../constants";
 
 function removeExistingTag(nickname: string): string {
-  // Get all values from digitReplacements to construct a regex
-  const superscriptChars = Object.values(eloNumbers).join("");
-  const regex = new RegExp(`[${superscriptChars}]`, "g");
-
-  // Remove superscript characters and trim extra spaces
-  return nickname.replace(regex, "").trim();
+  return nickname.replace(/\s?\[.*?\]/, "").trim();
 }
 
 export function isNickname(identifier: string | number): identifier is string {
@@ -25,10 +19,7 @@ export async function updateNickname(
   const cleanName = removeExistingTag(currentName);
 
   // Calculate the length of the clean name and the ELO to check if the total exceeds 32 characters
-  const eloTag = `[${player.faceitElo}]`
-    .split("")
-    .map((char) => eloNumbers[char] || char)
-    .join("");
+  const eloTag = `[${player.faceitElo}]`;
   const potentialNickname = `${cleanName} ${eloTag}`;
 
   // If the nickname exceeds 32 characters, use the Discord username instead of the nickname

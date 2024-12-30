@@ -277,42 +277,6 @@ export const sendMatchFinishNotification = async (match: Match) => {
   }
 };
 
-// Helper function to get all users in a voice channel
-export const transferUsersToNewChannel = async (
-  voiceChannelId: string,
-  newChannelId: string
-) => {
-  try {
-    const guild = await client.guilds.fetch(config.GUILD_ID);
-    if (!guild) {
-      console.error("Guild not found.");
-      return [];
-    }
-
-    const channel = await guild.channels.fetch(voiceChannelId);
-    if (!channel || !(channel instanceof VoiceChannel)) {
-      console.error(
-        `Channel with ID ${voiceChannelId} is not a valid voice channel.`
-      );
-      return [];
-    }
-
-    // Fetch and return members in the voice channel
-    const membersInChannel = Array.from(channel.members.values());
-
-    // Move each user to the new voice channel
-    for (const member of membersInChannel) {
-      await member.voice.setChannel(newChannelId);
-    }
-  } catch (error) {
-    console.error(
-      `Error fetching users from voice channel ${voiceChannelId}:`,
-      error
-    );
-    return [];
-  }
-};
-
 // Main function to update Elo
 export const runEloUpdate = async (users: SystemUser[]) => {
   try {

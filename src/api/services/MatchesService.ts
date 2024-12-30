@@ -9,18 +9,11 @@ import {
   updateMatchProcessed,
 } from "../../db/commands";
 import {
-  createNewVoiceChannel,
-  deleteVoiceChannel,
-  resetVoiceChannelStates,
   runEloUpdate,
   sendMatchFinishNotification,
-  transferUsersToNewChannel,
-  updateVoiceChannelName,
   updateVoiceChannelStatus,
 } from "./DiscordService";
 import { FaceitService } from "./FaceitService";
-import { config } from "../../config";
-import { ChannelIcons } from "../../constants";
 import { getScoreStatusText } from "../../utils/faceitHelper";
 
 let workers: Record<string, Worker> = {};
