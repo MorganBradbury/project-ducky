@@ -392,7 +392,10 @@ export const updateMinecraftVoiceChannel = async (
     // Filter channels that belong to the specified category and are voice channels
     const channelsInCategory = allChannels.filter(
       (channel) =>
-        channel && channel.parentId === categoryId && channel.type === 2 // 2 is for voice channels
+        channel &&
+        channel.parentId === categoryId &&
+        channel.type === 2 && // 2 is for voice channels
+        channel.name.includes("PLAYER(S)") // Only include channels with "PLAYERS" in the name
     );
 
     // If no active players, delete all voice channels in the category
@@ -423,7 +426,7 @@ export const updateMinecraftVoiceChannel = async (
     }
 
     // Create a new voice channel with the active player count
-    const channelName = `🟢 ${playerCount} PLAYERS`;
+    const channelName = `🟢 ${playerCount} PLAYER(S)`;
     const existingActiveChannel = channelsInCategory.find(
       (channel: any) => channel && channel.name.startsWith("🟢")
     );
