@@ -103,7 +103,7 @@ class FaceitApiClient {
 
       return {
         matchId: matchId,
-        mapName: response.data.voting.map.pick,
+        mapName: response.data.voting.map.pick[0],
         trackedTeam: {
           teamId: trackedTeamFaction.teamId,
           faction: trackedTeamFaction.faction,
