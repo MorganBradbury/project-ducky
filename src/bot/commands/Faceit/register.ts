@@ -42,6 +42,7 @@ export const registerTrackingCommand = {
           console.log(
             `User added to tracker: ${discordUsername} ${faceitName}`
           );
+          return;
         });
       } else {
         await interaction.reply({
