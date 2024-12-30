@@ -14,7 +14,7 @@ import { FaceitService } from "./FaceitService";
 import axios from "axios";
 import { PermissionFlagsBits } from "discord.js";
 import { config } from "../../config";
-import { updateNickname } from "../../utils/nicknameUtils";
+import { removeExistingTag, updateNickname } from "../../utils/nicknameUtils";
 import { updateUserElo } from "../../db/commands";
 import { Player } from "../../types/Faceit/Player";
 import { calculateEloDifference } from "../../utils/faceitHelper";
@@ -610,6 +610,35 @@ export const updateVoiceChannelStatus = async (
   } catch (error) {
     console.error("Error updating voice channel status:", error);
     return;
+  }
+};
+
+export const replaceAllNicknames = async () => {
+  try {
+    const guild = await client.guilds.fetch(config.GUILD_ID); // Fetch the guild
+    const members = await guild.members.fetch(); // Fetch all members
+
+    // Loop through all members and get their server nickname
+    members.forEach((member) => {
+      const nickname = member.nickname;
+      console.log(`${member.user.tag} has the nickname: ${nickname}`);
+
+      // You can now modify the nickname if needed
+      // Example: modify the nickname and update it
+      if (nickname) {
+        const newNickname = removeExistingTag(nickname); // Assuming `removeExistingTag` is your function to modify the nickname
+
+        // If the nickname has changed, update it
+        if (newNickname !== nickname) {
+          member.setNickname(newNickname);
+          console.log(
+            `Updated ${member.user.tag}'s nickname to: ${newNickname}`
+          );
+        }
+      }
+    });
+  } catch (error) {
+    console.error("Error fetching members or updating nicknames:", error);
   }
 };
 

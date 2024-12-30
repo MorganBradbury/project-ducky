@@ -2,11 +2,7 @@ import { GuildMember } from "discord.js";
 import { Player } from "../types/Faceit/Player";
 import { eloNumbers } from "../constants";
 
-// function removeExistingTag(nickname: string): string {
-//   return nickname.replace(/\s?\[.*?\]/, "").trim();
-// }
-
-function removeExistingTag(nickname: string): string {
+export function removeExistingTag(nickname: string): string {
   return nickname.replace(/\s?\[.*?\]/, "").trim();
 }
 
