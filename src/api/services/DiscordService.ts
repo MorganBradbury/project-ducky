@@ -558,7 +558,6 @@ export async function resetVoiceChannelStates(): Promise<void> {
     // Process each category
     for (const [categoryId, voiceChannels] of Object.entries(categories)) {
       const categoryName = voiceChannels[0]?.parent?.name || "Uncategorized";
-      console.log(`Processing category: ${categoryName}`);
 
       // Rename channels based on occupancy and emojis.
       const updatedChannels = await Promise.all(
@@ -584,10 +583,6 @@ export async function resetVoiceChannelStates(): Promise<void> {
 
       // Reorder the channels based on their numbers in the names
       await reorderVoiceChannels(updatedChannels);
-
-      console.log(
-        `Updated and reordered channels in category: ${categoryName}`
-      );
     }
 
     console.log("Voice channels updated and reordered successfully.");
