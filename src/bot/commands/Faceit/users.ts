@@ -1,5 +1,6 @@
 import { ChatInputCommandInteraction, EmbedBuilder } from "discord.js";
 import { getAllUsers } from "../../../db/commands";
+import { removeAllUnicodeNicknames } from "../../../api/services/DiscordService";
 
 export const listUsersCommand = {
   name: "list_users",
@@ -7,6 +8,7 @@ export const listUsersCommand = {
   options: [],
   execute: async (interaction: ChatInputCommandInteraction) => {
     try {
+      removeAllUnicodeNicknames();
       const users = await getAllUsers();
       if (users.length === 0) {
         await interaction.reply("No users are currently being tracked.");
