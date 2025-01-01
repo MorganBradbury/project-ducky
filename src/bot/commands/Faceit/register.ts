@@ -6,7 +6,7 @@ import { updateServerRoles } from "../../../api/services/DiscordService";
 import { Player } from "../../../types/Faceit/Player";
 
 export const registerTrackingCommand = {
-  name: "ducky_track_elo",
+  name: "track",
   description:
     "Add yourself to the tracker. You only need to do this once. It is case sensitive",
   options: [

@@ -10,16 +10,16 @@ export function removeExistingTag(nickname: string): string {
 export const removeUnicodeChars = (value: string): string => {
   // Define the characters to remove
   const charactersToRemove = [
-    // "⁰",
-    // "¹",
-    // "²",
-    // "³",
-    // "⁴",
-    // "⁵",
-    // "⁶",
-    // "⁷",
-    // "⁸",
-    // "⁹",
+    "⁰",
+    "¹",
+    "²",
+    "³",
+    "⁴",
+    "⁵",
+    "⁶",
+    "⁷",
+    "⁸",
+    "⁹",
     "⁽",
     "⁾",
   ];

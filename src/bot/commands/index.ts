@@ -5,6 +5,7 @@ import { helpCommand } from "./help";
 import { leaderboardCommand } from "./Faceit/leaderboard";
 import { getActivePlayers } from "./Minecraft/getActivePlayers";
 import { clearMessagesCommand } from "./Discord/clearMessages";
+import { updateNicknameCommand } from "./Discord/setNickname";
 
 export const commands = [
   registerTrackingCommand,
@@ -14,6 +15,7 @@ export const commands = [
   leaderboardCommand,
   getActivePlayers,
   clearMessagesCommand,
+  updateNicknameCommand,
 ];
 
 export const commandsMap = new Map(commands.map((cmd) => [cmd.name, cmd]));

@@ -40,7 +40,7 @@ client.on("guildMemberAdd", async (member: GuildMember) => {
     // Private welcome message with tagging the user
     await member.send(
       `Hello <@${member.user.id}>! I'm Duckybot 👋\n\n` +
-        `To track your elo in your username, type **/ducky_track_elo [FACEIT NAME]** in the Counter-Strike chat in Duckclub. Remember, it's **CASE SENSITIVE**, so please enter it exactly.\n\n` +
+        `To track your elo in your username, type **/track [FACEIT NAME]** in the Counter-Strike chat in Duckclub. Remember, it's **CASE SENSITIVE**, so please enter it exactly.\n\n` +
         `For other commands like /leaderboard, type **/help** to get a list of available commands.\n\n` +
         `If you need any assistance, feel free to reach out to a VIP! 🙂`
     );
