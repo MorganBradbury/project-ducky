@@ -47,8 +47,6 @@ export const toUnicodeStr = (value: string): string => {
     "7": "⁷",
     "8": "⁸",
     "9": "⁹",
-    "[": "⁽",
-    "]": "⁾",
   };
 
   // Loop through each character in the value and replace it if a match exists
@@ -74,7 +72,7 @@ export async function updateNickname(
   const cleanName = removeUnicodeChars(currentName);
 
   // Calculate the length of the clean name and the ELO to check if the total exceeds 32 characters
-  const eloTag = toUnicodeStr(`[${player.faceitElo}]`);
+  const eloTag = toUnicodeStr(`${player.faceitElo}`);
   const potentialNickname = `${cleanName.trim()} ${eloTag.trim()}`;
 
   // If the nickname exceeds 32 characters, use the Discord username instead of the nickname
