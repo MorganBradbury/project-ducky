@@ -52,7 +52,7 @@ export const updateNicknameCommand = {
       // Create the embed
       const embed = new EmbedBuilder()
         .setColor("#8d439c") // Green color for success
-        .setTitle("Notification: Nickname changed")
+        .setTitle("Notification: Nickname updated")
         .addFields(
           { name: "User", value: `<@${member.user.id}>` },
           { name: "Old Nickname", value: baseNickname || "None", inline: true },
