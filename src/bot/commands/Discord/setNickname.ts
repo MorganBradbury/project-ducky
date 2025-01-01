@@ -1,4 +1,8 @@
-import { ChatInputCommandInteraction, GuildMember } from "discord.js";
+import {
+  ChatInputCommandInteraction,
+  GuildMember,
+  EmbedBuilder,
+} from "discord.js";
 import { removeUnicodeChars } from "../../../utils/nicknameUtils";
 
 export const updateNicknameCommand = {
@@ -31,6 +35,9 @@ export const updateNicknameCommand = {
       const eloMatch = currentNickname.slice(-4);
       const currentElo = eloMatch ? eloMatch : "⁰⁰⁰⁰";
 
+      // Get the base nickname without the last 4 characters
+      const baseNickname = currentNickname.slice(0, -4).trim();
+
       // Get the new nickname from the command options
       const newNickname = removeUnicodeChars(
         interaction.options.getString("nickname", true)
@@ -42,9 +49,19 @@ export const updateNicknameCommand = {
       // Set the new nickname
       await member.setNickname(updatedNickname);
 
-      await interaction.reply({
-        content: `<@${member.user.id}> has updated their nickname from **${currentNickname}** to **${updatedNickname}**.`,
-      });
+      // Create the embed
+      const embed = new EmbedBuilder()
+        .setColor("#00FF00") // Green color for success
+        .setTitle("Nickname Changed")
+        .addFields(
+          { name: "User", value: `<@${member.user.id}>` },
+          { name: "Old Nickname", value: baseNickname || "None" },
+          { name: "New Nickname", value: newNickname }
+        )
+        .setTimestamp();
+
+      // Send the embed as a reply
+      await interaction.reply({ embeds: [embed] });
     } catch (error) {
       console.error("Error updating nickname:", error);
 
