@@ -675,7 +675,7 @@ export const removeAllUnicodeNicknames = async () => {
       // You can now modify the nickname if needed
       // Example: modify the nickname and update it
       if (nickname) {
-        const newNickname = removeExistingTag(nickname); // Assuming `removeExistingTag` is your function to modify the nickname
+        const newNickname = removeUnicodeChars(nickname); // Assuming `removeExistingTag` is your function to modify the nickname
 
         // If the nickname has changed, update it
         if (newNickname !== nickname) {
