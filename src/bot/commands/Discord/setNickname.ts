@@ -51,12 +51,12 @@ export const updateNicknameCommand = {
 
       // Create the embed
       const embed = new EmbedBuilder()
-        .setColor("#00FF00") // Green color for success
-        .setTitle("Nickname Changed")
+        .setColor("#8d439c") // Green color for success
+        .setTitle("Notification: Nickname changed")
         .addFields(
           { name: "User", value: `<@${member.user.id}>` },
-          { name: "Old Nickname", value: baseNickname || "None" },
-          { name: "New Nickname", value: newNickname }
+          { name: "Old Nickname", value: baseNickname || "None", inline: true },
+          { name: "New Nickname", value: newNickname, inline: true }
         )
         .setTimestamp();
 
