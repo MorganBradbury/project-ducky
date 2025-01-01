@@ -28,8 +28,8 @@ export const updateNicknameCommand = {
       const currentNickname = member.nickname || member.user.username;
 
       // Extract the Elo from the last 4 characters of the nickname
-      const eloMatch = currentNickname.match(/\d{4}$/);
-      const currentElo = eloMatch ? eloMatch[0] : "⁰⁰⁰⁰";
+      const eloMatch = currentNickname.slice(-4);
+      const currentElo = eloMatch ? eloMatch : "⁰⁰⁰⁰";
 
       // Get the new nickname from the command options
       const newNickname = removeUnicodeChars(
