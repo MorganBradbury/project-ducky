@@ -251,7 +251,7 @@ export const sendMatchFinishNotification = async (match: Match) => {
         const name = (player?.faceitUsername || "Unknown").padEnd(18, " ");
         const kda = `${stat.kills}/${stat.deaths}/${stat.assists}`;
         const adr = stat.ADR.padStart(5, " ");
-        const hs = stat.hsPercentage.padStart(5, " ");
+        const hs = stat.hsPercentage.padStart(3, " ");
         const elo =
           `${eloChange?.operator}${eloChange?.difference} (${eloChange?.newElo})`.padEnd(
             18,
@@ -297,7 +297,7 @@ export const sendMatchFinishNotification = async (match: Match) => {
         },
         {
           name: "Players and Stats",
-          value: `${header}\n${separator}\n${playerStatsTable.join("\n")}`,
+          value: `${playerStatsTable.join("\n")}`,
         }
       )
       .setTimestamp();
