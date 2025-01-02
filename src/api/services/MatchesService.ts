@@ -114,35 +114,39 @@ type PlayerStats = {
   winPercentage: number | "NaN";
 };
 
+const activeMatchIds = new Set<string>();
+
 export const sendPrematchAnalysis = async (matchId: string): Promise<any> => {
-  console.log("Processing sendPrematchAnalysis()", matchId);
-
-  // // Retrieves an array of players from the match by their ID
-  const leader = await FaceitService.getMatchFactionLeader(matchId);
-  if (leader === null) {
+  // Check if the matchId is already being processed
+  if (activeMatchIds.has(matchId)) {
+    console.log(`Match ${matchId} is already being processed. Skipping...`);
     return;
   }
-  console.log("Leader", leader);
-  const playerMapStats = await FaceitService.getMapStatsByPlayer(leader);
-  if (playerMapStats === null) {
-    return;
+
+  try {
+    // Mark the matchId as being processed
+    activeMatchIds.add(matchId);
+    console.log("Processing sendPrematchAnalysis()", matchId);
+
+    // Retrieves an array of players from the match by their ID
+    const leader = await FaceitService.getMatchFactionLeader(matchId);
+    if (leader === null) {
+      return;
+    }
+    console.log("Leader", leader);
+
+    const playerMapStats = await FaceitService.getMapStatsByPlayer(leader);
+    if (playerMapStats === null) {
+      return;
+    }
+    console.log("PlayerMapStats", playerMapStats);
+
+    // Create the prematch embed
+    createPrematchEmbed(playerMapStats, matchId);
+  } catch (error) {
+    console.error(`Error processing match ${matchId}:`, error);
+  } finally {
+    // After processing, remove the matchId from the active set
+    activeMatchIds.delete(matchId);
   }
-  console.log("PlayerMapStats", playerMapStats);
-  createPrematchEmbed(playerMapStats, matchId);
-  // if(players === null) {
-  //   console.log("No players in pre-match", matchId);
-  //   return;
-  // }
-
-  // let analysisObject: [];
-
-  // // Now loop through players and get their stats for all their maps
-  // players.map((playerId: string) => {
-  //   const playerMapStats = FaceitService.getMapStatsByPlayer(playerId);
-  //   // Now I have the stats of the player.
-
-  //   // Now i need to put this into a variable.
-  // });
-
-  // // Once all players have been looped through, the object will have all the data. Loop through it and aggregate the winrate for each map, and the aggregate of the amount played.
 };
