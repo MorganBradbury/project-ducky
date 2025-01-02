@@ -24,7 +24,7 @@ export const handleMatchesHook = async (
       AcceptedEventTypes.match_ready,
       AcceptedEventTypes.match_finished,
       AcceptedEventTypes.match_cancelled,
-      AcceptedEventTypes.match_status_configuring,
+      AcceptedEventTypes.match_ready,
     ];
 
     console.log(`Request received from FACEIT`, req.body?.payload);
@@ -39,8 +39,8 @@ export const handleMatchesHook = async (
       return;
     }
 
-    if (eventId === AcceptedEventTypes.match_status_configuring) {
-      await sendPrematchAnalysis(req?.body?.payload);
+    if (eventId === AcceptedEventTypes.match_created) {
+      await sendPrematchAnalysis(matchId);
     }
 
     // Match has just started
