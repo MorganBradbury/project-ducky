@@ -308,19 +308,20 @@ export const sendMatchFinishNotification = async (match: Match) => {
       .setTimestamp();
 
     // Create the buttons
+    // Create the "More Stats" button and "View matchroom" button
     const row = new ActionRowBuilder().addComponents(
       new ButtonBuilder()
         .setCustomId("more_stats") // Custom ID for button interaction
         .setLabel("More Stats") // Button label
-        .setStyle(ButtonStyle.Primary), // Button style
+        .setStyle(ButtonStyle.Primary), // Button style for interaction
 
       new ButtonBuilder()
+        .setURL(`https://www.faceit.com/en/cs2/room/${match.matchId}`) // Set URL for the button
         .setLabel("View matchroom") // Button label
-        .setStyle(ButtonStyle.Secondary) // Button style
-        .setURL(`https://www.faceit.com/en/cs2/room/${match.matchId}`) // URL for view matchroom button
+        .setStyle(ButtonStyle.Link) // Use Link style for a URL
     );
 
-    // Send the embed with both buttons
+    // Send the embed with the buttons
     await sendEmbedMessage(embed, [row]);
   } catch (error) {
     console.error("Error sending match finish notification:", error);
