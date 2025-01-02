@@ -24,7 +24,7 @@ export const handleMatchesHook = async (
       AcceptedEventTypes.match_ready,
       AcceptedEventTypes.match_finished,
       AcceptedEventTypes.match_cancelled,
-      AcceptedEventTypes.match_configuring,
+      AcceptedEventTypes.match_created,
     ];
 
     if (!matchId || !eventId) {
