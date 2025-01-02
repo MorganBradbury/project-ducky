@@ -686,13 +686,13 @@ export const createPrematchEmbed = (
   const mostPlayedMaps = sortedStats
     .slice(0, 3)
     .map((map) => {
-      `${getMapEmoji(map.mapName)}  ${map.mapName}`;
+      map.mapName;
     })
     .join("\n ");
   const leastPlayedMaps = sortedStats
     .slice(-3)
     .map((map) => {
-      `${getMapEmoji(map.mapName)}  ${map.mapName}`;
+      map.mapName;
     })
     .join("\n ");
 
