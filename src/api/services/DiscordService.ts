@@ -670,6 +670,8 @@ export const createPrematchEmbed = (mapStats: PlayerMapsData[]) => {
     .setFooter({ text: "Prematch analysis" })
     .setTimestamp();
 
+  sendEmbedMessage(embed);
+
   return embed;
 };
 
