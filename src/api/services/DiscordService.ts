@@ -233,10 +233,6 @@ export const sendMatchFinishNotification = async (match: Match) => {
       (a, b) => parseFloat(b.ADR) - parseFloat(a.ADR)
     );
 
-    // Construct the table header and separator
-    const header = "`Name         | Stats         | Elo Change  `"; // Each part is padded to 13 characters
-    const separator = "`--------------------------------------------`"; // Separator aligns with header
-
     // Construct table rows
     const playerStatsTable = await Promise.all(
       sortedPlayerStats.map(async (stat) => {
@@ -248,9 +244,10 @@ export const sendMatchFinishNotification = async (match: Match) => {
           player?.gamePlayerId || ""
         );
 
-        const name = (player?.faceitUsername || "Unknown").padEnd(6, " ");
+        const playerName = player?.faceitUsername || "Unknown";
+        const name = playerName.padEnd(playerName.length + 1, " ");
         const kda = `${stat.kills}/${stat.deaths}/${stat.assists}`;
-        const adr = stat.ADR.padStart(5, " ") + "ADR";
+        const adr = stat.ADR.padStart(5, " ");
         const elo =
           `${eloChange?.operator}${eloChange?.difference} (${eloChange?.newElo})`.padEnd(
             3,
