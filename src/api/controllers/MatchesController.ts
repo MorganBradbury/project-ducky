@@ -36,6 +36,11 @@ export const handleMatchesHook = async (
       AcceptedEventTypes.match_cancelled,
     ];
 
+    console.log(
+      `Request received from ${req.headers.referer}`,
+      req.body?.payload
+    );
+
     if (!matchId || !eventId) {
       console.log("No match id/ event present:", { matchId, eventId });
       return;
