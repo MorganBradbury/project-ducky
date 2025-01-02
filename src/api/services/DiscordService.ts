@@ -220,15 +220,17 @@ export const sendMatchFinishNotification = async (match: Match) => {
       (a, b) => parseFloat(b.ADR) - parseFloat(a.ADR)
     );
 
-    // Define column widths for alignment with no spaces
+    // Define column widths for alignment
     const columnWidths = {
       name: 18, // Name column: 18 characters max
-      stats: 22, // Stats column: 22 characters (e.g., 16/11/10 89ADR (46%))
+      stats: 18, // Stats column: 18 characters (e.g., 16/11/10 89ADR (46%))
       elo: 13, // Elo Change column: 13 characters (e.g., +25 (2100))
     };
 
     // Construct the table header
-    const header = `\`Name               | Stats                   | Elo Change\``;
+    const header = "`Name               | Stats               | Elo Change`";
+    const separator =
+      "`-------------------|---------------------|-------------`";
 
     // Construct table rows
     const playerStatsTable = await Promise.all(
@@ -258,7 +260,7 @@ export const sendMatchFinishNotification = async (match: Match) => {
         const adr = `${stat.ADR}ADR`.padEnd(5, " "); // Add space between ADR and HS%
 
         // Remove the % sign from HS% and ensure it has correct spacing
-        const hs = `${stat.hsPercentage}`.padEnd(7, " "); // Ensure 7 characters in HS%
+        const hs = `${stat.hsPercentage.replace("%", "")}%`.padEnd(7, " "); // Ensure 7 characters in HS%
 
         // Elo change
         const elo =
@@ -305,7 +307,11 @@ export const sendMatchFinishNotification = async (match: Match) => {
         },
         {
           name: "Players and Stats",
-          value: `${header}\n${playerStatsTable.join("\n")}`,
+          value:
+            `**Map Stats**\n` +
+            "`Name               | Stats               | Elo Change`\n" +
+            "`-------------------|---------------------|-------------`\n" +
+            playerStatsTable.join("\n"),
         }
       )
       .setTimestamp();
