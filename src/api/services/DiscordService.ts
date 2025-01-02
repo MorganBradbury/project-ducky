@@ -315,7 +315,6 @@ export const sendMatchFinishNotification = async (match: Match) => {
         .setStyle(ButtonStyle.Primary), // Button style
 
       new ButtonBuilder()
-        .setCustomId("view_match") // Custom ID for button interaction
         .setLabel("View matchroom") // Button label
         .setStyle(ButtonStyle.Secondary) // Button style
         .setURL(`https://www.faceit.com/en/cs2/room/${match.matchId}`) // URL for view matchroom button
