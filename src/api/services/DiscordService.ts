@@ -207,12 +207,21 @@ export const deleteVoiceChannel = async (voiceChannelId: string) => {
   }
 };
 
+const getMapEmoji = (mapName: string): string => {
+  const mapEmojis: { [key: string]: string } = {
+    de_ancient: "<:de_ancient:1324386141981507656>",
+    de_anubis: "<:de_anubis:1324386143462227990>",
+    de_dust2: "<:de_dust2:1324386144686702592>",
+    de_inferno: "<:de_inferno:1324386146322616392>",
+    de_mirage: "<:de_mirage:1324386148369563719>",
+    de_nuke: "<:de_nuke:1324386149623529553>",
+  };
+
+  return mapEmojis[mapName.toLowerCase()] || `:${mapName.toLowerCase()}:`; // Default to text-based emoji if not found
+};
+
 export const sendMatchFinishNotification = async (match: Match) => {
   try {
-    // Hardcode the Inferno emoji
-    const mapEmoji = "<:de_inferno:1324386146322616392>"; // Custom emoji for Inferno
-    // Default to map name if no custom emoji found
-
     // Get player stats using the getPlayerStats function
     const getPlayerStatsData = await FaceitService.getPlayerStats(
       match.matchId,
@@ -226,16 +235,14 @@ export const sendMatchFinishNotification = async (match: Match) => {
 
     // Define column widths for alignment
     const columnWidths = {
-      name: 18, // Name column: 18 characters max
-      stats: 20, // Stats column: 20 characters (e.g., 16/11/10 89ADR (46%))
-      elo: 15, // Elo Change column: 15 characters (e.g., +25 (2100))
+      name: 18, // Name column: 18 characters
+      stats: 24, // Stats column: 24 characters (e.g., "16/11/10 89ADR (46%)")
+      elo: 18, // Elo Change column: 18 characters
     };
 
-    // Construct the table header
-    const header =
-      "`Name               | Stats                   | Elo Change`";
-    const separator =
-      "`-------------------|-------------------------|-------------`";
+    // Construct the table header with proper alignment
+    const header = `\`Name                | Stats                   | Elo Change       \``;
+    const separator = `\`--------------------|-------------------------|------------------\``;
 
     // Construct table rows
     const playerStatsTable = await Promise.all(
@@ -248,33 +255,20 @@ export const sendMatchFinishNotification = async (match: Match) => {
           player?.gamePlayerId || ""
         );
 
-        // Truncate or pad the player name to 18 characters
-        const name =
-          (player?.faceitUsername || "Unknown").length > 18
-            ? `${(player?.faceitUsername || "Unknown").slice(0, 15)}...`
-            : (player?.faceitUsername || "Unknown").padEnd(
-                columnWidths.name,
-                " "
-              );
-
-        // Format K/D/A stats and ensure the column width
-        const kda = `${stat.kills}/${stat.deaths}/${stat.assists}`.padEnd(
-          7,
+        const name = (player?.faceitUsername || "Unknown").padEnd(
+          columnWidths.name,
           " "
         );
-        const adr = `${stat.ADR}ADR`.padEnd(5, " "); // Add space between ADR and HS%
-
-        // Remove the % sign from HS% and ensure it has correct spacing
-        const hs = `${stat.hsPercentage.replace("%", "")}%`.padEnd(7, " "); // Ensure 7 characters in HS%
-
-        // Elo change
+        const kda = `${stat.kills}/${stat.deaths}/${stat.assists}`;
+        const adr = stat.ADR.padStart(5, " ");
+        const hs = stat.hsPercentage.padStart(5, " ");
         const elo =
           `${eloChange?.operator}${eloChange?.difference} (${eloChange?.newElo})`.padEnd(
             columnWidths.elo,
             " "
           );
 
-        return `\`${name} | ${kda} ${adr} ${hs} | ${elo}\``;
+        return `\`${name}| ${kda} ${adr}ADR (${hs}%) | ${elo}\``;
       })
     );
 
@@ -289,6 +283,10 @@ export const sendMatchFinishNotification = async (match: Match) => {
       match.trackedTeam.faction
     );
 
+    // Get map emoji
+    const mapEmoji = getMapEmoji(match.mapName);
+
+    // Create the embed
     const embed = new EmbedBuilder()
       .setTitle(`🚨 New match finished`)
       .setColor(didTeamWin ? "#00FF00" : "#FF0000")
@@ -309,11 +307,7 @@ export const sendMatchFinishNotification = async (match: Match) => {
         },
         {
           name: "Players and Stats",
-          value:
-            `**Map Stats**\n` +
-            "`Name               | Stats                   | Elo Change`\n" +
-            "`-------------------|-------------------------|-------------`\n" +
-            playerStatsTable.join("\n"),
+          value: `${header}\n${separator}\n${playerStatsTable.join("\n")}`,
         }
       )
       .setTimestamp();
