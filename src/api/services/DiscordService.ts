@@ -511,7 +511,6 @@ export async function resetVoiceChannelStates(): Promise<void> {
 
         // Skip channels in ignored categories
         if (categoryId !== "no-category") {
-          console.log(`Skipping category with ID: ${categoryId}`);
           return;
         }
 
