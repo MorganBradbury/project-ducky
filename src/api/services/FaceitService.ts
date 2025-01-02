@@ -8,6 +8,7 @@ import {
 } from "../../utils/faceitHelper";
 import { Player } from "../../types/Faceit/Player";
 import { Match } from "../../types/Faceit/Match";
+import { activeMapPool } from "../../constants";
 
 class FaceitApiClient {
   private client: AxiosInstance;
@@ -190,6 +191,41 @@ class FaceitApiClient {
     } catch (error) {
       console.error("Error fetching player stats:", error);
       throw new Error("Failed to fetch player stats");
+    }
+  }
+
+  async getMapStatsByPlayer(
+    playerId: string
+  ): Promise<PlayerMapsData[] | null> {
+    try {
+      const queryUrl = `/players/${playerId}/games/cs2/stats`;
+      const response = await this.client.get(queryUrl);
+
+      if (response.status === 200 && response.data) {
+        let playerMapStats: PlayerMapsData[] = [];
+
+        activeMapPool.map((map) => {
+          const findMatch = response.data.items.filter(
+            (match: any) => match.mapName === map
+          );
+          const mapWins =
+            findMatch.filter((match: any) => match.win).length || 0;
+          const totalPlayed = findMatch.length || 0;
+          playerMapStats.push({
+            mapName: map,
+            playedTimes: totalPlayed,
+            wins: mapWins,
+            winPercentage: (mapWins / totalPlayed) * 100,
+          });
+        });
+
+        return playerMapStats;
+      }
+
+      return null;
+    } catch (error) {
+      console.error("Error fetching map stats:", error);
+      throw new Error("Failed to fetch map stats");
     }
   }
 }
