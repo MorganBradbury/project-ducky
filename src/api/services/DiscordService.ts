@@ -676,7 +676,7 @@ export const createPrematchEmbed = (
         playedTimes === 0 || isNaN(winPercentage)
           ? "N/A"
           : winPercentage.toFixed(2);
-      return `\`${mapName.padEnd(12)} | ${playedTimes
+      return `\`${getMapEmoji(mapName)} ${mapName.padEnd(12)} | ${playedTimes
         .toString()
         .padEnd(6)} | ${formattedWinPercentage.padEnd(6)}\``;
     })
@@ -685,15 +685,11 @@ export const createPrematchEmbed = (
   // Analysis for most and least played maps
   const mostPlayedMaps = sortedStats
     .slice(0, 3)
-    .map((map) => {
-      map.mapName;
-    })
+    .map((map) => `${getMapEmoji(map.mapName)} ${map.mapName}`)
     .join("\n ");
   const leastPlayedMaps = sortedStats
     .slice(-3)
-    .map((map) => {
-      map.mapName;
-    })
+    .map((map) => `${getMapEmoji(map.mapName)} ${map.mapName}`)
     .join("\n ");
 
   // Create the embed
