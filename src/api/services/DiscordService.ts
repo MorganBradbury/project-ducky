@@ -8,6 +8,9 @@ import {
   GuildMember,
   Role,
   ChannelType,
+  ButtonBuilder,
+  ButtonStyle,
+  ActionRowBuilder,
 } from "discord.js";
 import { SystemUser } from "../../types/SystemUser";
 import { FaceitService } from "./FaceitService";
@@ -83,8 +86,10 @@ export const createNewVoiceChannel = async (
   }
 };
 
-// Helper function to send an embed message to a specific channel
-const sendEmbedMessage = async (embed: EmbedBuilder) => {
+const sendEmbedMessage = async (
+  embed: EmbedBuilder,
+  components: any[] = []
+) => {
   try {
     if (!client.isReady()) {
       console.error("Discord client is not ready!");
@@ -101,7 +106,12 @@ const sendEmbedMessage = async (embed: EmbedBuilder) => {
       );
       return;
     }
-    await channel.send({ embeds: [embed] });
+
+    // Send the embed with the optional button in the components array
+    await channel.send({
+      embeds: [embed],
+      components, // If components (buttons) are passed, they will be included
+    });
   } catch (error) {
     console.error("Error sending message to Discord channel:", error);
   }
@@ -249,7 +259,7 @@ export const sendMatchFinishNotification = async (match: Match) => {
         // Ensure player name is 11 characters long
         const name =
           playerName.length > 11
-            ? `${playerName.substring(0, 8)}...` // truncate and add "..."
+            ? `${playerName.substring(0, 9)}..` // truncate and add "..."
             : playerName.padEnd(11, " "); // pad with spaces if shorter than 11
 
         const kda = `${stat.kills}/${stat.deaths}/${stat.assists}`;
@@ -303,7 +313,16 @@ export const sendMatchFinishNotification = async (match: Match) => {
       )
       .setTimestamp();
 
-    await sendEmbedMessage(embed);
+    // Create the "More Stats" button as needed
+    const row = new ActionRowBuilder().addComponents(
+      new ButtonBuilder()
+        .setCustomId("more_stats") // Custom ID for button interaction
+        .setLabel("More Stats") // Button label
+        .setStyle(ButtonStyle.Primary) // Button style
+    );
+
+    // Send the embed with the button in the action row
+    await sendEmbedMessage(embed, [row]);
   } catch (error) {
     console.error("Error sending match finish notification:", error);
   }
