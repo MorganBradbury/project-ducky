@@ -6,6 +6,7 @@ import { leaderboardCommand } from "./Faceit/leaderboard";
 import { getActivePlayers } from "./Minecraft/getActivePlayers";
 import { clearMessagesCommand } from "./Discord/clearMessages";
 import { updateNicknameCommand } from "./Discord/setNickname";
+import { listUserIdsCommand } from "./Faceit/getUsersOnWebhook";
 
 export const commands = [
   registerTrackingCommand,
@@ -16,6 +17,7 @@ export const commands = [
   getActivePlayers,
   clearMessagesCommand,
   updateNicknameCommand,
+  listUserIdsCommand,
 ];
 
 export const commandsMap = new Map(commands.map((cmd) => [cmd.name, cmd]));
