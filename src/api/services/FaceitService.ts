@@ -207,6 +207,7 @@ class FaceitApiClient {
         console.log("Could not find match by ID", matchId);
         return null;
       }
+      console.log("response in prematchplayers", response.data);
       const trackedTeamFaction = await getTeamFaction(response.data.teams);
       return (
         response.data.teams[
