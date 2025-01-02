@@ -222,12 +222,15 @@ export const sendMatchFinishNotification = async (match: Match) => {
 
     // Define column widths for alignment
     const columnWidths = {
-      name: 15,
-      kda: 12, // "Kills / Deaths / Assists"
-      adr: 6, // "ADR"
-      hs: 5, // "HS%"
-      elo: 12, // "Elo Change"
+      name: 20, // Name column: 20 characters
+      stats: 15, // Stats column: 15 characters
+      elo: 20, // Elo Change column: 20 characters
     };
+
+    // Construct the table header
+    const header = `\`Name${" ".repeat(
+      columnWidths.name - 4
+    )}| Stats${" ".repeat(columnWidths.stats - 5)}| Elo Change\``;
 
     // Construct table rows
     const playerStatsTable = await Promise.all(
@@ -239,23 +242,24 @@ export const sendMatchFinishNotification = async (match: Match) => {
           player?.previousElo || 0,
           player?.gamePlayerId || ""
         );
+
         const name = (player?.faceitUsername || "Unknown").padEnd(
           columnWidths.name,
           " "
         );
-        const kda = `${stat.kills}/${stat.deaths}/${stat.assists}`.padStart(
-          columnWidths.kda,
+        const kda = `${stat.kills}/${stat.deaths}/${stat.assists}`.padEnd(
+          columnWidths.stats,
           " "
         );
-        const adr = stat.ADR.padStart(columnWidths.adr, " ");
-        const hs = stat.hsPercentage.padStart(columnWidths.hs, " ");
+        const adr = stat.ADR.padStart(columnWidths.stats - 2, " "); // Right align ADR
+        const hs = stat.hsPercentage.padStart(5, " ");
         const elo =
-          `${eloChange?.operator}${eloChange?.difference} (${eloChange?.newElo})`.padStart(
+          `${eloChange?.operator}${eloChange?.difference} (${eloChange?.newElo})`.padEnd(
             columnWidths.elo,
             " "
           );
 
-        return `\`${name}${kda}${adr}${hs}${elo}\``;
+        return `\`${name}| ${kda}${adr} / ${hs} | ${elo}\``;
       })
     );
 
@@ -293,9 +297,7 @@ export const sendMatchFinishNotification = async (match: Match) => {
         },
         {
           name: "Players and Stats",
-          value: `\`Name           K/D/A      ADR   HS%  Elo Change  \`\n${playerStatsTable.join(
-            "\n"
-          )}`,
+          value: `${header}\n${playerStatsTable.join("\n")}`,
         }
       )
       .setTimestamp();
