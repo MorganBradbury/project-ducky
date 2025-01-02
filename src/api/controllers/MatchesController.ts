@@ -27,7 +27,7 @@ export const handleMatchesHook = async (
       AcceptedEventTypes.match_status_configuring,
     ];
 
-    console.log(`Request received from ${req.headers.referer}`, req.body);
+    console.log(`Request received from FACEIT`, req.body?.payload);
 
     if (!matchId || !eventId) {
       console.log("No match id/ event present:", { matchId, eventId });
