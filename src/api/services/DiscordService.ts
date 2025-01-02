@@ -223,12 +223,12 @@ export const sendMatchFinishNotification = async (match: Match) => {
     // Define column widths for alignment with no spaces
     const columnWidths = {
       name: 18, // Name column: 18 characters max
-      stats: 21, // Stats column: 21 characters (e.g., 16/11/10 89ADR (46%))
+      stats: 22, // Stats column: 22 characters (e.g., 16/11/10 89ADR (46%))
       elo: 13, // Elo Change column: 13 characters (e.g., +25 (2100))
     };
 
     // Construct the table header
-    const header = `\`Name               | Stats                 | Elo Change\``;
+    const header = `\`Name               | Stats                   | Elo Change\``;
 
     // Construct table rows
     const playerStatsTable = await Promise.all(
@@ -255,8 +255,8 @@ export const sendMatchFinishNotification = async (match: Match) => {
           7,
           " "
         );
-        const adr = `${stat.ADR}ADR`.padEnd(4, " ");
-        const hs = `(${stat.hsPercentage}%)`.padEnd(5, " ");
+        const adr = `${stat.ADR}ADR`.padEnd(5, " "); // Add space between ADR and HS%
+        const hs = `(${stat.hsPercentage}%)`.padEnd(7, " "); // Ensure 7 characters in HS%
 
         // Elo change
         const elo =
@@ -265,7 +265,7 @@ export const sendMatchFinishNotification = async (match: Match) => {
             " "
           );
 
-        return `\`${name} | ${kda} ${adr}${hs} | ${elo}\``;
+        return `\`${name} | ${kda} ${adr} ${hs} | ${elo}\``;
       })
     );
 
