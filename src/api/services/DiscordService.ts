@@ -306,6 +306,7 @@ export const sendMatchFinishNotification = async (match: Match) => {
           value: `${playerStatsTable.join("\n")}`,
         }
       )
+      .setFooter({ text: "Match result" })
       .setTimestamp();
 
     // Create the buttons
