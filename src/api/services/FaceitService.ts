@@ -194,7 +194,7 @@ class FaceitApiClient {
     }
   }
 
-  async getPrematchPlayers(matchId: string): Promise<string[] | null> {
+  async getMatchFactionLeader(matchId: string): Promise<string | null> {
     try {
       const queryUrl = `/matches/${matchId}`;
       const response = await this.client.get(queryUrl);
@@ -207,13 +207,17 @@ class FaceitApiClient {
         console.log("Could not find match by ID", matchId);
         return null;
       }
-      console.log("response in prematchplayers", response.data);
-      const trackedTeamFaction = await getTeamFaction(response.data.teams);
-      return (
-        response.data.teams[
-          trackedTeamFaction.faction === "faction1" ? "faction2" : "faction1"
-        ]?.roster?.map((player: any) => player.player_id) || null
-      );
+
+      if (response.data.status !== "CONFIGURING") {
+        const trackedTeamFaction = await getTeamFaction(response.data.teams);
+        const correctFaction =
+          trackedTeamFaction.faction === "faction1" ? "faction2" : "faction1";
+        const factionLeader = response.data.teams[correctFaction].leader;
+        return factionLeader || null;
+      } else {
+        console.log("Match state is not configuring, " + matchId);
+        return null;
+      }
     } catch (error) {
       console.error(`Error fetching match details for ${matchId}:`, error);
       return null;
@@ -225,11 +229,9 @@ class FaceitApiClient {
   ): Promise<PlayerMapsData[] | null> {
     try {
       const queryUrl = `/players/${playerId}/games/cs2/stats`;
-      console.log("request made to", queryUrl);
       const response = await this.client.get(queryUrl);
 
       if (response.status === 200 && response.data) {
-        console.log("response", response.data);
         let playerMapStats: PlayerMapsData[] = [];
 
         activeMapPool.map((map) => {
@@ -244,7 +246,7 @@ class FaceitApiClient {
             mapName: map,
             playedTimes: totalPlayed,
             wins: mapWins,
-            winPercentage: (mapWins / totalPlayed) * 100,
+            winPercentage: (mapWins / totalPlayed) * 100 || 0,
           });
         });
 

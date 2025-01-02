@@ -9,12 +9,14 @@ import {
   updateMatchProcessed,
 } from "../../db/commands";
 import {
+  createPrematchEmbed,
   runEloUpdate,
   sendMatchFinishNotification,
   updateVoiceChannelStatus,
 } from "./DiscordService";
 import { FaceitService } from "./FaceitService";
 import { getScoreStatusText } from "../../utils/faceitHelper";
+import { activeMapPool } from "../../constants";
 
 let workers: Record<string, Worker> = {};
 
@@ -105,14 +107,42 @@ export const cancelMatch = async (matchId: string) => {
   }
 };
 
-export const sendPrematchAnalysis = async (matchId: string) => {
+type PlayerStats = {
+  mapName: string;
+  playedTimes: number;
+  wins: number;
+  winPercentage: number | "NaN";
+};
+
+export const sendPrematchAnalysis = async (matchId: string): Promise<any> => {
   console.log("Processing sendPrematchAnalysis()", matchId);
-  const playersForAnalysis = await FaceitService.getPrematchPlayers(matchId);
-  console.log("New match created, retrieve other team IDs", playersForAnalysis);
-  if (playersForAnalysis !== null) {
-    playersForAnalysis?.map(async (player) => {
-      const getPlayerStats = await FaceitService.getMapStatsByPlayer(player);
-      console.log("Player stats for " + player, getPlayerStats);
-    });
+
+  // // Retrieves an array of players from the match by their ID
+  const leader = await FaceitService.getMatchFactionLeader(matchId);
+  if (leader === null) {
+    return;
   }
+  console.log("Leader", leader);
+  const playerMapStats = await FaceitService.getMapStatsByPlayer(leader);
+  if (playerMapStats === null) {
+    return;
+  }
+  console.log("PlayerMapStats", playerMapStats);
+  createPrematchEmbed(playerMapStats);
+  // if(players === null) {
+  //   console.log("No players in pre-match", matchId);
+  //   return;
+  // }
+
+  // let analysisObject: [];
+
+  // // Now loop through players and get their stats for all their maps
+  // players.map((playerId: string) => {
+  //   const playerMapStats = FaceitService.getMapStatsByPlayer(playerId);
+  //   // Now I have the stats of the player.
+
+  //   // Now i need to put this into a variable.
+  // });
+
+  // // Once all players have been looped through, the object will have all the data. Loop through it and aggregate the winrate for each map, and the aggregate of the amount played.
 };

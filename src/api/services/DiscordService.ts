@@ -613,6 +613,66 @@ export const updateVoiceChannelStatus = async (
   }
 };
 
+export const createPrematchEmbed = (mapStats: PlayerMapsData[]) => {
+  // Sort by playedTimes (desc) and then winPercentage (desc)
+  const sortedStats = [...mapStats].sort((a, b) => {
+    if (b.playedTimes === a.playedTimes) {
+      return b.winPercentage - a.winPercentage;
+    }
+    return b.playedTimes - a.playedTimes;
+  });
+
+  // Generate the table content
+  const tableRows = sortedStats
+    .map(({ mapName, playedTimes, winPercentage }) => {
+      const formattedWinPercentage =
+        playedTimes === 0 || isNaN(winPercentage)
+          ? "N/A"
+          : winPercentage.toFixed(2);
+      return `\`${mapName.padEnd(12)} | ${playedTimes
+        .toString()
+        .padEnd(6)} | ${formattedWinPercentage.padEnd(6)}\``;
+    })
+    .join("\n");
+
+  // Analysis for most and least played maps
+  const mostPlayedMaps = sortedStats
+    .slice(0, 3)
+    .map((map) => map.mapName)
+    .join(", ");
+  const leastPlayedMaps = sortedStats
+    .slice(-3)
+    .map((map) => map.mapName)
+    .join(", ");
+
+  // Create the embed
+  const embed = new EmbedBuilder()
+    .setTitle("Prematch Analysis")
+    .setDescription(
+      "**Map Stats**\n" +
+        "`Map Name     | Played | Win %  `\n" +
+        "`-------------|--------|--------`\n" +
+        tableRows
+    )
+    .addFields(
+      {
+        name: "Most likely map picks:",
+        value: mostPlayedMaps || "No maps found.",
+        inline: false,
+      },
+      {
+        name: "Most likely bans are:",
+        value: leastPlayedMaps || "No maps found.",
+        inline: false,
+      }
+    )
+    .setColor("#00AE86")
+    .setFooter({ text: "Prematch analysis" })
+    .setTimestamp();
+
+  return embed;
+};
+
 export const updateAllUnicodeNicknames = async () => {
   try {
     const guild = await client.guilds.fetch(config.GUILD_ID); // Fetch the guild
