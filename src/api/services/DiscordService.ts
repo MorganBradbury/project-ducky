@@ -703,10 +703,6 @@ export const createPrematchEmbed = (
     )
     .addFields(
       {
-        name: "Match Link",
-        value: `[Click here](https://www.faceit.com/en/cs2/room/${matchId})`,
-      },
-      {
         name: "Captain's most played maps",
         value: mostPlayedMaps || "No maps found.",
         inline: false,
@@ -720,6 +716,13 @@ export const createPrematchEmbed = (
     .setColor("#00AE86")
     .setFooter({ text: "Prematch analysis" })
     .setTimestamp();
+
+  const row = new ActionRowBuilder().addComponents(
+    new ButtonBuilder()
+      .setURL(`https://www.faceit.com/en/cs2/room/${matchId}`) // Set URL for the button
+      .setLabel("View match") // Button label
+      .setStyle(ButtonStyle.Link) // Use Link style for a URL
+  );
 
   sendEmbedMessage(embed);
 
