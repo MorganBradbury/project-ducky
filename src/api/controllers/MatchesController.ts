@@ -1,25 +1,15 @@
 import { Request, Response } from "express";
-import { cancelMatch, endMatch, startMatch } from "../services/MatchesService"; // Centralized match flow logic
 import {
-  createNewVoiceChannel,
-  deleteVoiceChannel,
-  getChannelNameById,
-  updateVoiceChannelStatus,
-} from "../services/DiscordService";
+  cancelMatch,
+  endMatch,
+  sendPrematchAnalysis,
+  startMatch,
+} from "../services/MatchesService"; // Centralized match flow logic
+import { updateVoiceChannelStatus } from "../services/DiscordService";
 import { FaceitService } from "../services/FaceitService";
-import {
-  getMatchDataFromDb,
-  updateLiveScoresChannelIdForMatch,
-} from "../../db/commands";
-import { config } from "../../config";
-import { ChannelIcons } from "../../constants";
+import { getMatchDataFromDb } from "../../db/commands";
+import { AcceptedEventTypes } from "../../constants";
 import { getScoreStatusText } from "../../utils/faceitHelper";
-
-enum AcceptedEventTypes {
-  match_ready = "match_status_ready",
-  match_finished = "match_status_finished",
-  match_cancelled = "match_status_cancelled",
-}
 
 // Main controller function to handle the webhook for match events
 export const handleMatchesHook = async (
@@ -34,6 +24,7 @@ export const handleMatchesHook = async (
       AcceptedEventTypes.match_ready,
       AcceptedEventTypes.match_finished,
       AcceptedEventTypes.match_cancelled,
+      AcceptedEventTypes.match_status_configuring,
     ];
 
     console.log(`Request received from ${req.headers.referer}`, req.body);
@@ -46,6 +37,10 @@ export const handleMatchesHook = async (
     if (!acceptedHookEvents.includes(eventId)) {
       console.log(`Event type ${eventId} is not supported.`);
       return;
+    }
+
+    if (eventId === AcceptedEventTypes.match_status_configuring) {
+      await sendPrematchAnalysis(req?.body?.payload);
     }
 
     // Match has just started

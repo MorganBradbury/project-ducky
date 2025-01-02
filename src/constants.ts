@@ -18,3 +18,21 @@ export const eloNumbers: any = {
   "[": "⁽",
   "]": "⁾",
 };
+
+export const activeMapPool = [
+  "de_dust2",
+  "de_inferno",
+  "de_mirage",
+  "de_ancient",
+  "de_vertigo",
+  "de_nuke",
+  "de_train",
+  "de_anubis",
+];
+
+export enum AcceptedEventTypes {
+  match_ready = "match_status_ready",
+  match_finished = "match_status_finished",
+  match_cancelled = "match_status_cancelled",
+  match_status_configuring = "match_status_configuring",
+}

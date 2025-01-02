@@ -104,3 +104,12 @@ export const cancelMatch = async (matchId: string) => {
     await updateVoiceChannelStatus(match.voiceChannelId, "");
   }
 };
+
+export const sendPrematchAnalysis = async (matchObject: any) => {
+  console.log("Processing sendPrematchAnalysis()", matchObject);
+
+  const roster = matchObject.teams;
+  console.log("roster", roster);
+
+  // const getPlayerStats = await FaceitService.getMapStatsByPlayer();
+};
