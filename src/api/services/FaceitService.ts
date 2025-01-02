@@ -208,9 +208,11 @@ class FaceitApiClient {
         return null;
       }
       const trackedTeamFaction = await getTeamFaction(response.data.teams);
-      return response.data.teams[
-        trackedTeamFaction.faction === "faction1" ? "faction2" : "faction1"
-      ].roster.map((player: any) => player.player_id);
+      return (
+        response.data.teams[
+          trackedTeamFaction.faction === "faction1" ? "faction2" : "faction1"
+        ]?.roster?.map((player: any) => player.player_id) || null
+      );
     } catch (error) {
       console.error(`Error fetching match details for ${matchId}:`, error);
       return null;
@@ -222,17 +224,20 @@ class FaceitApiClient {
   ): Promise<PlayerMapsData[] | null> {
     try {
       const queryUrl = `/players/${playerId}/games/cs2/stats`;
+      console.log("request made to", queryUrl);
       const response = await this.client.get(queryUrl);
 
       if (response.status === 200 && response.data) {
+        console.log("response", response.data);
         let playerMapStats: PlayerMapsData[] = [];
 
         activeMapPool.map((map) => {
           const findMatch = response.data.items.filter(
-            (match: any) => match.mapName === map
+            (match: any) => match.stats.Map === map
           );
           const mapWins =
-            findMatch.filter((match: any) => match.win).length || 0;
+            findMatch.filter((match: any) => match.stats.Result === "1")
+              .length || 0;
           const totalPlayed = findMatch.length || 0;
           playerMapStats.push({
             mapName: map,

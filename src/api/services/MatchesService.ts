@@ -109,9 +109,10 @@ export const sendPrematchAnalysis = async (matchId: string) => {
   console.log("Processing sendPrematchAnalysis()", matchId);
   const playersForAnalysis = await FaceitService.getPrematchPlayers(matchId);
   console.log("New match created, retrieve other team IDs", playersForAnalysis);
-
-  playersForAnalysis?.map(async (player) => {
-    const getPlayerStats = await FaceitService.getMapStatsByPlayer(player);
-    console.log("Player stats for " + player, getPlayerStats);
-  });
+  if (playersForAnalysis !== null) {
+    playersForAnalysis?.map(async (player) => {
+      const getPlayerStats = await FaceitService.getMapStatsByPlayer(player);
+      console.log("Player stats for " + player, getPlayerStats);
+    });
+  }
 };
