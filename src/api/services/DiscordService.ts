@@ -256,12 +256,10 @@ export const sendMatchFinishNotification = async (match: Match) => {
         );
 
         const playerName = player?.faceitUsername || "Unknown";
-        // Ensure player name is 11 characters long
         const name =
           playerName.length > 11
-            ? `${playerName.substring(0, 9)}..` // truncate and add "..."
-            : playerName.padEnd(11, " "); // pad with spaces if shorter than 11
-
+            ? `${playerName.substring(0, 9)}..`
+            : playerName.padEnd(11, " ");
         const kda = `${stat.kills}/${stat.deaths}/${stat.assists}`;
         const elo =
           `${eloChange?.operator}${eloChange?.difference} (${eloChange?.newElo})`.padEnd(
@@ -287,7 +285,7 @@ export const sendMatchFinishNotification = async (match: Match) => {
     // Get map emoji
     const mapEmoji = getMapEmoji(match.mapName);
 
-    // Create the embed
+    // Create the embed without the Match Link
     const embed = new EmbedBuilder()
       .setTitle(`🚨 New match finished`)
       .setColor(didTeamWin ? "#00FF00" : "#FF0000")
@@ -295,10 +293,6 @@ export const sendMatchFinishNotification = async (match: Match) => {
         {
           name: "Map",
           value: `${mapEmoji}  ${match.mapName}`,
-        },
-        {
-          name: "Match Link",
-          value: `[Click here](https://www.faceit.com/en/cs2/room/${match?.matchId})`,
         },
         {
           name: "Match Result",
@@ -313,15 +307,21 @@ export const sendMatchFinishNotification = async (match: Match) => {
       )
       .setTimestamp();
 
-    // Create the "More Stats" button as needed
+    // Create the buttons
     const row = new ActionRowBuilder().addComponents(
       new ButtonBuilder()
         .setCustomId("more_stats") // Custom ID for button interaction
         .setLabel("More Stats") // Button label
-        .setStyle(ButtonStyle.Primary) // Button style
+        .setStyle(ButtonStyle.Primary), // Button style
+
+      new ButtonBuilder()
+        .setCustomId("view_match") // Custom ID for button interaction
+        .setLabel("View matchroom") // Button label
+        .setStyle(ButtonStyle.Secondary) // Button style
+        .setURL(`https://www.faceit.com/en/cs2/room/${match.matchId}`) // URL for view matchroom button
     );
 
-    // Send the embed with the button in the action row
+    // Send the embed with both buttons
     await sendEmbedMessage(embed, [row]);
   } catch (error) {
     console.error("Error sending match finish notification:", error);
