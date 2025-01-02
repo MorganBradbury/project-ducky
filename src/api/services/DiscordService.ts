@@ -666,11 +666,15 @@ export const createPrematchEmbed = (
   // Analysis for most and least played maps
   const mostPlayedMaps = sortedStats
     .slice(0, 3)
-    .map((map) => map.mapName)
+    .map((map) => {
+      `${getMapEmoji(map.mapName)}  ${map.mapName}`;
+    })
     .join("\n ");
   const leastPlayedMaps = sortedStats
     .slice(-3)
-    .map((map) => map.mapName)
+    .map((map) => {
+      `${getMapEmoji(map.mapName)}  ${map.mapName}`;
+    })
     .join("\n ");
 
   // Create the embed
