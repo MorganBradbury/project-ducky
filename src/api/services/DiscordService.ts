@@ -220,30 +220,32 @@ export const sendMatchFinishNotification = async (match: Match) => {
       (a, b) => parseFloat(b.ADR) - parseFloat(a.ADR)
     );
 
-    // Player details with stats
-    const playerStatsTable = sortedPlayerStats.map(async (stat) => {
-      const player = match.trackedTeam.trackedPlayers.find(
-        (player) => player.faceitId === stat.playerId
-      );
-      const eloChange = await calculateEloDifference(
-        player?.previousElo || 0,
-        player?.gamePlayerId || ""
-      );
-      const name = player?.faceitUsername || "Unknown";
-      const kills = stat.kills.toString().padStart(3);
-      const deaths = stat.deaths.toString().padStart(3);
-      const assists = stat.assists.toString().padStart(3);
-      const adr = stat.ADR.padStart(6);
-      const hs = stat.hsPercentage.padStart(4);
-      const elo =
-        `${eloChange?.operator}${eloChange?.difference} (${eloChange?.newElo})`.padStart(
-          12
+    // Resolve all player details with stats
+    const playerStatsTable = await Promise.all(
+      sortedPlayerStats.map(async (stat) => {
+        const player = match.trackedTeam.trackedPlayers.find(
+          (player) => player.faceitId === stat.playerId
         );
+        const eloChange = await calculateEloDifference(
+          player?.previousElo || 0,
+          player?.gamePlayerId || ""
+        );
+        const name = player?.faceitUsername || "Unknown";
+        const kills = stat.kills.toString().padStart(3);
+        const deaths = stat.deaths.toString().padStart(3);
+        const assists = stat.assists.toString().padStart(3);
+        const adr = stat.ADR.padStart(6);
+        const hs = stat.hsPercentage.padStart(4);
+        const elo =
+          `${eloChange?.operator}${eloChange?.difference} (${eloChange?.newElo})`.padStart(
+            12
+          );
 
-      return `\`${name.padEnd(
-        15
-      )} ${kills} / ${deaths} / ${assists} / ${adr} / ${hs}  ${elo}\``;
-    });
+        return `\`${name.padEnd(
+          15
+        )} ${kills} / ${deaths} / ${assists} / ${adr} / ${hs}  ${elo}\``;
+      })
+    );
 
     // Determine win/loss based on finalScore or eloDifference
     const finalScore = await FaceitService.getMatchScore(
