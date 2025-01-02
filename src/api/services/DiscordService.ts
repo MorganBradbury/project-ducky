@@ -233,16 +233,11 @@ export const sendMatchFinishNotification = async (match: Match) => {
       (a, b) => parseFloat(b.ADR) - parseFloat(a.ADR)
     );
 
-    // Define column widths for alignment
-    const columnWidths = {
-      name: 18, // Name column: 18 characters
-      stats: 24, // Stats column: 24 characters (e.g., "16/11/10 89ADR (46%)")
-      elo: 18, // Elo Change column: 18 characters
-    };
-
-    // Construct the table header with proper alignment
-    const header = `\`Name                | Stats                   | Elo Change       \``;
-    const separator = `\`--------------------|-------------------------|------------------\``;
+    // Construct the table header and separator
+    const header =
+      "`Name               | Stats                | Elo Change       `";
+    const separator =
+      "`-------------------|----------------------|------------------`";
 
     // Construct table rows
     const playerStatsTable = await Promise.all(
@@ -255,16 +250,13 @@ export const sendMatchFinishNotification = async (match: Match) => {
           player?.gamePlayerId || ""
         );
 
-        const name = (player?.faceitUsername || "Unknown").padEnd(
-          columnWidths.name,
-          " "
-        );
+        const name = (player?.faceitUsername || "Unknown").padEnd(18, " ");
         const kda = `${stat.kills}/${stat.deaths}/${stat.assists}`;
         const adr = stat.ADR.padStart(5, " ");
         const hs = stat.hsPercentage.padStart(5, " ");
         const elo =
           `${eloChange?.operator}${eloChange?.difference} (${eloChange?.newElo})`.padEnd(
-            columnWidths.elo,
+            18,
             " "
           );
 
@@ -647,7 +639,10 @@ export const updateVoiceChannelStatus = async (
   }
 };
 
-export const createPrematchEmbed = (mapStats: PlayerMapsData[]) => {
+export const createPrematchEmbed = (
+  mapStats: PlayerMapsData[],
+  matchId: string
+) => {
   // Sort by playedTimes (desc) and then winPercentage (desc)
   const sortedStats = [...mapStats].sort((a, b) => {
     if (b.playedTimes === a.playedTimes) {
@@ -689,6 +684,10 @@ export const createPrematchEmbed = (mapStats: PlayerMapsData[]) => {
         tableRows
     )
     .addFields(
+      {
+        name: "Match Link",
+        value: `[Click here](https://www.faceit.com/en/cs2/room/${matchId})`,
+      },
       {
         name: "Captain's most played maps",
         value: mostPlayedMaps || "No maps found.",

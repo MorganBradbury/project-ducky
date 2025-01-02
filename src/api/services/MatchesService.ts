@@ -128,7 +128,7 @@ export const sendPrematchAnalysis = async (matchId: string): Promise<any> => {
     return;
   }
   console.log("PlayerMapStats", playerMapStats);
-  createPrematchEmbed(playerMapStats);
+  createPrematchEmbed(playerMapStats, matchId);
   // if(players === null) {
   //   console.log("No players in pre-match", matchId);
   //   return;
