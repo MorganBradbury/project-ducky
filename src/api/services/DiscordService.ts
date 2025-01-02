@@ -302,7 +302,7 @@ export const sendMatchFinishNotification = async (match: Match) => {
           })`,
         },
         {
-          name: "Players and Stats",
+          name: "Players and Stats (K/D/A)",
           value: `${playerStatsTable.join("\n")}`,
         }
       )
