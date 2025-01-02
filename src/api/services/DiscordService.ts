@@ -676,7 +676,7 @@ export const createPrematchEmbed = (
         playedTimes === 0 || isNaN(winPercentage)
           ? "N/A"
           : winPercentage.toFixed(2);
-      return `\`${getMapEmoji(mapName)} ${mapName.padEnd(12)} | ${playedTimes
+      return `\`${mapName.padEnd(12)} | ${playedTimes
         .toString()
         .padEnd(6)} | ${formattedWinPercentage.padEnd(6)}\``;
     })
