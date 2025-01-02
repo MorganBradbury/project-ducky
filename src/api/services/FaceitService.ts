@@ -195,35 +195,47 @@ class FaceitApiClient {
   }
 
   async getMatchFactionLeader(matchId: string): Promise<string | null> {
-    try {
-      const queryUrl = `/matches/${matchId}`;
-      const response = await this.client.get(queryUrl);
-      console.log("getMatchFactionLeader: ", response.data);
-      return "";
+    const maxRetries = 20; // Retry for up to 1 minute (20 attempts, 3 seconds apart)
+    const retryDelay = 3000; // 3 seconds
 
-      if (
-        response.status !== 200 ||
-        !response.data ||
-        response.data.best_of != 1
-      ) {
-        console.log("Could not find match by ID", matchId);
-        return null;
+    for (let attempt = 1; attempt <= maxRetries; attempt++) {
+      try {
+        const queryUrl = `/matches/${matchId}`;
+        const response = await this.client.get(queryUrl);
+
+        if (
+          response.status !== 200 ||
+          !response.data ||
+          response.data.best_of !== 1
+        ) {
+          console.log("Could not find match by ID", matchId);
+          return null;
+        }
+
+        const trackedTeamFaction = await getTeamFaction(response.data.teams);
+        const correctFaction =
+          trackedTeamFaction.faction === "faction1" ? "faction2" : "faction1";
+        const factionLeader = response.data.teams[correctFaction].leader;
+        return factionLeader || null;
+      } catch (error) {
+        console.error(
+          `Attempt ${attempt}: Error fetching match details for ${matchId}:`,
+          error
+        );
+
+        // Stop retrying if max retries reached
+        if (attempt === maxRetries) {
+          console.error(`Max retries reached for matchId: ${matchId}`);
+          return null;
+        }
+
+        // Wait before the next retry
+        await new Promise((resolve) => setTimeout(resolve, retryDelay));
       }
-
-      // if (response.data.status !== "CONFIGURING") {
-      const trackedTeamFaction = await getTeamFaction(response.data.teams);
-      const correctFaction =
-        trackedTeamFaction.faction === "faction1" ? "faction2" : "faction1";
-      const factionLeader = response.data.teams[correctFaction].leader;
-      return factionLeader || null;
-      // } else {
-      //   console.log("Match state is not configuring, " + matchId);
-      //   return null;
-      // }
-    } catch (error) {
-      console.error(`Error fetching match details for ${matchId}:`, error);
-      return null;
     }
+
+    // If the loop somehow exits without returning, return null
+    return null;
   }
 
   async getMapStatsByPlayer(

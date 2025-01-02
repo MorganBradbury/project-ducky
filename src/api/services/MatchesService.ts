@@ -122,14 +122,13 @@ export const sendPrematchAnalysis = async (matchId: string): Promise<any> => {
   if (leader === null) {
     return;
   }
-  return;
-  // console.log("Leader", leader);
-  // const playerMapStats = await FaceitService.getMapStatsByPlayer(leader);
-  // if (playerMapStats === null) {
-  //   return;
-  // }
-  // console.log("PlayerMapStats", playerMapStats);
-  // createPrematchEmbed(playerMapStats);
+  console.log("Leader", leader);
+  const playerMapStats = await FaceitService.getMapStatsByPlayer(leader);
+  if (playerMapStats === null) {
+    return;
+  }
+  console.log("PlayerMapStats", playerMapStats);
+  createPrematchEmbed(playerMapStats);
   // if(players === null) {
   //   console.log("No players in pre-match", matchId);
   //   return;
