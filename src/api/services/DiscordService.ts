@@ -222,13 +222,13 @@ export const sendMatchFinishNotification = async (match: Match) => {
 
     // Define column widths for alignment with no spaces
     const columnWidths = {
-      name: 15, // Name column: 15 characters
-      stats: 10, // Stats column: 10 characters
-      elo: 15, // Elo Change column: 15 characters
+      name: 18, // Name column: 18 characters max
+      stats: 21, // Stats column: 21 characters (e.g., 16/11/10 89ADR (46%))
+      elo: 13, // Elo Change column: 13 characters (e.g., +25 (2100))
     };
 
     // Construct the table header
-    const header = `\`Name|Stats|Elo Change\``;
+    const header = `\`Name               | Stats                 | Elo Change\``;
 
     // Construct table rows
     const playerStatsTable = await Promise.all(
@@ -241,23 +241,31 @@ export const sendMatchFinishNotification = async (match: Match) => {
           player?.gamePlayerId || ""
         );
 
-        const name = (player?.faceitUsername || "Unknown").padEnd(
-          columnWidths.name,
-          " "
-        );
+        // Truncate or pad the player name to 18 characters
+        const name =
+          (player?.faceitUsername || "Unknown").length > 18
+            ? `${(player?.faceitUsername || "Unknown").slice(0, 15)}...`
+            : (player?.faceitUsername || "Unknown").padEnd(
+                columnWidths.name,
+                " "
+              );
+
+        // Format K/D/A stats and ensure the column width
         const kda = `${stat.kills}/${stat.deaths}/${stat.assists}`.padEnd(
-          columnWidths.stats,
+          7,
           " "
         );
-        const adr = stat.ADR.padStart(columnWidths.stats - 2, " "); // Right align ADR
-        const hs = stat.hsPercentage.padStart(5, " ");
+        const adr = `${stat.ADR}ADR`.padEnd(4, " ");
+        const hs = `(${stat.hsPercentage}%)`.padEnd(5, " ");
+
+        // Elo change
         const elo =
           `${eloChange?.operator}${eloChange?.difference} (${eloChange?.newElo})`.padEnd(
             columnWidths.elo,
             " "
           );
 
-        return `\`${name}|${kda}${adr}/${hs}|${elo}\``;
+        return `\`${name} | ${kda} ${adr}${hs} | ${elo}\``;
       })
     );
 
