@@ -220,7 +220,16 @@ export const sendMatchFinishNotification = async (match: Match) => {
       (a, b) => parseFloat(b.ADR) - parseFloat(a.ADR)
     );
 
-    // Resolve all player details with stats
+    // Define column widths for alignment
+    const columnWidths = {
+      name: 15,
+      kda: 12, // "Kills / Deaths / Assists"
+      adr: 6, // "ADR"
+      hs: 5, // "HS%"
+      elo: 12, // "Elo Change"
+    };
+
+    // Construct table rows
     const playerStatsTable = await Promise.all(
       sortedPlayerStats.map(async (stat) => {
         const player = match.trackedTeam.trackedPlayers.find(
@@ -230,20 +239,23 @@ export const sendMatchFinishNotification = async (match: Match) => {
           player?.previousElo || 0,
           player?.gamePlayerId || ""
         );
-        const name = player?.faceitUsername || "Unknown";
-        const kills = stat.kills.toString().padStart(3);
-        const deaths = stat.deaths.toString().padStart(3);
-        const assists = stat.assists.toString().padStart(3);
-        const adr = stat.ADR.padStart(6);
-        const hs = stat.hsPercentage.padStart(4);
+        const name = (player?.faceitUsername || "Unknown").padEnd(
+          columnWidths.name,
+          " "
+        );
+        const kda = `${stat.kills}/${stat.deaths}/${stat.assists}`.padStart(
+          columnWidths.kda,
+          " "
+        );
+        const adr = stat.ADR.padStart(columnWidths.adr, " ");
+        const hs = stat.hsPercentage.padStart(columnWidths.hs, " ");
         const elo =
           `${eloChange?.operator}${eloChange?.difference} (${eloChange?.newElo})`.padStart(
-            12
+            columnWidths.elo,
+            " "
           );
 
-        return `\`${name.padEnd(
-          15
-        )} ${kills} / ${deaths} / ${assists} / ${adr} / ${hs}  ${elo}\``;
+        return `\`${name}${kda}${adr}${hs}${elo}\``;
       })
     );
 
@@ -281,7 +293,7 @@ export const sendMatchFinishNotification = async (match: Match) => {
         },
         {
           name: "Players and Stats",
-          value: `\`Name              K / D / A / ADR / HS   Elo Change\`\n${playerStatsTable.join(
+          value: `\`Name           K/D/A      ADR   HS%  Elo Change  \`\n${playerStatsTable.join(
             "\n"
           )}`,
         }
