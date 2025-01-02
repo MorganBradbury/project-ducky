@@ -220,24 +220,30 @@ export const sendMatchFinishNotification = async (match: Match) => {
       (a, b) => parseFloat(b.ADR) - parseFloat(a.ADR)
     );
 
-    // Format player stats (K/D/A/ADR)
-    const playerStats = sortedPlayerStats.map((stat) => {
-      return `${stat.kills} / ${stat.deaths} / ${stat.assists} / ${stat.ADR} (${stat.hsPercentage})`; // Format as K/D/A/ADR
-    });
+    // Player details with stats
+    const playerStatsTable = sortedPlayerStats.map(async (stat) => {
+      const player = match.trackedTeam.trackedPlayers.find(
+        (player) => player.faceitId === stat.playerId
+      );
+      const eloChange = await calculateEloDifference(
+        player?.previousElo || 0,
+        player?.gamePlayerId || ""
+      );
+      const name = player?.faceitUsername || "Unknown";
+      const kills = stat.kills.toString().padStart(3);
+      const deaths = stat.deaths.toString().padStart(3);
+      const assists = stat.assists.toString().padStart(3);
+      const adr = stat.ADR.padStart(6);
+      const hs = stat.hsPercentage.padStart(4);
+      const elo =
+        `${eloChange?.operator}${eloChange?.difference} (${eloChange?.newElo})`.padStart(
+          12
+        );
 
-    // Player details (you may still want to calculate Elo as per your existing logic)
-    const playerDetails = await Promise.all(
-      sortedPlayerStats.map(async (stat) => {
-        const player = match.trackedTeam.trackedPlayers.find(
-          (player) => player.faceitId === stat.playerId
-        );
-        const elo = await calculateEloDifference(
-          player?.previousElo || 0,
-          player?.gamePlayerId || ""
-        );
-        return `**${player?.faceitUsername}**: **${elo?.operator}${elo?.difference}** (${elo?.newElo})`;
-      })
-    );
+      return `\`${name.padEnd(
+        15
+      )} ${kills} / ${deaths} / ${assists} / ${adr} / ${hs}  ${elo}\``;
+    });
 
     // Determine win/loss based on finalScore or eloDifference
     const finalScore = await FaceitService.getMatchScore(
@@ -250,11 +256,17 @@ export const sendMatchFinishNotification = async (match: Match) => {
       match.trackedTeam.faction
     );
 
+    // Map Emoji
+    const mapEmoji = `:${match.mapName}:`;
+
     const embed = new EmbedBuilder()
       .setTitle(`🚨 New match finished`)
       .setColor(didTeamWin ? "#00FF00" : "#FF0000")
       .addFields(
-        { name: "Map", value: match.mapName },
+        {
+          name: "Map",
+          value: `${mapEmoji} ${match.mapName}`,
+        },
         {
           name: "Match Link",
           value: `[Click here](https://www.faceit.com/en/cs2/room/${match?.matchId})`,
@@ -266,14 +278,10 @@ export const sendMatchFinishNotification = async (match: Match) => {
           })`,
         },
         {
-          name: "Players",
-          value: playerDetails.join("\n"),
-          inline: true, // Make it inline to appear next to the "Stats" column
-        },
-        {
-          name: "K / D / A / ADR (HS%)",
-          value: playerStats.join("\n"),
-          inline: true, // Make it inline to appear next to the "Players" column
+          name: "Players and Stats",
+          value: `\`Name              K / D / A / ADR / HS   Elo Change\`\n${playerStatsTable.join(
+            "\n"
+          )}`,
         }
       )
       .setTimestamp();
@@ -639,11 +647,11 @@ export const createPrematchEmbed = (mapStats: PlayerMapsData[]) => {
   const mostPlayedMaps = sortedStats
     .slice(0, 3)
     .map((map) => map.mapName)
-    .join(", ");
+    .join("\n ");
   const leastPlayedMaps = sortedStats
     .slice(-3)
     .map((map) => map.mapName)
-    .join(", ");
+    .join("\n ");
 
   // Create the embed
   const embed = new EmbedBuilder()
@@ -656,12 +664,12 @@ export const createPrematchEmbed = (mapStats: PlayerMapsData[]) => {
     )
     .addFields(
       {
-        name: "Most likely map picks:",
+        name: "Captain's most played maps",
         value: mostPlayedMaps || "No maps found.",
         inline: false,
       },
       {
-        name: "Most likely bans are:",
+        name: "Captain is likely going to ban:",
         value: leastPlayedMaps || "No maps found.",
         inline: false,
       }
