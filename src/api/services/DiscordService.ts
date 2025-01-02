@@ -215,6 +215,7 @@ const getMapEmoji = (mapName: string): string => {
     de_inferno: "<:de_inferno:1324386146322616392>",
     de_mirage: "<:de_mirage:1324386148369563719>",
     de_nuke: "<:de_nuke:1324386149623529553>",
+    de_vertigo: "<:de_vertigo:1324421533262811297>",
   };
 
   return mapEmojis[mapName.toLowerCase()] || `:${mapName.toLowerCase()}:`; // Default to text-based emoji if not found
