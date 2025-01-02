@@ -258,7 +258,7 @@ export const sendMatchFinishNotification = async (match: Match) => {
         const adr = `${stat.ADR}ADR`.padEnd(5, " "); // Add space between ADR and HS%
 
         // Remove the % sign from HS% and ensure it has correct spacing
-        const hs = `${stat.hsPercentage.replace("%", "")}%`.padEnd(7, " "); // Ensure 7 characters in HS%
+        const hs = `${stat.hsPercentage}`.padEnd(7, " "); // Ensure 7 characters in HS%
 
         // Elo change
         const elo =
