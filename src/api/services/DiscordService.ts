@@ -226,6 +226,7 @@ const getMapEmoji = (mapName: string): string => {
     de_mirage: "<:de_mirage:1324386148369563719>",
     de_nuke: "<:de_nuke:1324386149623529553>",
     de_vertigo: "<:de_vertigo:1324421533262811297>",
+    de_train: "<:de_train:1324434992494940231>",
   };
 
   return mapEmojis[mapName.toLowerCase()] || `:${mapName.toLowerCase()}:`; // Default to text-based emoji if not found
@@ -724,7 +725,7 @@ export const createPrematchEmbed = (
       .setStyle(ButtonStyle.Link) // Use Link style for a URL
   );
 
-  sendEmbedMessage(embed);
+  sendEmbedMessage(embed, [row]);
 
   return embed;
 };
