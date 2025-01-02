@@ -220,17 +220,15 @@ export const sendMatchFinishNotification = async (match: Match) => {
       (a, b) => parseFloat(b.ADR) - parseFloat(a.ADR)
     );
 
-    // Define column widths for alignment
+    // Define column widths for alignment with no spaces
     const columnWidths = {
-      name: 20, // Name column: 20 characters
-      stats: 15, // Stats column: 15 characters
-      elo: 20, // Elo Change column: 20 characters
+      name: 15, // Name column: 15 characters
+      stats: 10, // Stats column: 10 characters
+      elo: 15, // Elo Change column: 15 characters
     };
 
     // Construct the table header
-    const header = `\`Name${" ".repeat(
-      columnWidths.name - 4
-    )}| Stats${" ".repeat(columnWidths.stats - 5)}| Elo Change\``;
+    const header = `\`Name|Stats|Elo Change\``;
 
     // Construct table rows
     const playerStatsTable = await Promise.all(
@@ -259,7 +257,7 @@ export const sendMatchFinishNotification = async (match: Match) => {
             " "
           );
 
-        return `\`${name}| ${kda}${adr} / ${hs} | ${elo}\``;
+        return `\`${name}|${kda}${adr}/${hs}|${elo}\``;
       })
     );
 
