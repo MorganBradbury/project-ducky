@@ -246,16 +246,20 @@ export const sendMatchFinishNotification = async (match: Match) => {
         );
 
         const playerName = player?.faceitUsername || "Unknown";
-        const name = playerName.padEnd(playerName.length + 1, " ");
+        // Ensure player name is 11 characters long
+        const name =
+          playerName.length > 11
+            ? `${playerName.substring(0, 8)}...` // truncate and add "..."
+            : playerName.padEnd(11, " "); // pad with spaces if shorter than 11
+
         const kda = `${stat.kills}/${stat.deaths}/${stat.assists}`;
-        const adr = stat.ADR.padStart(5, " ");
         const elo =
           `${eloChange?.operator}${eloChange?.difference} (${eloChange?.newElo})`.padEnd(
             3,
             " "
           );
 
-        return `\`${name} ${kda}${adr} ${elo}\``;
+        return `\`${name} ${kda}  ${elo}\``;
       })
     );
 
@@ -280,7 +284,7 @@ export const sendMatchFinishNotification = async (match: Match) => {
       .addFields(
         {
           name: "Map",
-          value: `${mapEmoji} ${match.mapName}`,
+          value: `${mapEmoji}  ${match.mapName}`,
         },
         {
           name: "Match Link",
