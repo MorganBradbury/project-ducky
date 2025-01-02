@@ -209,6 +209,10 @@ export const deleteVoiceChannel = async (voiceChannelId: string) => {
 
 export const sendMatchFinishNotification = async (match: Match) => {
   try {
+    // Hardcode the Inferno emoji
+    const mapEmoji = "<:de_inferno:1324386146322616392>"; // Custom emoji for Inferno
+    // Default to map name if no custom emoji found
+
     // Get player stats using the getPlayerStats function
     const getPlayerStatsData = await FaceitService.getPlayerStats(
       match.matchId,
@@ -223,14 +227,15 @@ export const sendMatchFinishNotification = async (match: Match) => {
     // Define column widths for alignment
     const columnWidths = {
       name: 18, // Name column: 18 characters max
-      stats: 18, // Stats column: 18 characters (e.g., 16/11/10 89ADR (46%))
-      elo: 13, // Elo Change column: 13 characters (e.g., +25 (2100))
+      stats: 20, // Stats column: 20 characters (e.g., 16/11/10 89ADR (46%))
+      elo: 15, // Elo Change column: 15 characters (e.g., +25 (2100))
     };
 
     // Construct the table header
-    const header = "`Name               | Stats               | Elo Change`";
+    const header =
+      "`Name               | Stats                   | Elo Change`";
     const separator =
-      "`-------------------|---------------------|-------------`";
+      "`-------------------|-------------------------|-------------`";
 
     // Construct table rows
     const playerStatsTable = await Promise.all(
@@ -284,9 +289,6 @@ export const sendMatchFinishNotification = async (match: Match) => {
       match.trackedTeam.faction
     );
 
-    // Map Emoji using the format for custom emojis
-    const mapEmoji = `:${match.mapName}:`; // Replace match.mapName with the emoji name like 'de_mirage'
-
     const embed = new EmbedBuilder()
       .setTitle(`🚨 New match finished`)
       .setColor(didTeamWin ? "#00FF00" : "#FF0000")
@@ -309,8 +311,8 @@ export const sendMatchFinishNotification = async (match: Match) => {
           name: "Players and Stats",
           value:
             `**Map Stats**\n` +
-            "`Name               | Stats               | Elo Change`\n" +
-            "`-------------------|---------------------|-------------`\n" +
+            "`Name               | Stats                   | Elo Change`\n" +
+            "`-------------------|-------------------------|-------------`\n" +
             playerStatsTable.join("\n"),
         }
       )
