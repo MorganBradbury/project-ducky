@@ -37,10 +37,8 @@ export const handleMatchesHook = async (
       return;
     }
 
-    if (
-      eventId === AcceptedEventTypes.match_created ||
-      eventId === AcceptedEventTypes.match_configuring
-    ) {
+    if (eventId === AcceptedEventTypes.match_created) {
+      console.log("Request received for match being created: ", req.body);
       await sendPrematchAnalysis(matchId);
     }
 

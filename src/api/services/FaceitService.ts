@@ -198,6 +198,8 @@ class FaceitApiClient {
     try {
       const queryUrl = `/matches/${matchId}`;
       const response = await this.client.get(queryUrl);
+      console.log("getMatchFactionLeader: ", response.data);
+      return "";
 
       if (
         response.status !== 200 ||
@@ -208,16 +210,16 @@ class FaceitApiClient {
         return null;
       }
 
-      if (response.data.status !== "CONFIGURING") {
-        const trackedTeamFaction = await getTeamFaction(response.data.teams);
-        const correctFaction =
-          trackedTeamFaction.faction === "faction1" ? "faction2" : "faction1";
-        const factionLeader = response.data.teams[correctFaction].leader;
-        return factionLeader || null;
-      } else {
-        console.log("Match state is not configuring, " + matchId);
-        return null;
-      }
+      // if (response.data.status !== "CONFIGURING") {
+      const trackedTeamFaction = await getTeamFaction(response.data.teams);
+      const correctFaction =
+        trackedTeamFaction.faction === "faction1" ? "faction2" : "faction1";
+      const factionLeader = response.data.teams[correctFaction].leader;
+      return factionLeader || null;
+      // } else {
+      //   console.log("Match state is not configuring, " + matchId);
+      //   return null;
+      // }
     } catch (error) {
       console.error(`Error fetching match details for ${matchId}:`, error);
       return null;
