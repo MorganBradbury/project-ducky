@@ -34,5 +34,5 @@ export enum AcceptedEventTypes {
   match_ready = "match_status_ready",
   match_finished = "match_status_finished",
   match_cancelled = "match_status_cancelled",
-  match_created = "match_object_created",
+  match_created = "match_status_configuring",
 }
