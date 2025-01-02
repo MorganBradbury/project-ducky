@@ -254,7 +254,7 @@ export const sendMatchFinishNotification = async (match: Match) => {
             " "
           );
 
-        return `\`${name}| ${kda}${adr} | ${elo}\``;
+        return `\`${name} ${kda}${adr} ${elo}\``;
       })
     );
 
