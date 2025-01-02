@@ -235,7 +235,7 @@ export const sendMatchFinishNotification = async (match: Match) => {
 
     // Construct the table header and separator
     const header = "`Name           | Stats           | Elo Change    `"; // Each part is padded to 13 characters
-    const separator = "`-------------|-----------------|--------------`"; // Separator aligns with header
+    const separator = "`----------------------------------------------`"; // Separator aligns with header
 
     // Construct table rows
     const playerStatsTable = await Promise.all(
