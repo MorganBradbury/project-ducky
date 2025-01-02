@@ -107,10 +107,11 @@ export const cancelMatch = async (matchId: string) => {
 
 export const sendPrematchAnalysis = async (matchId: string) => {
   console.log("Processing sendPrematchAnalysis()", matchId);
-  const getMatchData = FaceitService.getMatch(matchId);
-  console.log(
-    "New match created, go get me the match data before voting happens",
-    getMatchData
-  );
-  // const getPlayerStats = await FaceitService.getMapStatsByPlayer();
+  const playersForAnalysis = await FaceitService.getPrematchPlayers(matchId);
+  console.log("New match created, retrieve other team IDs", playersForAnalysis);
+
+  playersForAnalysis?.map(async (player) => {
+    const getPlayerStats = await FaceitService.getMapStatsByPlayer(player);
+    console.log("Player stats for " + player, getPlayerStats);
+  });
 };

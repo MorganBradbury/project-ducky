@@ -194,6 +194,29 @@ class FaceitApiClient {
     }
   }
 
+  async getPrematchPlayers(matchId: string): Promise<string[] | null> {
+    try {
+      const queryUrl = `/matches/${matchId}`;
+      const response = await this.client.get(queryUrl);
+
+      if (
+        response.status !== 200 ||
+        !response.data ||
+        response.data.best_of != 1
+      ) {
+        console.log("Could not find match by ID", matchId);
+        return null;
+      }
+      const trackedTeamFaction = await getTeamFaction(response.data.teams);
+      return response.data.teams[
+        trackedTeamFaction.faction === "faction1" ? "faction2" : "faction1"
+      ].roster.map((player: any) => player.player_id);
+    } catch (error) {
+      console.error(`Error fetching match details for ${matchId}:`, error);
+      return null;
+    }
+  }
+
   async getMapStatsByPlayer(
     playerId: string
   ): Promise<PlayerMapsData[] | null> {

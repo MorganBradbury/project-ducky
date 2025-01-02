@@ -27,8 +27,6 @@ export const handleMatchesHook = async (
       AcceptedEventTypes.match_ready,
     ];
 
-    console.log(`Request received from FACEIT`, req.body?.payload);
-
     if (!matchId || !eventId) {
       console.log("No match id/ event present:", { matchId, eventId });
       return;
