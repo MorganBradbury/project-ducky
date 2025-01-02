@@ -248,17 +248,16 @@ export const sendMatchFinishNotification = async (match: Match) => {
           player?.gamePlayerId || ""
         );
 
-        const name = (player?.faceitUsername || "Unknown").padEnd(3, " ");
+        const name = (player?.faceitUsername || "Unknown").padEnd(6, " ");
         const kda = `${stat.kills}/${stat.deaths}/${stat.assists}`;
-        const adr = stat.ADR.padStart(5, " ");
-        const hs = stat.hsPercentage.padStart(3, " ");
+        const adr = stat.ADR.padStart(5, " ") + "ADR";
         const elo =
           `${eloChange?.operator}${eloChange?.difference} (${eloChange?.newElo})`.padEnd(
             3,
             " "
           );
 
-        return `\`${name}| ${kda}${adr}ADR (${hs} HS) | ${elo}\``;
+        return `\`${name}| ${kda}${adr} | ${elo}\``;
       })
     );
 
