@@ -301,11 +301,6 @@ export const sendMatchFinishNotification = async (match: Match) => {
           inline: true,
         },
         {
-          name: "\u200B", // Invisible character to add blank space
-          value: "\u200B", // Invisible character for space
-          inline: false,
-        },
-        {
           name: "Match Result",
           value: `${finalScore.join(" / ") || "N/A"}`,
           inline: true,
