@@ -282,6 +282,9 @@ export const sendMatchFinishNotification = async (match: Match) => {
     );
 
     const mapEmoji = getMapEmoji(match.mapName);
+    const formattedMapName = match.mapName
+      .replace(/^de_/, "")
+      .replace(/\b\w/g, (char) => char.toUpperCase());
 
     const embed = new EmbedBuilder()
       .setTitle(`🚨 New match finished`)
@@ -289,7 +292,7 @@ export const sendMatchFinishNotification = async (match: Match) => {
       .addFields(
         {
           name: "Map",
-          value: `${mapEmoji}  ${match.mapName}`,
+          value: `${mapEmoji}  ${formattedMapName}`,
           inline: true,
         },
         {
@@ -346,20 +349,28 @@ export const sendMatchFinishNotification = async (match: Match) => {
           },
         ];
 
+        // Create the header row for the stats table
+        const columnHeaders = `\`Player       ADR   HS  3K  4K  5K  Clutches\``;
+
+        // Create the data rows with proper padding for alignment
         const additionalStatsTable = additionalStats
           .map(
             (stat) =>
-              `\`${stat.playerName.padEnd(10)} ADR: ${stat.ADR}, HS: ${
-                stat.HS
-              }, 3K: ${stat.threeK}, 4K: ${stat.fourK}, 5K: ${
-                stat.fiveK
-              }, Clutches: ${stat.clutches}\``
+              `\`${
+                stat.playerName.length > 11
+                  ? `${stat.playerName.substring(0, 9)}..`
+                  : stat.playerName.padEnd(11)
+              } ${stat.ADR.padEnd(3)} ${stat.HS.padEnd(2)} ${stat.threeK
+                .toString()
+                .padStart(2)} ${stat.fourK.toString().padStart(2)} ${stat.fiveK
+                .toString()
+                .padStart(2)} ${stat.clutches.toString().padStart(2)}\``
           )
           .join("\n");
 
         embed.addFields({
           name: "Additional Stats",
-          value: additionalStatsTable,
+          value: `${columnHeaders}\n${additionalStatsTable}`,
         });
 
         (row.components[0] as ButtonBuilder).setDisabled(true);
