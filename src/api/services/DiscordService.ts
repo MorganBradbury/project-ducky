@@ -694,8 +694,8 @@ export const createPrematchEmbed = (
     .setTitle("Prematch Analysis")
     .setDescription(
       "**Map Stats**\n" +
-        "`Map Name     | Played | Win %  `\n" +
-        "`-------------|--------|--------`\n" +
+        "`Map Name      | Played | Win %  `\n" +
+        "`-------------|--------|-------`\n" +
         tableRows
     )
     .addFields(
