@@ -40,6 +40,7 @@ export const startMatch = async (matchId: string) => {
 
   // If the players are in a voice channel. Create a JS Worker to update the live score in the status of the channel.
   if (match?.voiceChannelId) {
+    console.log("worker started for", { matchId, vcid: match?.voiceChannelId });
     const scoreStatus = await getScoreStatusText(match.mapName);
     await updateVoiceChannelStatus(match.voiceChannelId, scoreStatus);
     const worker = new Worker(path.resolve(__dirname, "../worker.js"));
