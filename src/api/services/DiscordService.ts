@@ -261,19 +261,19 @@ export const sendMatchFinishNotification = async (match: Match) => {
             ? `${playerName.substring(0, 9)}..`
             : playerName.padEnd(11, " ");
 
-        // Ensure kills, deaths, and assists are always 2 characters long
-        const kills = `${stat.kills}`.padEnd(2, " ");
-        const deaths = `${stat.deaths}`.padEnd(2, " ");
-        const assists = `${stat.assists}`.padEnd(2, " ");
+        // Create K/D/A string (without padding)
+        const kda = `${stat.kills}/${stat.deaths}/${stat.assists}`;
 
-        const kda = `${kills}/${deaths}/${assists}`;
+        // Pad the K/D/A string to ensure it has exactly 8 characters
+        const paddedKDA = kda.padEnd(8, " ");
+
         const elo =
           `${eloChange?.operator}${eloChange?.difference} (${eloChange?.newElo})`.padEnd(
             3,
             " "
           );
 
-        return `\`${name} ${kda}  ${elo}\``;
+        return `\`${name} ${paddedKDA}  ${elo}\``;
       })
     );
 
