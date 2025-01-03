@@ -306,11 +306,6 @@ export const sendMatchFinishNotification = async (match: Match) => {
           inline: true,
         },
         {
-          name: "\u200B", // Invisible character to add blank space
-          value: "\u200B", // Invisible character for space
-          inline: false,
-        },
-        {
           name: "Players and Stats (K/D/A)",
           value: `${playerStatsTable.join("\n")}`,
         }
