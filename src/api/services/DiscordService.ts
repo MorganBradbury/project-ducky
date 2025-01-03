@@ -793,8 +793,11 @@ export const createMatchAnalysisEmbed = (
     .map((map: any) => `${getMapEmoji(map.mapName)} ${map.mapName}`)
     .join("\n");
 
+  // Sort maps in ascending order of played times for most likely bans
   const mostLikelyBans = sortedMapData
-    .slice(-3)
+    .slice()
+    .sort((a: any, b: any) => a.totalPlayedTimes - b.totalPlayedTimes) // Sort by least played first
+    .slice(0, 3) // Take the least played 3 maps
     .map((map: any) => `${getMapEmoji(map.mapName)} ${map.mapName}`)
     .join("\n");
 
@@ -806,7 +809,7 @@ export const createMatchAnalysisEmbed = (
         map.totalPlayedTimes === 0 ||
         isNaN(parseFloat(map.averageWinPercentage))
           ? "N/A"
-          : parseFloat(map.averageWinPercentage).toFixed(2); // Convert string to number and format
+          : Math.ceil(parseFloat(map.averageWinPercentage)).toString(); // Round up the win percentage to nearest whole number
       return `\`${map.mapName.padEnd(12)} | ${map.totalPlayedTimes
         .toString()
         .padEnd(6)} | ${formattedWinPercentage.padEnd(6)}\``;
@@ -837,7 +840,7 @@ export const createMatchAnalysisEmbed = (
       { name: "Most Likely Picks", value: mostLikelyPicks, inline: true },
       { name: "Most Likely Bans", value: mostLikelyBans, inline: true }
     )
-    .setFooter({ text: `Matchroom analysis` })
+    .setFooter({ text: `Matchroom analysis for ${matchId}` })
     .setColor("#00FF00");
 
   // Create the "View Match" button
@@ -847,6 +850,7 @@ export const createMatchAnalysisEmbed = (
       .setLabel("View match")
       .setStyle(ButtonStyle.Link)
   );
+
   // Pass the embed and the button to sendEmbedMessage
   sendEmbedMessage(embed, [row], "1324729528035053629");
   return;
