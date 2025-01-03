@@ -123,18 +123,25 @@ export const getMatchAnalysis = async (matchId: string): Promise<any> => {
     return;
   }
 
-  const getAllTrackedUsers = await getAllUsers();
+  const allTrackedUsers = await getAllUsers();
 
   // Assuming matchroomPlayers.homeFaction is an object with a playerId array
-  const totalTrackedInGame = getAllTrackedUsers.filter((user) =>
+  const totalTrackedInGame = allTrackedUsers.filter((user) =>
     matchroomPlayers.homeFaction.some(
       (player) => player.playerId === user.faceitId
     )
   ).length;
 
-  if (totalTrackedInGame < 3) {
+  // Check if there are 2 or more tracked users or if the captain exists in the tracked users
+  const isCaptainInGame = matchroomPlayers.homeFaction.some((player) =>
+    allTrackedUsers.some(
+      (user) => user.faceitId === player.playerId && player.captain
+    )
+  );
+
+  if (totalTrackedInGame < 2 && !isCaptainInGame) {
     console.log(
-      `match only contains ${totalTrackedInGame} users so not sending analysis`,
+      `Match only contains ${totalTrackedInGame} tracked users, so not sending analysis`,
       matchId
     );
     return;
