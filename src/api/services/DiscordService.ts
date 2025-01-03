@@ -858,9 +858,9 @@ export const createMatchAnalysisEmbed = (
         inline: true,
       },
       {
-        name: `Map Data for Team ${enemyFactionCaptain.nickname} (Last 30 games)`,
+        name: `Map stats for Team ${enemyFactionCaptain.nickname} (Last 30 games)`,
         value:
-          "`Map Name     | Played | Win % `\n" +
+          "`Map name     | Played | Win % `\n" +
           "`-------------|--------|-------`\n" +
           mapDataTable,
       },
