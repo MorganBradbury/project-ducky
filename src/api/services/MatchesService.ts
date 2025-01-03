@@ -107,33 +107,18 @@ export const cancelMatch = async (matchId: string) => {
   }
 };
 
-import { performance } from "perf_hooks";
-
 export const getMatchAnalysis = async (matchId: string): Promise<any> => {
-  const startTotal = performance.now();
-
-  // Check if match exists in DB
-  const startCheckMatch = performance.now();
+  // Does match exist in DB already. If so, return.
   const doesExist = await checkMatchExists(matchId);
-  console.log(`checkMatchExists took ${performance.now() - startCheckMatch}ms`);
-
   if (doesExist) {
-    // console.log("getMatchAnalysis, game already exists", matchId);
-    console.log(`Total execution took ${performance.now() - startTotal}ms`);
+    console.log("getMatchAnalysis, game already exists", matchId);
     return;
   }
 
-  // Retrieve matchroom players
-  const startGetPlayers = performance.now();
+  // If match is ready for analysis, retrieve all players from the matchroom and their level.
   const matchroomPlayers = await FaceitService.getMatchPlayers(matchId);
-  console.log(
-    `FaceitService.getMatchPlayers took ${
-      performance.now() - startGetPlayers
-    }ms`
-  );
-  // console.log("matchroomPlayers", matchroomPlayers);
+  console.log("matchroomPlayers", matchroomPlayers);
   if (!matchroomPlayers) {
-    console.log(`Total execution took ${performance.now() - startTotal}ms`);
     return;
   }
 
@@ -157,26 +142,18 @@ export const getMatchAnalysis = async (matchId: string): Promise<any> => {
     mapStats: new Map(),
   };
 
-  // Process enemyFaction players
-  const startProcessPlayers = performance.now();
+  // Loop through the enemyFaction players to get their map stats
   for (const player of matchroomPlayers.enemyFaction) {
-    const startPlayerStats = performance.now();
     try {
+      // Get the map stats for the player
       const playerMapStats = await FaceitService.getMapStatsByPlayer(
         player.playerId
       );
-      console.log(
-        `FaceitService.getMapStatsByPlayer for player ${player.nickname} took ${
-          performance.now() - startPlayerStats
-        }ms`
-      );
-
       if (!playerMapStats) {
-        console.log(`Total execution took ${performance.now() - startTotal}ms`);
         return;
       }
 
-      const startAggregation = performance.now();
+      // Loop through the player's map stats and aggregate the data
       playerMapStats.forEach((mapStat) => {
         if (!enemyFactionMapData.mapStats.has(mapStat.mapName)) {
           enemyFactionMapData.mapStats.set(mapStat.mapName, {
@@ -186,13 +163,17 @@ export const getMatchAnalysis = async (matchId: string): Promise<any> => {
           });
         }
 
+        // Aggregate map data
         const mapData = enemyFactionMapData.mapStats.get(mapStat.mapName)!;
         mapData.totalPlayedTimes += mapStat.playedTimes;
         mapData.totalWins += mapStat.wins;
         mapData.totalWinPercentage += mapStat.winPercentage;
+
+        // Update the map data back in the Map
         enemyFactionMapData.mapStats.set(mapStat.mapName, mapData);
       });
 
+      // Aggregate total data
       enemyFactionMapData.totalPlayedTimes += playerMapStats.reduce(
         (acc, stat) => acc + stat.playedTimes,
         0
@@ -205,11 +186,6 @@ export const getMatchAnalysis = async (matchId: string): Promise<any> => {
         (acc, stat) => acc + stat.winPercentage,
         0
       );
-      console.log(
-        `Aggregation for player ${player.nickname} took ${
-          performance.now() - startAggregation
-        }ms`
-      );
     } catch (error) {
       console.error(
         `Error fetching map stats for player ${player.nickname}:`,
@@ -217,22 +193,12 @@ export const getMatchAnalysis = async (matchId: string): Promise<any> => {
       );
     }
   }
-  console.log(
-    `Processing all players took ${performance.now() - startProcessPlayers}ms`
-  );
 
-  // Calculate average win percentage
-  const startCalcAverage = performance.now();
+  // Calculate average win percentage for the enemy faction
   const playerCount = matchroomPlayers.enemyFaction.length;
   enemyFactionMapData.totalWinPercentage /= playerCount;
-  console.log(
-    `Calculating average win percentage took ${
-      performance.now() - startCalcAverage
-    }ms`
-  );
 
-  // Format data for output
-  const startFormatting = performance.now();
+  // Prepare data for embed or output
   const formattedMapData = Array.from(
     enemyFactionMapData.mapStats.entries()
   ).map(([mapName, stats]) => ({
@@ -241,17 +207,8 @@ export const getMatchAnalysis = async (matchId: string): Promise<any> => {
     totalWins: stats.totalWins,
     averageWinPercentage: (stats.totalWinPercentage / playerCount).toFixed(2),
   }));
-  console.log(
-    `Formatting map data took ${performance.now() - startFormatting}ms`
-  );
 
-  // console.log("formattedMapData", formattedMapData);
+  console.log("formattedMapData", formattedMapData);
 
-  const startEmbed = performance.now();
   createMatchAnalysisEmbed(matchId, matchroomPlayers, formattedMapData);
-  console.log(
-    `createMatchAnalysisEmbed took ${performance.now() - startEmbed}ms`
-  );
-
-  console.log(`Total execution took ${performance.now() - startTotal}ms`);
 };
