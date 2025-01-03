@@ -864,8 +864,8 @@ export const createMatchAnalysisEmbed = (
           "`-------------|--------|-------`\n" +
           mapDataTable,
       },
-      { name: "Most Likely Picks", value: mostLikelyPicks, inline: true },
-      { name: "Most Likely Bans", value: mostLikelyBans, inline: true }
+      { name: "Most likely picks", value: mostLikelyPicks, inline: true },
+      { name: "Most likely bans", value: mostLikelyBans, inline: true }
     )
     .setFooter({ text: `${matchId}` })
     .setColor("#ff5733");
