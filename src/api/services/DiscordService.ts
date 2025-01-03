@@ -809,10 +809,10 @@ export const createMatchAnalysisEmbed = (
         map.totalPlayedTimes === 0 ||
         isNaN(parseFloat(map.averageWinPercentage))
           ? "N/A"
-          : Math.ceil(parseFloat(map.averageWinPercentage)).toString(); // Round up the win percentage to nearest whole number
+          : Math.ceil(parseFloat(map.averageWinPercentage)).toString() + "%"; // Round up the win percentage to nearest whole number
       return `\`${map.mapName.padEnd(12)} | ${map.totalPlayedTimes
         .toString()
-        .padEnd(6)} | ${formattedWinPercentage.padEnd(6)}%\``;
+        .padEnd(6)} | ${formattedWinPercentage.padEnd(6)}\``;
     })
     .join("\n");
 
