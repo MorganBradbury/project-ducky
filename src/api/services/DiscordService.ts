@@ -869,16 +869,14 @@ export const createMatchAnalysisEmbed = (
     .map((map: any) => `${getMapEmoji(map.mapName)} ${map.mapName}`)
     .join("\n");
 
-  // Creating the map stats table content
+  // Creating the map stats table content (without map icons)
   const mapDataTable = sortedMapData
     .map((map: any) => {
       const formattedWinPercentage =
         map.totalPlayedTimes === 0 || isNaN(map.averageWinPercentage)
           ? "N/A"
           : map.averageWinPercentage.toFixed(2);
-      return `\`${getMapEmoji(map.mapName).padEnd(3)} ${map.mapName.padEnd(
-        12
-      )} | ${map.totalPlayedTimes
+      return `\`${map.mapName.padEnd(12)} | ${map.totalPlayedTimes
         .toString()
         .padEnd(6)} | ${formattedWinPercentage.padEnd(6)}\``;
     })
