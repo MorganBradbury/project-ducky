@@ -307,74 +307,12 @@ export const sendMatchFinishNotification = async (match: Match) => {
 
     const row = new ActionRowBuilder<ButtonBuilder>().addComponents(
       new ButtonBuilder()
-        .setCustomId("more_stats")
-        .setLabel("More Stats")
-        .setStyle(ButtonStyle.Primary),
-
-      new ButtonBuilder()
         .setURL(`https://www.faceit.com/en/cs2/room/${match.matchId}`)
         .setLabel("View match")
         .setStyle(ButtonStyle.Link)
     );
 
-    const message = await sendEmbedMessage(embed, [row]);
-
-    const collector = message?.createMessageComponentCollector({
-      componentType: ComponentType.Button,
-    });
-
-    collector?.on("collect", async (interaction: ButtonInteraction) => {
-      if (interaction.customId === "more_stats") {
-        const additionalStats = [
-          {
-            playerName: "Player1",
-            ADR: "100",
-            HS: "50%",
-            threeK: 2,
-            fourK: 1,
-            fiveK: 0,
-            clutches: 1,
-          },
-          {
-            playerName: "Player2",
-            ADR: "90",
-            HS: "40%",
-            threeK: 3,
-            fourK: 1,
-            fiveK: 0,
-            clutches: 2,
-          },
-        ];
-
-        const additionalStatsTable = additionalStats
-          .map(
-            (stat) =>
-              `\`${stat.playerName.padEnd(10)} ADR: ${stat.ADR}, HS: ${
-                stat.HS
-              }, 3K: ${stat.threeK}, 4K: ${stat.fourK}, 5K: ${
-                stat.fiveK
-              }, Clutches: ${stat.clutches}\``
-          )
-          .join("\n");
-
-        embed.addFields({
-          name: "Additional Stats",
-          value: additionalStatsTable,
-        });
-
-        (row.components[0] as ButtonBuilder).setDisabled(true);
-
-        await interaction.update({
-          embeds: [embed],
-          components: [row],
-        });
-      }
-    });
-
-    collector?.on("end", () => {
-      (row.components[0] as ButtonBuilder).setDisabled(true);
-      message?.edit({ components: [row] });
-    });
+    await sendEmbedMessage(embed, [row]);
   } catch (error) {
     console.error("Error sending match finish notification:", error);
   }
