@@ -714,11 +714,11 @@ export const createPrematchEmbed = (
     .setFooter({ text: "Prematch analysis" })
     .setTimestamp();
 
-  const row = new ActionRowBuilder().addComponents(
+  const row = new ActionRowBuilder<ButtonBuilder>().addComponents(
     new ButtonBuilder()
-      .setURL(`https://www.faceit.com/en/cs2/room/${matchId}`) // Set URL for the button
-      .setLabel("View match") // Button label
-      .setStyle(ButtonStyle.Link) // Use Link style for a URL
+      .setURL(`https://www.faceit.com/en/cs2/room/${matchId}`)
+      .setLabel("View match")
+      .setStyle(ButtonStyle.Link)
   );
 
   sendEmbedMessage(embed, [row], "1324729528035053629");
