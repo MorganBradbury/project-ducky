@@ -808,7 +808,9 @@ export const createMatchAnalysisEmbed = (
   const homePlayers = homeFaction
     .map(
       (player: any) =>
-        `${getSkillLevelEmoji(player.faceitLevel)} ${player.nickname}`
+        `${getSkillLevelEmoji(player.faceitLevel)} ${player.nickname}${
+          player.captain ? " 👑" : ""
+        }`
     )
     .join("\n");
   const enemyPlayers = enemyFaction

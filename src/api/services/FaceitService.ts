@@ -308,17 +308,8 @@ class FaceitApiClient {
     playerId: string
   ): Promise<PlayerMapsData[] | null> {
     try {
-      // Start the request timing
-      const startRequest = performance.now();
       const queryUrl = `/players/${playerId}/games/cs2/stats?limit=30`;
       const response = await this.client.get(queryUrl);
-
-      // Log the time taken for the API request
-      console.log(
-        `Request to get stats for player ${playerId} took ${
-          performance.now() - startRequest
-        }ms`
-      );
 
       if (response.status === 200 && response.data) {
         const playerMapStats = activeMapPool.map((map) => {
