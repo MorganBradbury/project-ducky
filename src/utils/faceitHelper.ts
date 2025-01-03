@@ -28,7 +28,7 @@ export const getTeamFaction = async (
     trackedPlayers.length > 0 ? "faction1" : "faction2";
 
   return {
-    teamId: teams[faction].faction_id,
+    teamId: teams[faction]?.faction_id,
     faction,
   };
 };
