@@ -229,7 +229,7 @@ class FaceitApiClient {
           trackedTeamFaction.faction === "faction1" ? "faction2" : "faction1";
 
         const mapTeamData = (teamFaction: string) =>
-          teams[teamFaction].roster.map((player: any) => ({
+          teams[teamFaction]?.roster.map((player: any) => ({
             playerId: player.player_id,
             faceitLevel: player.game_skill_level,
             captain: teams[teamFaction].leader === player.player_id,
