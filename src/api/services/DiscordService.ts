@@ -90,7 +90,8 @@ export const createNewVoiceChannel = async (
 
 const sendEmbedMessage = async (
   embed: EmbedBuilder,
-  components: any[] = []
+  components: any[] = [],
+  channelId: string = config.BOT_UPDATES_CHANNEL_ID
 ) => {
   try {
     if (!client.isReady()) {
@@ -98,9 +99,7 @@ const sendEmbedMessage = async (
       return;
     }
 
-    const channel = (await client.channels.fetch(
-      config.BOT_UPDATES_CHANNEL_ID
-    )) as TextChannel;
+    const channel = (await client.channels.fetch(channelId)) as TextChannel;
 
     if (!channel) {
       console.log(
@@ -722,7 +721,7 @@ export const createPrematchEmbed = (
       .setStyle(ButtonStyle.Link) // Use Link style for a URL
   );
 
-  sendEmbedMessage(embed, [row]);
+  sendEmbedMessage(embed, [row], "1324729528035053629");
 
   return embed;
 };
@@ -802,6 +801,81 @@ export const removeAllUnicodeNicknames = async () => {
   } catch (error) {
     console.error("Error fetching members or updating nicknames:", error);
   }
+};
+
+export const createMatchAnalysisEmbed = (
+  matchId: string,
+  playersData: any,
+  gameData: any
+) => {
+  // Sorting the game data: first by most played times, then by average win percentage if needed
+  const sortedMapData = gameData.sort((a: any, b: any) => {
+    if (b.totalPlayedTimes === a.totalPlayedTimes) {
+      return (
+        parseFloat(b.averageWinPercentage) - parseFloat(a.averageWinPercentage)
+      );
+    }
+    return b.totalPlayedTimes - a.totalPlayedTimes;
+  });
+
+  // Extracting teams and their players
+  const homeFaction = playersData.homeFaction;
+  const enemyFaction = playersData.enemyFaction;
+
+  const homeFactionCaptain = homeFaction.find((player: any) => player.captain);
+  const enemyFactionCaptain = enemyFaction.find(
+    (player: any) => player.captain
+  );
+
+  const homePlayers = homeFaction
+    .map((player: any) => player.nickname)
+    .join("\n");
+  const enemyPlayers = enemyFaction
+    .map((player: any) => player.nickname)
+    .join("\n");
+
+  // Getting most likely picks and bans
+  const mostLikelyPicks = sortedMapData
+    .slice(0, 3)
+    .map((map: any) => map.mapName)
+    .join("\n");
+  const mostLikelyBans = sortedMapData
+    .slice(-3)
+    .map((map: any) => map.mapName)
+    .join("\n");
+
+  // Creating a markdown table for map stats
+  const mapDataTable = sortedMapData
+    .map((map: any) => {
+      return `| **${map.mapName}** | ${map.totalPlayedTimes} | ${map.totalWins} | ${map.averageWinPercentage}% |`;
+    })
+    .join("\n");
+
+  const embed = new EmbedBuilder()
+    .setTitle("Matchroom Analysis")
+    .addFields(
+      {
+        name: `Team ${homeFactionCaptain.nickname}`,
+        value: homePlayers,
+        inline: true,
+      },
+      {
+        name: `Team ${enemyFactionCaptain.nickname}`,
+        value: enemyPlayers,
+        inline: true,
+      },
+      {
+        name: "Map Data",
+        value: `| **Map Name** | **Played** | **Wins** | **Win %** |\n| --- | --- | --- | --- |\n${mapDataTable}`,
+      },
+      { name: "Most Likely Picks", value: mostLikelyPicks, inline: true },
+      { name: "Most Likely Bans", value: mostLikelyBans, inline: true }
+    )
+    .setFooter({ text: `Match Room ID: ${matchId}` })
+    .setColor("#00FF00");
+
+  sendEmbedMessage(embed, [], "1324729528035053629");
+  return;
 };
 
 const loginBot = async () => {

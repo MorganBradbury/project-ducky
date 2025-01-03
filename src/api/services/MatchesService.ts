@@ -9,7 +9,7 @@ import {
   updateMatchProcessed,
 } from "../../db/commands";
 import {
-  createPrematchEmbed,
+  createMatchAnalysisEmbed,
   runEloUpdate,
   sendMatchFinishNotification,
   updateVoiceChannelStatus,
@@ -107,15 +107,6 @@ export const cancelMatch = async (matchId: string) => {
   }
 };
 
-type PlayerStats = {
-  mapName: string;
-  playedTimes: number;
-  wins: number;
-  winPercentage: number | "NaN";
-};
-
-const activeMatchIds = new Set<string>();
-
 export const getMatchAnalysis = async (matchId: string): Promise<any> => {
   // Does match exist in DB already. If so, return.
   const doesExist = await checkMatchExists(matchId);
@@ -208,55 +199,40 @@ export const getMatchAnalysis = async (matchId: string): Promise<any> => {
 
   console.log("formattedMapData", formattedMapData);
 
-  // Send the embed to the text channel.
-
-  // Format:
-  // Match room ID
-  // Team [teamName] Players : Team [teanmName] players
-  // List of players for each team
-
-  // Table of all map data
-
-  // Most likely picks:
-  //[list of maps]
-
-  // Most likely bans:
-  //[list of maps]
-
-  // Button to link the match room.
+  createMatchAnalysisEmbed(matchId, matchroomPlayers, formattedMapData);
 };
 
-export const sendPrematchAnalysis = async (matchId: string): Promise<any> => {
-  // Check if the matchId is already being processed
-  if (activeMatchIds.has(matchId)) {
-    console.log(`Match ${matchId} is already being processed. Skipping...`);
-    return;
-  }
+// export const sendPrematchAnalysis = async (matchId: string): Promise<any> => {
+//   // Check if the matchId is already being processed
+//   if (activeMatchIds.has(matchId)) {
+//     console.log(`Match ${matchId} is already being processed. Skipping...`);
+//     return;
+//   }
 
-  try {
-    // Mark the matchId as being processed
-    activeMatchIds.add(matchId);
-    console.log("Processing sendPrematchAnalysis()", matchId);
+//   try {
+//     // Mark the matchId as being processed
+//     activeMatchIds.add(matchId);
+//     console.log("Processing sendPrematchAnalysis()", matchId);
 
-    // Retrieves an array of players from the match by their ID
-    const leader = await FaceitService.getMatchFactionLeader(matchId);
-    if (leader === null) {
-      return;
-    }
-    console.log("Leader", leader);
+//     // Retrieves an array of players from the match by their ID
+//     const leader = await FaceitService.getMatchFactionLeader(matchId);
+//     if (leader === null) {
+//       return;
+//     }
+//     console.log("Leader", leader);
 
-    const playerMapStats = await FaceitService.getMapStatsByPlayer(leader);
-    if (playerMapStats === null) {
-      return;
-    }
-    console.log("PlayerMapStats", playerMapStats);
+//     const playerMapStats = await FaceitService.getMapStatsByPlayer(leader);
+//     if (playerMapStats === null) {
+//       return;
+//     }
+//     console.log("PlayerMapStats", playerMapStats);
 
-    // Create the prematch embed
-    createPrematchEmbed(playerMapStats, matchId);
-  } catch (error) {
-    console.error(`Error processing match ${matchId}:`, error);
-  } finally {
-    // After processing, remove the matchId from the active set
-    activeMatchIds.delete(matchId);
-  }
-};
+//     // Create the prematch embed
+//     createPrematchEmbed(playerMapStats, matchId);
+//   } catch (error) {
+//     console.error(`Error processing match ${matchId}:`, error);
+//   } finally {
+//     // After processing, remove the matchId from the active set
+//     activeMatchIds.delete(matchId);
+//   }
+// };

@@ -3,7 +3,6 @@ import {
   cancelMatch,
   endMatch,
   getMatchAnalysis,
-  sendPrematchAnalysis,
   startMatch,
 } from "../services/MatchesService"; // Centralized match flow logic
 import { updateVoiceChannelStatus } from "../services/DiscordService";

@@ -333,7 +333,7 @@ class FaceitApiClient {
     playerId: string
   ): Promise<PlayerMapsData[] | null> {
     try {
-      const queryUrl = `/players/${playerId}/games/cs2/stats`;
+      const queryUrl = `/players/${playerId}/games/cs2/stats?limit=100`;
       const response = await this.client.get(queryUrl);
 
       if (response.status === 200 && response.data) {
