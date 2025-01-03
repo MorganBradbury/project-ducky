@@ -307,13 +307,13 @@ class FaceitApiClient {
   async getMapStatsByPlayer(
     playerId: string
   ): Promise<PlayerMapsData[] | null> {
-    const startTotal = performance.now(); // Start total timing
-
     try {
       // Start the request timing
       const startRequest = performance.now();
       const queryUrl = `/players/${playerId}/games/cs2/stats?limit=100`;
       const response = await this.client.get(queryUrl);
+
+      // Log the time taken for the API request
       console.log(
         `Request to get stats for player ${playerId} took ${
           performance.now() - startRequest
@@ -321,57 +321,26 @@ class FaceitApiClient {
       );
 
       if (response.status === 200 && response.data) {
-        const startMapProcessing = performance.now(); // Start map processing timing
-
         const playerMapStats = activeMapPool.map((map) => {
-          const startMapFilter = performance.now(); // Start map filter timing
           const matches: any[] = response.data.items.filter(
             (match: any) => match.stats.Map === map
           );
-          console.log(
-            `Filtering matches for map ${map} took ${
-              performance.now() - startMapFilter
-            }ms`
-          );
 
-          const startMapWinCalc = performance.now(); // Start map win calculation timing
+          const totalPlayed = matches.length;
           const mapWins = matches.reduce(
             (count: number, match: { stats: { Result: string } }) =>
               count + (match.stats.Result === "1" ? 1 : 0),
             0
-          );
-          console.log(
-            `Calculating wins for map ${map} took ${
-              performance.now() - startMapWinCalc
-            }ms`
-          );
-
-          const totalPlayed = matches.length;
-          const winPercentage =
-            totalPlayed > 0 ? (mapWins / totalPlayed) * 100 : 0;
-
-          console.log(
-            `Processing stats for map ${map} took ${
-              performance.now() - startMapProcessing
-            }ms`
           );
 
           return {
             mapName: map,
             playedTimes: totalPlayed,
             wins: mapWins,
-            winPercentage: winPercentage,
+            winPercentage: totalPlayed > 0 ? (mapWins / totalPlayed) * 100 : 0,
           };
         });
 
-        console.log(
-          `Processing all maps took ${performance.now() - startMapProcessing}ms`
-        );
-        console.log(
-          `Total execution for player ${playerId} took ${
-            performance.now() - startTotal
-          }ms`
-        );
         return playerMapStats;
       }
 
