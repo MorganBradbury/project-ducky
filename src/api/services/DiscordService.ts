@@ -654,78 +654,6 @@ export const updateVoiceChannelStatus = async (
   }
 };
 
-export const createPrematchEmbed = (
-  mapStats: PlayerMapsData[],
-  matchId: string
-) => {
-  // Sort by playedTimes (desc) and then winPercentage (desc)
-  const sortedStats = [...mapStats].sort((a, b) => {
-    if (b.playedTimes === a.playedTimes) {
-      return b.winPercentage - a.winPercentage;
-    }
-    return b.playedTimes - a.playedTimes;
-  });
-
-  // Generate the table content
-  const tableRows = sortedStats
-    .map(({ mapName, playedTimes, winPercentage }) => {
-      const formattedWinPercentage =
-        playedTimes === 0 || isNaN(winPercentage)
-          ? "N/A"
-          : winPercentage.toFixed(2);
-      return `\`${mapName.padEnd(12)} | ${playedTimes
-        .toString()
-        .padEnd(6)} | ${formattedWinPercentage.padEnd(6)}\``;
-    })
-    .join("\n");
-
-  // Analysis for most and least played maps
-  const mostPlayedMaps = sortedStats
-    .slice(0, 3)
-    .map((map) => `${getMapEmoji(map.mapName)} ${map.mapName}`)
-    .join("\n ");
-  const leastPlayedMaps = sortedStats
-    .slice(-3)
-    .map((map) => `${getMapEmoji(map.mapName)} ${map.mapName}`)
-    .join("\n ");
-
-  // Create the embed
-  const embed = new EmbedBuilder()
-    .setTitle("Prematch Analysis")
-    .setDescription(
-      "**Map Stats**\n" +
-        "`Map Name      | Played | Win %  `\n" +
-        "`-------------|--------|-------`\n" +
-        tableRows
-    )
-    .addFields(
-      {
-        name: "Captain's most played maps",
-        value: mostPlayedMaps || "No maps found.",
-        inline: false,
-      },
-      {
-        name: "Captain is likely going to ban:",
-        value: leastPlayedMaps || "No maps found.",
-        inline: false,
-      }
-    )
-    .setColor("#00AE86")
-    .setFooter({ text: "Prematch analysis" })
-    .setTimestamp();
-
-  const row = new ActionRowBuilder<ButtonBuilder>().addComponents(
-    new ButtonBuilder()
-      .setURL(`https://www.faceit.com/en/cs2/room/${matchId}`)
-      .setLabel("View match")
-      .setStyle(ButtonStyle.Link)
-  );
-
-  sendEmbedMessage(embed, [row], "1324729528035053629");
-
-  return embed;
-};
-
 export const updateAllUnicodeNicknames = async () => {
   try {
     const guild = await client.guilds.fetch(config.GUILD_ID); // Fetch the guild
@@ -913,13 +841,14 @@ export const createMatchAnalysisEmbed = (
     .setColor("#00FF00");
 
   // Create the "View Match" button
-  const viewMatchButton = new ButtonBuilder()
-    .setLabel("View Match") // Text displayed on the button
-    .setStyle(ButtonStyle.Link) // Make it a link button
-    .setURL(`https://www.faceit.com/en/cs2/room/${matchId}`); // URL to matchroom
-
+  const row = new ActionRowBuilder<ButtonBuilder>().addComponents(
+    new ButtonBuilder()
+      .setURL(`https://www.faceit.com/en/cs2/room/${matchId}`)
+      .setLabel("View match")
+      .setStyle(ButtonStyle.Link)
+  );
   // Pass the embed and the button to sendEmbedMessage
-  sendEmbedMessage(embed, [viewMatchButton], "1324729528035053629");
+  sendEmbedMessage(embed, [row], "1324729528035053629");
   return;
 };
 
