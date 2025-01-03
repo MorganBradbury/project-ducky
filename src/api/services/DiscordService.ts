@@ -868,7 +868,7 @@ export const createMatchAnalysisEmbed = (
       { name: "Most Likely Bans", value: mostLikelyBans, inline: true }
     )
     .setFooter({ text: `${matchId}` })
-    .setColor("#00FF00");
+    .setColor("#00AE86");
 
   // Create the "View Match" button
   const row = new ActionRowBuilder<ButtonBuilder>().addComponents(
