@@ -349,24 +349,24 @@ export const sendMatchFinishNotification = async (match: Match) => {
           },
         ];
 
-        // Create the header row for the stats table
-        const columnHeaders = `\`Player       ADR   HS  3K  4K  5K  Clutches\``;
-
-        // Create the data rows with proper padding for alignment
         const additionalStatsTable = additionalStats
           .map(
             (stat) =>
-              `\`${
-                stat.playerName.length > 11
-                  ? `${stat.playerName.substring(0, 9)}..`
-                  : stat.playerName.padEnd(11)
-              } ${stat.ADR.padEnd(3)} ${stat.HS.padEnd(2)} ${stat.threeK
+              `\`${stat.playerName.padEnd(10)} ADR: ${stat.ADR.padEnd(
+                3
+              )}, HS: ${stat.HS.padEnd(2)}, 3K: ${stat.threeK
                 .toString()
-                .padStart(2)} ${stat.fourK.toString().padStart(2)} ${stat.fiveK
+                .padStart(2)}, 4K: ${stat.fourK
                 .toString()
-                .padStart(2)} ${stat.clutches.toString().padStart(2)}\``
+                .padStart(2)}, 5K: ${stat.fiveK
+                .toString()
+                .padStart(2)}, Clutches: ${stat.clutches
+                .toString()
+                .padStart(2)}\``
           )
           .join("\n");
+
+        const columnHeaders = `\`Player Name  ADR   HS  3K  4K  5K  Clutches\``;
 
         embed.addFields({
           name: "Additional Stats",
