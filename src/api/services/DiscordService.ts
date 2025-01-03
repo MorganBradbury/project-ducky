@@ -267,12 +267,8 @@ export const sendMatchFinishNotification = async (match: Match) => {
       match.trackedTeam.trackedPlayers.map((player) => player.faceitId)
     );
 
-    const sortedPlayerStats = getPlayerStatsData.sort(
-      (a, b) => parseFloat(b.ADR) - parseFloat(a.ADR)
-    );
-
     const playerStatsTable = await Promise.all(
-      sortedPlayerStats.map(async (stat) => {
+      getPlayerStatsData.map(async (stat) => {
         const player = match.trackedTeam.trackedPlayers.find(
           (player) => player.faceitId === stat.playerId
         );

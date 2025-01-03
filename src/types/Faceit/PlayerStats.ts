@@ -3,6 +3,4 @@ interface PlayerStats {
   kills: string;
   deaths: string;
   assists: string;
-  ADR: string;
-  hsPercentage: string;
 }
