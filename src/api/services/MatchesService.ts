@@ -2,6 +2,7 @@ import path from "path";
 import { Worker } from "worker_threads";
 import {
   checkMatchExists,
+  getAllUsers,
   getMatchDataFromDb,
   insertMatch,
   isMatchProcessed,
@@ -119,6 +120,23 @@ export const getMatchAnalysis = async (matchId: string): Promise<any> => {
   const matchroomPlayers = await FaceitService.getMatchPlayers(matchId);
   console.log("matchroomPlayers", matchroomPlayers);
   if (!matchroomPlayers) {
+    return;
+  }
+
+  const getAllTrackedUsers = await getAllUsers();
+
+  // Assuming matchroomPlayers.homeFaction is an object with a playerId array
+  const totalTrackedInGame = getAllTrackedUsers.filter((user) =>
+    matchroomPlayers.homeFaction.some(
+      (player) => player.playerId === user.faceitId
+    )
+  ).length;
+
+  if (totalTrackedInGame < 3) {
+    console.log(
+      `match only contains ${totalTrackedInGame} users so not sending analysis`,
+      matchId
+    );
     return;
   }
 
