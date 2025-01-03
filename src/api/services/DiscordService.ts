@@ -903,7 +903,7 @@ export const createMatchAnalysisEmbed = (
         name: "Map Data",
         value:
           "`Map Name    | Played | Win %  `\n" +
-          "`------------|--------|--------`\n" +
+          "`-------------|--------|--------`\n" +
           mapDataTable,
       },
       { name: "Most Likely Picks", value: mostLikelyPicks, inline: true },
