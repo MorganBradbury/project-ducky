@@ -233,30 +233,32 @@ class FaceitApiClient {
         const enemyFaction =
           trackedTeamFaction.faction === "faction1" ? "faction2" : "faction1";
 
-        let homeTeamObj: any = [];
-        const homeFactionData = response.data.teams[
+        // Mapping home faction players
+        const homeFactionData: any = response.data.teams[
           trackedTeamFaction.faction
         ].roster.map((team: any) => {
-          homeTeamObj.push({
+          return {
             playerId: team.player_id,
             faceitLevel: team.game_skill_level,
             captain:
               response.data.teams[trackedTeamFaction.faction].leader ===
               team.player_id,
             nickname: team.nickname,
-          });
+          };
         });
-        const enemyFactionData = response.data.teams[enemyFaction].roster.map(
-          (team: any) => {
-            homeTeamObj.push({
-              playerId: team.player_id,
-              faceitLevel: team.game_skill_level,
-              captain:
-                response.data.teams[enemyFaction].leader === team.player_id,
-              nickname: team.nickname,
-            });
-          }
-        );
+
+        // Mapping enemy faction players
+        const enemyFactionData: any = response.data.teams[
+          enemyFaction
+        ].roster.map((team: any) => {
+          return {
+            playerId: team.player_id,
+            faceitLevel: team.game_skill_level,
+            captain:
+              response.data.teams[enemyFaction].leader === team.player_id,
+            nickname: team.nickname,
+          };
+        });
 
         return {
           homeFaction: homeFactionData,
