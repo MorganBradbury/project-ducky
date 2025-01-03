@@ -110,7 +110,7 @@ const sendEmbedMessage = async (
     }
 
     // Fetch the last 10 messages from the channel
-    const messages = await channel.messages.fetch({ limit: 10 });
+    const messages = await channel.messages.fetch({ limit: 4 });
 
     // Extract the matchId from the embed footer (using data.footer)
     const matchId = embed.data.footer?.text?.split("for ")[1];
