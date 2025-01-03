@@ -109,28 +109,30 @@ const sendEmbedMessage = async (
       return;
     }
 
-    // Fetch the last 10 messages from the channel
-    const messages = await channel.messages.fetch({ limit: 4 });
+    if (channelId === "1324729528035053629") {
+      // Fetch the last 10 messages from the channel
+      const messages = await channel.messages.fetch({ limit: 4 });
 
-    // Extract the matchId from the embed footer (using data.footer)
-    const matchId = embed.data.footer?.text?.split("for ")[1];
+      // Extract the matchId from the embed footer (using data.footer)
+      const matchId = embed.data.footer?.text?.split("for ")[1];
 
-    if (!matchId) {
-      console.error("No matchId found in embed footer!");
-      return;
-    }
+      if (!matchId) {
+        console.error("No matchId found in embed footer!");
+        return;
+      }
 
-    // Check if any of the last 10 messages contain an embed with the same matchId in the footer
-    const duplicate = messages.some((message: Message) => {
-      return message.embeds.some((embedMsg: any) => {
-        console.log(`does ${embed?.data?.footer?.text} include ${matchId}`);
-        return embedMsg.footer?.text?.includes(matchId); // Check for matching matchId in the footer
+      // Check if any of the last 10 messages contain an embed with the same matchId in the footer
+      const duplicate = messages.some((message: Message) => {
+        return message.embeds.some((embedMsg: any) => {
+          console.log(`does ${embed?.data?.footer?.text} include ${matchId}`);
+          return embedMsg.footer?.text?.includes(matchId); // Check for matching matchId in the footer
+        });
       });
-    });
 
-    if (duplicate) {
-      console.log("Duplicate embed found, not sending the embed.");
-      return;
+      if (duplicate) {
+        console.log("Duplicate embed found, not sending the embed.");
+        return;
+      }
     }
 
     // Send the embed with the optional button in the components array
