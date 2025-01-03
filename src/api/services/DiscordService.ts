@@ -803,6 +803,23 @@ export const removeAllUnicodeNicknames = async () => {
   }
 };
 
+const getSkillLevelEmoji = (faceitLevel: number): string => {
+  const skillLevelEmojis: { [key: number]: string } = {
+    1: "<:level_1:1313100283273936896>",
+    2: "<:level_2:1313100284301545522>",
+    3: "<:level_3:1313100285215903785>",
+    4: "<:level_4:1313100286989959180>",
+    5: "<:level_5:1313100288512622682>",
+    6: "<:level_6:1313100291045851186>",
+    7: "<:level_7:1313100292870377523>",
+    8: "<:level_8:1313100294321868866>",
+    9: "<:level_9:1313100296557432832>",
+    10: "<:level_10:1314528913380081717>", // Added level 10 as well
+  };
+
+  return skillLevelEmojis[faceitLevel] || `:${faceitLevel}:`; // Default to text-based emoji if not found
+};
+
 export const createMatchAnalysisEmbed = (
   matchId: string,
   playersData: any,
@@ -827,30 +844,47 @@ export const createMatchAnalysisEmbed = (
     (player: any) => player.captain
   );
 
+  // Adding skill level icons next to each player name
   const homePlayers = homeFaction
-    .map((player: any) => player.nickname)
+    .map(
+      (player: any) =>
+        `${getSkillLevelEmoji(player.faceitLevel)} ${player.nickname}`
+    )
     .join("\n");
   const enemyPlayers = enemyFaction
-    .map((player: any) => player.nickname)
+    .map(
+      (player: any) =>
+        `${getSkillLevelEmoji(player.faceitLevel)} ${player.nickname}`
+    )
     .join("\n");
 
-  // Getting most likely picks and bans
+  // Getting most likely picks and bans with map emojis
   const mostLikelyPicks = sortedMapData
     .slice(0, 3)
-    .map((map: any) => map.mapName)
-    .join("\n");
-  const mostLikelyBans = sortedMapData
-    .slice(-3)
-    .map((map: any) => map.mapName)
+    .map((map: any) => `${getMapEmoji(map.mapName)} ${map.mapName}`)
     .join("\n");
 
-  // Creating a markdown table for map stats
+  const mostLikelyBans = sortedMapData
+    .slice(-3)
+    .map((map: any) => `${getMapEmoji(map.mapName)} ${map.mapName}`)
+    .join("\n");
+
+  // Creating the map stats table content
   const mapDataTable = sortedMapData
     .map((map: any) => {
-      return `| **${map.mapName}** | ${map.totalPlayedTimes} | ${map.totalWins} | ${map.averageWinPercentage}% |`;
+      const formattedWinPercentage =
+        map.totalPlayedTimes === 0 || isNaN(map.averageWinPercentage)
+          ? "N/A"
+          : map.averageWinPercentage.toFixed(2);
+      return `\`${getMapEmoji(map.mapName).padEnd(3)} ${map.mapName.padEnd(
+        12
+      )} | ${map.totalPlayedTimes
+        .toString()
+        .padEnd(6)} | ${formattedWinPercentage.padEnd(6)}\``;
     })
     .join("\n");
 
+  // Create the embed
   const embed = new EmbedBuilder()
     .setTitle("Matchroom Analysis")
     .addFields(
@@ -866,7 +900,10 @@ export const createMatchAnalysisEmbed = (
       },
       {
         name: "Map Data",
-        value: `| **Map Name** | **Played** | **Wins** | **Win %** |\n| --- | --- | --- | --- |\n${mapDataTable}`,
+        value:
+          "`Map Name    | Played | Win %  `\n" +
+          "`------------|--------|--------`\n" +
+          mapDataTable,
       },
       { name: "Most Likely Picks", value: mostLikelyPicks, inline: true },
       { name: "Most Likely Bans", value: mostLikelyBans, inline: true }
