@@ -872,10 +872,13 @@ export const createMatchAnalysisEmbed = (
   // Creating the map stats table content (without map icons)
   const mapDataTable = sortedMapData
     .map((map: any) => {
+      // Ensure averageWinPercentage is a valid number
       const formattedWinPercentage =
         map.totalPlayedTimes === 0 || isNaN(map.averageWinPercentage)
           ? "N/A"
-          : map.averageWinPercentage.toFixed(2);
+          : typeof map.averageWinPercentage === "number"
+          ? map.averageWinPercentage.toFixed(2) // Format to two decimal places
+          : "N/A"; // Default to "N/A" if the value isn't a number
       return `\`${map.mapName.padEnd(12)} | ${map.totalPlayedTimes
         .toString()
         .padEnd(6)} | ${formattedWinPercentage.padEnd(6)}\``;
