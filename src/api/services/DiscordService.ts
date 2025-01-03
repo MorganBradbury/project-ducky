@@ -11,6 +11,8 @@ import {
   ButtonBuilder,
   ButtonStyle,
   ActionRowBuilder,
+  ButtonInteraction,
+  ComponentType,
 } from "discord.js";
 import { SystemUser } from "../../types/SystemUser";
 import { FaceitService } from "./FaceitService";
@@ -108,7 +110,7 @@ const sendEmbedMessage = async (
     }
 
     // Send the embed with the optional button in the components array
-    await channel.send({
+    return channel.send({
       embeds: [embed],
       components, // If components (buttons) are passed, they will be included
     });
@@ -234,18 +236,15 @@ const getMapEmoji = (mapName: string): string => {
 
 export const sendMatchFinishNotification = async (match: Match) => {
   try {
-    // Get player stats using the getPlayerStats function
     const getPlayerStatsData = await FaceitService.getPlayerStats(
       match.matchId,
       match.trackedTeam.trackedPlayers.map((player) => player.faceitId)
     );
 
-    // Sort the player stats by ADR in descending order
     const sortedPlayerStats = getPlayerStatsData.sort(
       (a, b) => parseFloat(b.ADR) - parseFloat(a.ADR)
     );
 
-    // Construct table rows
     const playerStatsTable = await Promise.all(
       sortedPlayerStats.map(async (stat) => {
         const player = match.trackedTeam.trackedPlayers.find(
@@ -272,7 +271,6 @@ export const sendMatchFinishNotification = async (match: Match) => {
       })
     );
 
-    // Determine win/loss based on finalScore or eloDifference
     const finalScore = await FaceitService.getMatchScore(
       match.matchId,
       match.trackedTeam.faction,
@@ -283,10 +281,8 @@ export const sendMatchFinishNotification = async (match: Match) => {
       match.trackedTeam.faction
     );
 
-    // Get map emoji
     const mapEmoji = getMapEmoji(match.mapName);
 
-    // Create the embed without the Match Link
     const embed = new EmbedBuilder()
       .setTitle(`🚨 New match finished`)
       .setColor(didTeamWin ? "#00FF00" : "#FF0000")
@@ -294,12 +290,12 @@ export const sendMatchFinishNotification = async (match: Match) => {
         {
           name: "Map",
           value: `${mapEmoji}  ${match.mapName}`,
+          inline: true,
         },
         {
           name: "Match Result",
-          value: `${finalScore.join(" / ") || "N/A"} (${
-            didTeamWin ? "WIN" : "LOSS"
-          })`,
+          value: `${finalScore.join(" / ") || "N/A"}`,
+          inline: true,
         },
         {
           name: "Players and Stats (K/D/A)",
@@ -309,22 +305,76 @@ export const sendMatchFinishNotification = async (match: Match) => {
       .setFooter({ text: "Match result" })
       .setTimestamp();
 
-    // Create the buttons
-    // Create the "More Stats" button and "View matchroom" button
-    const row = new ActionRowBuilder().addComponents(
+    const row = new ActionRowBuilder<ButtonBuilder>().addComponents(
       new ButtonBuilder()
-        .setCustomId("more_stats") // Custom ID for button interaction
-        .setLabel("More Stats") // Button label
-        .setStyle(ButtonStyle.Primary), // Button style for interaction
+        .setCustomId("more_stats")
+        .setLabel("More Stats")
+        .setStyle(ButtonStyle.Primary),
 
       new ButtonBuilder()
-        .setURL(`https://www.faceit.com/en/cs2/room/${match.matchId}`) // Set URL for the button
-        .setLabel("View match") // Button label
-        .setStyle(ButtonStyle.Link) // Use Link style for a URL
+        .setURL(`https://www.faceit.com/en/cs2/room/${match.matchId}`)
+        .setLabel("View match")
+        .setStyle(ButtonStyle.Link)
     );
 
-    // Send the embed with the buttons
-    await sendEmbedMessage(embed, [row]);
+    const message = await sendEmbedMessage(embed, [row]);
+
+    const collector = message?.createMessageComponentCollector({
+      componentType: ComponentType.Button,
+    });
+
+    collector?.on("collect", async (interaction: ButtonInteraction) => {
+      if (interaction.customId === "more_stats") {
+        const additionalStats = [
+          {
+            playerName: "Player1",
+            ADR: "100",
+            HS: "50%",
+            threeK: 2,
+            fourK: 1,
+            fiveK: 0,
+            clutches: 1,
+          },
+          {
+            playerName: "Player2",
+            ADR: "90",
+            HS: "40%",
+            threeK: 3,
+            fourK: 1,
+            fiveK: 0,
+            clutches: 2,
+          },
+        ];
+
+        const additionalStatsTable = additionalStats
+          .map(
+            (stat) =>
+              `\`${stat.playerName.padEnd(10)} ADR: ${stat.ADR}, HS: ${
+                stat.HS
+              }, 3K: ${stat.threeK}, 4K: ${stat.fourK}, 5K: ${
+                stat.fiveK
+              }, Clutches: ${stat.clutches}\``
+          )
+          .join("\n");
+
+        embed.addFields({
+          name: "Additional Stats",
+          value: additionalStatsTable,
+        });
+
+        (row.components[0] as ButtonBuilder).setDisabled(true);
+
+        await interaction.update({
+          embeds: [embed],
+          components: [row],
+        });
+      }
+    });
+
+    collector?.on("end", () => {
+      (row.components[0] as ButtonBuilder).setDisabled(true);
+      message?.edit({ components: [row] });
+    });
   } catch (error) {
     console.error("Error sending match finish notification:", error);
   }
