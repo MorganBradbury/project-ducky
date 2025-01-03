@@ -195,25 +195,21 @@ class FaceitApiClient {
   }
 
   async getMatchPlayers(matchId: string): Promise<{
-    homeFaction: [
-      {
-        playerId: string;
-        faceitLevel: string;
-        captain: boolean;
-        nickname: string;
-      }
-    ];
-    enemyFaction: [
-      {
-        playerId: string;
-        faceitLevel: string;
-        captain: boolean;
-        nickname: string;
-      }
-    ];
+    homeFaction: Array<{
+      playerId: string;
+      faceitLevel: string;
+      captain: boolean;
+      nickname: string;
+    }>;
+    enemyFaction: Array<{
+      playerId: string;
+      faceitLevel: string;
+      captain: boolean;
+      nickname: string;
+    }>;
   } | null> {
-    const maxRetries = 30; // Retry for up to 1 minute (20 attempts, 3 seconds apart)
-    const retryDelay = 2000; // 3 seconds
+    const maxRetries = 15; // Adjust retries for faster failover
+    const retryDelay = 1000; // 1 second for faster polling
 
     for (let attempt = 1; attempt <= maxRetries; attempt++) {
       try {
@@ -225,64 +221,43 @@ class FaceitApiClient {
           !response.data ||
           response.data.best_of !== 1
         ) {
-          console.log("Could not find match by ID", matchId);
+          console.log("Invalid match data", matchId);
           return null;
         }
 
-        const trackedTeamFaction = await getTeamFaction(response.data.teams);
-        const enemyFaction =
+        const { teams } = response.data;
+        const trackedTeamFaction = await getTeamFaction(teams);
+        const enemyFactionName =
           trackedTeamFaction.faction === "faction1" ? "faction2" : "faction1";
 
-        // Mapping home faction players
-        const homeFactionData: any = response.data.teams[
-          trackedTeamFaction.faction
-        ].roster.map((team: any) => {
-          return {
-            playerId: team.player_id,
-            faceitLevel: team.game_skill_level,
-            captain:
-              response.data.teams[trackedTeamFaction.faction].leader ===
-              team.player_id,
-            nickname: team.nickname,
-          };
-        });
-
-        // Mapping enemy faction players
-        const enemyFactionData: any = response.data.teams[
-          enemyFaction
-        ].roster.map((team: any) => {
-          return {
-            playerId: team.player_id,
-            faceitLevel: team.game_skill_level,
-            captain:
-              response.data.teams[enemyFaction].leader === team.player_id,
-            nickname: team.nickname,
-          };
-        });
+        const mapTeamData = (teamFaction: string) =>
+          teams[teamFaction].roster.map((player: any) => ({
+            playerId: player.player_id,
+            faceitLevel: player.game_skill_level,
+            captain: teams[teamFaction].leader === player.player_id,
+            nickname: player.nickname,
+          }));
 
         return {
-          homeFaction: homeFactionData,
-          enemyFaction: enemyFactionData,
+          homeFaction: mapTeamData(trackedTeamFaction.faction),
+          enemyFaction: mapTeamData(enemyFactionName),
         };
       } catch (error) {
         console.error(
-          `Attempt ${attempt}: Error fetching match details for ${matchId}:`,
+          `Attempt ${attempt}: Error fetching match details:`,
           error
         );
 
-        // Stop retrying if max retries reached
         if (attempt === maxRetries) {
-          console.error(`Max retries reached for matchId: ${matchId}`);
+          console.error("Max retries reached");
           return null;
         }
 
-        // Wait before the next retry
         await new Promise((resolve) => setTimeout(resolve, retryDelay));
       }
     }
 
-    // If the loop somehow exits without returning, return null
-    return null;
+    return null; // Fallback if retries are exhausted
   }
 
   async getMatchFactionLeader(matchId: string): Promise<string | null> {
@@ -337,22 +312,24 @@ class FaceitApiClient {
       const response = await this.client.get(queryUrl);
 
       if (response.status === 200 && response.data) {
-        let playerMapStats: PlayerMapsData[] = [];
-
-        activeMapPool.map((map) => {
-          const findMatch = response.data.items.filter(
+        const playerMapStats = activeMapPool.map((map) => {
+          const matches: any[] = response.data.items.filter(
             (match: any) => match.stats.Map === map
           );
-          const mapWins =
-            findMatch.filter((match: any) => match.stats.Result === "1")
-              .length || 0;
-          const totalPlayed = findMatch.length || 0;
-          playerMapStats.push({
+
+          const totalPlayed = matches.length;
+          const mapWins = matches.reduce(
+            (count: number, match: { stats: { Result: string } }) =>
+              count + (match.stats.Result === "1" ? 1 : 0),
+            0
+          );
+
+          return {
             mapName: map,
             playedTimes: totalPlayed,
             wins: mapWins,
-            winPercentage: (mapWins / totalPlayed) * 100 || 0,
-          });
+            winPercentage: totalPlayed > 0 ? (mapWins / totalPlayed) * 100 : 0,
+          };
         });
 
         return playerMapStats;

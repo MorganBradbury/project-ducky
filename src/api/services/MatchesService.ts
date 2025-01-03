@@ -115,22 +115,31 @@ export const getMatchAnalysis = async (matchId: string): Promise<any> => {
     return;
   }
 
-  // If match is ready for analysis
-  // retrieve all players from the matchroom and their level.
+  // If match is ready for analysis, retrieve all players from the matchroom and their level.
   const matchroomPlayers = await FaceitService.getMatchPlayers(matchId);
   console.log("matchroomPlayers", matchroomPlayers);
   if (!matchroomPlayers) {
     return;
   }
-  // if no player is in VC, return.
 
-  // Loop through all the players and aggregate the statistics.
   // Initialize variables to store aggregated data
-  const enemyFactionMapData: any = {
+  const enemyFactionMapData: {
+    totalPlayedTimes: number;
+    totalWins: number;
+    totalWinPercentage: number;
+    mapStats: Map<
+      string,
+      {
+        totalPlayedTimes: number;
+        totalWins: number;
+        totalWinPercentage: number;
+      }
+    >;
+  } = {
     totalPlayedTimes: 0,
     totalWins: 0,
     totalWinPercentage: 0,
-    mapStats: {}, // This will store aggregated map data
+    mapStats: new Map(),
   };
 
   // Loop through the enemyFaction players to get their map stats
@@ -146,20 +155,22 @@ export const getMatchAnalysis = async (matchId: string): Promise<any> => {
 
       // Loop through the player's map stats and aggregate the data
       playerMapStats.forEach((mapStat) => {
-        if (!enemyFactionMapData.mapStats[mapStat.mapName]) {
-          enemyFactionMapData.mapStats[mapStat.mapName] = {
+        if (!enemyFactionMapData.mapStats.has(mapStat.mapName)) {
+          enemyFactionMapData.mapStats.set(mapStat.mapName, {
             totalPlayedTimes: 0,
             totalWins: 0,
             totalWinPercentage: 0,
-          };
+          });
         }
 
         // Aggregate map data
-        enemyFactionMapData.mapStats[mapStat.mapName].totalPlayedTimes +=
-          mapStat.playedTimes;
-        enemyFactionMapData.mapStats[mapStat.mapName].totalWins += mapStat.wins;
-        enemyFactionMapData.mapStats[mapStat.mapName].totalWinPercentage +=
-          mapStat.winPercentage;
+        const mapData = enemyFactionMapData.mapStats.get(mapStat.mapName)!;
+        mapData.totalPlayedTimes += mapStat.playedTimes;
+        mapData.totalWins += mapStat.wins;
+        mapData.totalWinPercentage += mapStat.winPercentage;
+
+        // Update the map data back in the Map
+        enemyFactionMapData.mapStats.set(mapStat.mapName, mapData);
       });
 
       // Aggregate total data
@@ -188,51 +199,16 @@ export const getMatchAnalysis = async (matchId: string): Promise<any> => {
   enemyFactionMapData.totalWinPercentage /= playerCount;
 
   // Prepare data for embed or output
-  const formattedMapData = Object.entries(enemyFactionMapData.mapStats).map(
-    ([mapName, stats]: any) => ({
-      mapName,
-      totalPlayedTimes: stats.totalPlayedTimes,
-      totalWins: stats.totalWins,
-      averageWinPercentage: (stats.totalWinPercentage / playerCount).toFixed(2),
-    })
-  );
+  const formattedMapData = Array.from(
+    enemyFactionMapData.mapStats.entries()
+  ).map(([mapName, stats]) => ({
+    mapName,
+    totalPlayedTimes: stats.totalPlayedTimes,
+    totalWins: stats.totalWins,
+    averageWinPercentage: (stats.totalWinPercentage / playerCount).toFixed(2),
+  }));
 
   console.log("formattedMapData", formattedMapData);
 
   createMatchAnalysisEmbed(matchId, matchroomPlayers, formattedMapData);
 };
-
-// export const sendPrematchAnalysis = async (matchId: string): Promise<any> => {
-//   // Check if the matchId is already being processed
-//   if (activeMatchIds.has(matchId)) {
-//     console.log(`Match ${matchId} is already being processed. Skipping...`);
-//     return;
-//   }
-
-//   try {
-//     // Mark the matchId as being processed
-//     activeMatchIds.add(matchId);
-//     console.log("Processing sendPrematchAnalysis()", matchId);
-
-//     // Retrieves an array of players from the match by their ID
-//     const leader = await FaceitService.getMatchFactionLeader(matchId);
-//     if (leader === null) {
-//       return;
-//     }
-//     console.log("Leader", leader);
-
-//     const playerMapStats = await FaceitService.getMapStatsByPlayer(leader);
-//     if (playerMapStats === null) {
-//       return;
-//     }
-//     console.log("PlayerMapStats", playerMapStats);
-
-//     // Create the prematch embed
-//     createPrematchEmbed(playerMapStats, matchId);
-//   } catch (error) {
-//     console.error(`Error processing match ${matchId}:`, error);
-//   } finally {
-//     // After processing, remove the matchId from the active set
-//     activeMatchIds.delete(matchId);
-//   }
-// };
