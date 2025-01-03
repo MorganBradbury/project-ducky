@@ -116,6 +116,40 @@ type PlayerStats = {
 
 const activeMatchIds = new Set<string>();
 
+export const getMatchAnalysis = async (matchId: string): Promise<any> => {
+  // Does match exist in DB already. If so, return.
+  const doesExist = await checkMatchExists(matchId);
+  if (doesExist) {
+    console.log("getMatchAnalysis, game already exists", matchId);
+    return;
+  }
+
+  // If match is ready for analysis
+  // retrieve all players from the matchroom and their level.
+  const matchroomPlayers = await FaceitService.getMatchPlayers(matchId);
+  console.log("matchroomPlayers", matchroomPlayers);
+  // if no player is in VC, return.
+
+  // Loop through all the players and aggregate the statistics.
+
+  // Send the embed to the text channel.
+
+  // Format:
+  // Match room ID
+  // Team [teamName] Players : Team [teanmName] players
+  // List of players for each team
+
+  // Table of all map data
+
+  // Most likely picks:
+  //[list of maps]
+
+  // Most likely bans:
+  //[list of maps]
+
+  // Button to link the match room.
+};
+
 export const sendPrematchAnalysis = async (matchId: string): Promise<any> => {
   // Check if the matchId is already being processed
   if (activeMatchIds.has(matchId)) {

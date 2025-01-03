@@ -194,9 +194,98 @@ class FaceitApiClient {
     }
   }
 
+  async getMatchPlayers(matchId: string): Promise<{
+    homeFaction: [
+      {
+        playerId: string;
+        faceitLevel: string;
+        captain: boolean;
+        nickname: string;
+      }
+    ];
+    enemyFaction: [
+      {
+        playerId: string;
+        faceitLevel: string;
+        captain: boolean;
+        nickname: string;
+      }
+    ];
+  } | null> {
+    const maxRetries = 30; // Retry for up to 1 minute (20 attempts, 3 seconds apart)
+    const retryDelay = 2000; // 3 seconds
+
+    for (let attempt = 1; attempt <= maxRetries; attempt++) {
+      try {
+        const queryUrl = `/matches/${matchId}`;
+        const response = await this.client.get(queryUrl);
+
+        if (
+          response.status !== 200 ||
+          !response.data ||
+          response.data.best_of !== 1
+        ) {
+          console.log("Could not find match by ID", matchId);
+          return null;
+        }
+
+        const trackedTeamFaction = await getTeamFaction(response.data.teams);
+        const enemyFaction =
+          trackedTeamFaction.faction === "faction1" ? "faction2" : "faction1";
+
+        let homeTeamObj: any = [];
+        const homeFactionData = response.data.teams[
+          trackedTeamFaction.faction
+        ].roster.map((team: any) => {
+          homeTeamObj.push({
+            playerId: team.player_id,
+            faceitLevel: team.game_skill_level,
+            captain:
+              response.data.teams[trackedTeamFaction.faction].leader ===
+              team.player_id,
+            nickname: team.nickname,
+          });
+        });
+        const enemyFactionData = response.data.teams[enemyFaction].roster.map(
+          (team: any) => {
+            homeTeamObj.push({
+              playerId: team.player_id,
+              faceitLevel: team.game_skill_level,
+              captain:
+                response.data.teams[enemyFaction].leader === team.player_id,
+              nickname: team.nickname,
+            });
+          }
+        );
+
+        return {
+          homeFaction: homeFactionData,
+          enemyFaction: enemyFactionData,
+        };
+      } catch (error) {
+        console.error(
+          `Attempt ${attempt}: Error fetching match details for ${matchId}:`,
+          error
+        );
+
+        // Stop retrying if max retries reached
+        if (attempt === maxRetries) {
+          console.error(`Max retries reached for matchId: ${matchId}`);
+          return null;
+        }
+
+        // Wait before the next retry
+        await new Promise((resolve) => setTimeout(resolve, retryDelay));
+      }
+    }
+
+    // If the loop somehow exits without returning, return null
+    return null;
+  }
+
   async getMatchFactionLeader(matchId: string): Promise<string | null> {
-    const maxRetries = 20; // Retry for up to 1 minute (20 attempts, 3 seconds apart)
-    const retryDelay = 3000; // 3 seconds
+    const maxRetries = 30; // Retry for up to 1 minute (20 attempts, 3 seconds apart)
+    const retryDelay = 2000; // 3 seconds
 
     for (let attempt = 1; attempt <= maxRetries; attempt++) {
       try {

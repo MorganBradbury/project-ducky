@@ -2,6 +2,7 @@ import { Request, Response } from "express";
 import {
   cancelMatch,
   endMatch,
+  getMatchAnalysis,
   sendPrematchAnalysis,
   startMatch,
 } from "../services/MatchesService"; // Centralized match flow logic
@@ -39,7 +40,7 @@ export const handleMatchesHook = async (
 
     if (eventId === AcceptedEventTypes.match_created) {
       console.log("Request received for match being configured: ", req.body);
-      //await sendPrematchAnalysis(matchId);
+      await getMatchAnalysis(matchId);
     }
 
     // Match has just started
