@@ -261,10 +261,7 @@ export const sendMatchFinishNotification = async (match: Match) => {
             ? `${playerName.substring(0, 9)}..`
             : playerName.padEnd(11, " ");
 
-        // Create K/D/A string (without padding)
         const kda = `${stat.kills}/${stat.deaths}/${stat.assists}`;
-
-        // Pad the K/D/A string to ensure it has exactly 8 characters
         const paddedKDA = kda.padEnd(8, " ");
 
         const elo =
@@ -304,9 +301,19 @@ export const sendMatchFinishNotification = async (match: Match) => {
           inline: true,
         },
         {
+          name: "\u200B", // Invisible character to add blank space
+          value: "\u200B", // Invisible character for space
+          inline: false,
+        },
+        {
           name: "Match Result",
           value: `${finalScore.join(" / ") || "N/A"}`,
           inline: true,
+        },
+        {
+          name: "\u200B", // Invisible character to add blank space
+          value: "\u200B", // Invisible character for space
+          inline: false,
         },
         {
           name: "Players and Stats (K/D/A)",
