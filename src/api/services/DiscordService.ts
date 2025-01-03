@@ -809,7 +809,7 @@ export const createMatchAnalysisEmbed = (
     .map(
       (player: any) =>
         `${getSkillLevelEmoji(player.faceitLevel)} ${player.nickname}${
-          player.captain ? " 👑" : ""
+          player.captain ? "*" : ""
         }`
     )
     .join("\n");
