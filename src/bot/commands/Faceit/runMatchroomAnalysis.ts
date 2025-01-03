@@ -35,9 +35,10 @@ export const matchAnalysisCommand = {
       // Call the getMatchAnalysis function with the extracted matchId
       await getMatchAnalysis(matchId);
 
-      await interaction.reply(
-        `Match analysis for match ID: ${matchId} has been triggered.`
-      );
+      await interaction.reply({
+        content: `Match analysis for match ID: ${matchId} has been triggered.`,
+        ephemeral: true,
+      });
     } catch (error) {
       console.error("Error fetching match analysis:", error);
       await interaction.reply(`Failed to fetch match analysis: ${error}`);
