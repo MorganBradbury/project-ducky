@@ -118,7 +118,7 @@ export const getMatchAnalysis = async (matchId: string): Promise<any> => {
   console.log(`checkMatchExists took ${performance.now() - startCheckMatch}ms`);
 
   if (doesExist) {
-    console.log("getMatchAnalysis, game already exists", matchId);
+    // console.log("getMatchAnalysis, game already exists", matchId);
     console.log(`Total execution took ${performance.now() - startTotal}ms`);
     return;
   }
@@ -131,7 +131,7 @@ export const getMatchAnalysis = async (matchId: string): Promise<any> => {
       performance.now() - startGetPlayers
     }ms`
   );
-  console.log("matchroomPlayers", matchroomPlayers);
+  // console.log("matchroomPlayers", matchroomPlayers);
   if (!matchroomPlayers) {
     console.log(`Total execution took ${performance.now() - startTotal}ms`);
     return;
@@ -245,7 +245,7 @@ export const getMatchAnalysis = async (matchId: string): Promise<any> => {
     `Formatting map data took ${performance.now() - startFormatting}ms`
   );
 
-  console.log("formattedMapData", formattedMapData);
+  // console.log("formattedMapData", formattedMapData);
 
   const startEmbed = performance.now();
   createMatchAnalysisEmbed(matchId, matchroomPlayers, formattedMapData);
