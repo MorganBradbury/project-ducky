@@ -282,9 +282,6 @@ export const sendMatchFinishNotification = async (match: Match) => {
     );
 
     const mapEmoji = getMapEmoji(match.mapName);
-    const formattedMapName = match.mapName
-      .replace(/^de_/, "")
-      .replace(/\b\w/g, (char) => char.toUpperCase());
 
     const embed = new EmbedBuilder()
       .setTitle(`🚨 New match finished`)
@@ -292,7 +289,7 @@ export const sendMatchFinishNotification = async (match: Match) => {
       .addFields(
         {
           name: "Map",
-          value: `${mapEmoji}  ${formattedMapName}`,
+          value: `${mapEmoji}  ${match.mapName}`,
           inline: true,
         },
         {
@@ -352,25 +349,17 @@ export const sendMatchFinishNotification = async (match: Match) => {
         const additionalStatsTable = additionalStats
           .map(
             (stat) =>
-              `\`${stat.playerName.padEnd(10)} ADR: ${stat.ADR.padEnd(
-                3
-              )}, HS: ${stat.HS.padEnd(2)}, 3K: ${stat.threeK
-                .toString()
-                .padStart(2)}, 4K: ${stat.fourK
-                .toString()
-                .padStart(2)}, 5K: ${stat.fiveK
-                .toString()
-                .padStart(2)}, Clutches: ${stat.clutches
-                .toString()
-                .padStart(2)}\``
+              `\`${stat.playerName.padEnd(10)} ADR: ${stat.ADR}, HS: ${
+                stat.HS
+              }, 3K: ${stat.threeK}, 4K: ${stat.fourK}, 5K: ${
+                stat.fiveK
+              }, Clutches: ${stat.clutches}\``
           )
           .join("\n");
 
-        const columnHeaders = `\`Player Name  ADR   HS  3K  4K  5K  Clutches\``;
-
         embed.addFields({
           name: "Additional Stats",
-          value: `${columnHeaders}\n${additionalStatsTable}`,
+          value: additionalStatsTable,
         });
 
         (row.components[0] as ButtonBuilder).setDisabled(true);
