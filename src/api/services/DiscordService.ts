@@ -109,7 +109,7 @@ const sendEmbedMessage = async (
       return;
     }
 
-    if (channelId === "1324729528035053629") {
+    if (channelId === config.MATCHROOM_ANALYSIS_CHANNEL_ID) {
       // Fetch the last 10 messages from the channel
       const messages = await channel.messages.fetch({ limit: 4 });
 
@@ -891,7 +891,7 @@ export const createMatchAnalysisEmbed = (
   );
 
   // Pass the embed and the button to sendEmbedMessage
-  sendEmbedMessage(embed, [row], "1324729528035053629");
+  sendEmbedMessage(embed, [row], config.MATCHROOM_ANALYSIS_CHANNEL_ID);
   return;
 };
 
