@@ -318,7 +318,7 @@ export const sendMatchFinishNotification = async (match: Match) => {
     const mapEmoji = getMapEmoji(match.mapName);
 
     const embed = new EmbedBuilder()
-      .setTitle(`🚨 New match finished`)
+      .setTitle(`New match finished`)
       .setColor(didTeamWin ? "#00FF00" : "#FF0000")
       .addFields(
         {
