@@ -33,7 +33,7 @@ export const matchAnalysisCommand = {
       }
 
       // Call the getMatchAnalysis function with the extracted matchId
-      await getMatchAnalysis(matchId);
+      getMatchAnalysis(matchId);
 
       await interaction.reply({
         content: `Match analysis for match ID: ${matchId} has been triggered.`,
