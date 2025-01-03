@@ -260,7 +260,13 @@ export const sendMatchFinishNotification = async (match: Match) => {
           playerName.length > 11
             ? `${playerName.substring(0, 9)}..`
             : playerName.padEnd(11, " ");
-        const kda = `${stat.kills}/${stat.deaths}/${stat.assists}`;
+
+        // Ensure kills, deaths, and assists are always 2 characters long
+        const kills = `${stat.kills}`.padEnd(2, " ");
+        const deaths = `${stat.deaths}`.padEnd(2, " ");
+        const assists = `${stat.assists}`.padEnd(2, " ");
+
+        const kda = `${kills}/${deaths}/${assists}`;
         const elo =
           `${eloChange?.operator}${eloChange?.difference} (${eloChange?.newElo})`.padEnd(
             3,
