@@ -128,9 +128,85 @@ export const getMatchAnalysis = async (matchId: string): Promise<any> => {
   // retrieve all players from the matchroom and their level.
   const matchroomPlayers = await FaceitService.getMatchPlayers(matchId);
   console.log("matchroomPlayers", matchroomPlayers);
+  if (!matchroomPlayers) {
+    return;
+  }
   // if no player is in VC, return.
 
   // Loop through all the players and aggregate the statistics.
+  // Initialize variables to store aggregated data
+  const enemyFactionMapData: any = {
+    totalPlayedTimes: 0,
+    totalWins: 0,
+    totalWinPercentage: 0,
+    mapStats: {}, // This will store aggregated map data
+  };
+
+  // Loop through the enemyFaction players to get their map stats
+  for (const player of matchroomPlayers.enemyFaction) {
+    try {
+      // Get the map stats for the player
+      const playerMapStats = await FaceitService.getMapStatsByPlayer(
+        player.playerId
+      );
+      if (!playerMapStats) {
+        return;
+      }
+
+      // Loop through the player's map stats and aggregate the data
+      playerMapStats.forEach((mapStat) => {
+        if (!enemyFactionMapData.mapStats[mapStat.mapName]) {
+          enemyFactionMapData.mapStats[mapStat.mapName] = {
+            totalPlayedTimes: 0,
+            totalWins: 0,
+            totalWinPercentage: 0,
+          };
+        }
+
+        // Aggregate map data
+        enemyFactionMapData.mapStats[mapStat.mapName].totalPlayedTimes +=
+          mapStat.playedTimes;
+        enemyFactionMapData.mapStats[mapStat.mapName].totalWins += mapStat.wins;
+        enemyFactionMapData.mapStats[mapStat.mapName].totalWinPercentage +=
+          mapStat.winPercentage;
+      });
+
+      // Aggregate total data
+      enemyFactionMapData.totalPlayedTimes += playerMapStats.reduce(
+        (acc, stat) => acc + stat.playedTimes,
+        0
+      );
+      enemyFactionMapData.totalWins += playerMapStats.reduce(
+        (acc, stat) => acc + stat.wins,
+        0
+      );
+      enemyFactionMapData.totalWinPercentage += playerMapStats.reduce(
+        (acc, stat) => acc + stat.winPercentage,
+        0
+      );
+    } catch (error) {
+      console.error(
+        `Error fetching map stats for player ${player.nickname}:`,
+        error
+      );
+    }
+  }
+
+  // Calculate average win percentage for the enemy faction
+  const playerCount = matchroomPlayers.enemyFaction.length;
+  enemyFactionMapData.totalWinPercentage /= playerCount;
+
+  // Prepare data for embed or output
+  const formattedMapData = Object.entries(enemyFactionMapData.mapStats).map(
+    ([mapName, stats]: any) => ({
+      mapName,
+      totalPlayedTimes: stats.totalPlayedTimes,
+      totalWins: stats.totalWins,
+      averageWinPercentage: (stats.totalWinPercentage / playerCount).toFixed(2),
+    })
+  );
+
+  console.log("formattedMapData", formattedMapData);
 
   // Send the embed to the text channel.
 
