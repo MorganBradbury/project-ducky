@@ -236,7 +236,6 @@ const getMapEmoji = (mapName: string): string => {
 
 export const sendMatchFinishNotification = async (match: Match) => {
   try {
-    console.log("Reached the send notification");
     const getPlayerStatsData = await FaceitService.getPlayerStats(
       match.matchId,
       match.trackedTeam.trackedPlayers.map((player) => player.faceitId)
@@ -317,8 +316,6 @@ export const sendMatchFinishNotification = async (match: Match) => {
         .setLabel("View match")
         .setStyle(ButtonStyle.Link)
     );
-
-    console.log(embed);
 
     const message = await sendEmbedMessage(embed, [row]);
 
