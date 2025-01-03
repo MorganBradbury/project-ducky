@@ -123,6 +123,7 @@ const sendEmbedMessage = async (
     // Check if any of the last 10 messages contain an embed with the same matchId in the footer
     const duplicate = messages.some((message: Message) => {
       return message.embeds.some((embedMsg: any) => {
+        console.log(`does ${embed?.data?.footer?.text} include ${matchId}`);
         return embedMsg.footer?.text?.includes(matchId); // Check for matching matchId in the footer
       });
     });
