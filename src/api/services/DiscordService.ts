@@ -775,6 +775,10 @@ const getSkillLevelEmoji = (faceitLevel: number): string => {
   return skillLevelEmojis[faceitLevel] || `:${faceitLevel}:`; // Default to text-based emoji if not found
 };
 
+// Strip 'de_' and capitalize the first letter of the map name
+const formattedMapName = (mapName: string) =>
+  mapName.replace(/^de_/, "").replace(/\b\w/g, (char) => char.toUpperCase());
+
 export const createMatchAnalysisEmbed = (
   matchId: string,
   playersData: any,
@@ -817,7 +821,10 @@ export const createMatchAnalysisEmbed = (
   // Getting most likely picks and bans with map emojis
   const mostLikelyPicks = sortedMapData
     .slice(0, 3)
-    .map((map: any) => `${getMapEmoji(map.mapName)} ${map.mapName}`)
+    .map(
+      (map: any) =>
+        `${getMapEmoji(map.mapName)} ${formattedMapName(map.mapName)}`
+    )
     .join("\n");
 
   // Sort maps in ascending order of played times for most likely bans
@@ -825,7 +832,10 @@ export const createMatchAnalysisEmbed = (
     .slice()
     .sort((a: any, b: any) => a.totalPlayedTimes - b.totalPlayedTimes) // Sort by least played first
     .slice(0, 3) // Take the least played 3 maps
-    .map((map: any) => `${getMapEmoji(map.mapName)} ${map.mapName}`)
+    .map(
+      (map: any) =>
+        `${getMapEmoji(map.mapName)} ${formattedMapName(map.mapName)}`
+    )
     .join("\n");
 
   // Creating the map stats table content (without map icons)
@@ -837,7 +847,9 @@ export const createMatchAnalysisEmbed = (
         isNaN(parseFloat(map.averageWinPercentage))
           ? "N/A"
           : Math.ceil(parseFloat(map.averageWinPercentage)).toString() + "%"; // Round up the win percentage to nearest whole number
-      return `\`${map.mapName.padEnd(12)} | ${map.totalPlayedTimes
+      return `\`${formattedMapName(map.mapName).padEnd(
+        12
+      )} | ${map.totalPlayedTimes
         .toString()
         .padEnd(6)} | ${formattedWinPercentage.padEnd(6)}\``;
     })
