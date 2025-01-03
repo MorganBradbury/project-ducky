@@ -825,6 +825,7 @@ export const createMatchAnalysisEmbed = (
   playersData: any,
   gameData: any
 ) => {
+  console.log("gameData", gameData);
   // Sorting the game data: first by most played times, then by average win percentage if needed
   const sortedMapData = gameData.sort((a: any, b: any) => {
     if (b.totalPlayedTimes === a.totalPlayedTimes) {
