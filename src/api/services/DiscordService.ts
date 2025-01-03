@@ -902,17 +902,24 @@ export const createMatchAnalysisEmbed = (
       {
         name: "Map Data",
         value:
-          "`Map Name    | Played | Win %  `\n" +
-          "`-------------|--------|--------`\n" +
+          "`Map Name     | Played | Win % `\n" +
+          "`-------------|--------|-------`\n" +
           mapDataTable,
       },
       { name: "Most Likely Picks", value: mostLikelyPicks, inline: true },
       { name: "Most Likely Bans", value: mostLikelyBans, inline: true }
     )
-    .setFooter({ text: `Match Room ID: ${matchId}` })
+    .setFooter({ text: `Matchroom analysis` })
     .setColor("#00FF00");
 
-  sendEmbedMessage(embed, [], "1324729528035053629");
+  // Create the "View Match" button
+  const viewMatchButton = new ButtonBuilder()
+    .setLabel("View Match") // Text displayed on the button
+    .setStyle(ButtonStyle.Link) // Make it a link button
+    .setURL(`https://www.faceit.com/en/cs2/room/${matchId}`); // URL to matchroom
+
+  // Pass the embed and the button to sendEmbedMessage
+  sendEmbedMessage(embed, [viewMatchButton], "1324729528035053629");
   return;
 };
 
