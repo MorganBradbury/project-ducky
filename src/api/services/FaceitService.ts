@@ -310,7 +310,7 @@ class FaceitApiClient {
     try {
       // Start the request timing
       const startRequest = performance.now();
-      const queryUrl = `/players/${playerId}/games/cs2/stats?limit=100`;
+      const queryUrl = `/players/${playerId}/games/cs2/stats?limit=25`;
       const response = await this.client.get(queryUrl);
 
       // Log the time taken for the API request
