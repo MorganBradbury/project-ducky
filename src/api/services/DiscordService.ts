@@ -13,6 +13,7 @@ import {
   ActionRowBuilder,
   ButtonInteraction,
   ComponentType,
+  Message,
 } from "discord.js";
 import { SystemUser } from "../../types/SystemUser";
 import { FaceitService } from "./FaceitService";
@@ -105,6 +106,29 @@ const sendEmbedMessage = async (
       console.log(
         `Channel with ID ${config.BOT_UPDATES_CHANNEL_ID} not found.`
       );
+      return;
+    }
+
+    // Fetch the last 10 messages from the channel
+    const messages = await channel.messages.fetch({ limit: 10 });
+
+    // Extract the matchId from the embed footer (using data.footer)
+    const matchId = embed.data.footer?.text?.split("for ")[1];
+
+    if (!matchId) {
+      console.error("No matchId found in embed footer!");
+      return;
+    }
+
+    // Check if any of the last 10 messages contain an embed with the same matchId in the footer
+    const duplicate = messages.some((message: Message) => {
+      return message.embeds.some((embedMsg: any) => {
+        return embedMsg.footer?.text?.includes(matchId); // Check for matching matchId in the footer
+      });
+    });
+
+    if (duplicate) {
+      console.log("Duplicate embed found, not sending the embed.");
       return;
     }
 
