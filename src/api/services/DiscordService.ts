@@ -114,7 +114,7 @@ const sendEmbedMessage = async (
       const messages = await channel.messages.fetch({ limit: 4 });
 
       // Extract the matchId from the embed footer (using data.footer)
-      const matchId = embed.data.footer?.text?.split("for ")[1];
+      const matchId = embed.data.footer?.text;
 
       if (!matchId) {
         console.error("No matchId found in embed footer!");
@@ -867,7 +867,7 @@ export const createMatchAnalysisEmbed = (
       { name: "Most Likely Picks", value: mostLikelyPicks, inline: true },
       { name: "Most Likely Bans", value: mostLikelyBans, inline: true }
     )
-    .setFooter({ text: `Matchroom analysis for ${matchId}` })
+    .setFooter({ text: `${matchId}` })
     .setColor("#00FF00");
 
   // Create the "View Match" button
