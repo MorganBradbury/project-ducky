@@ -281,6 +281,11 @@ export const sendMatchFinishNotification = async (match: Match) => {
       match.trackedTeam.faction
     );
 
+    // Strip 'de_' and capitalize the first letter of the map name
+    const formattedMapName = match.mapName
+      .replace(/^de_/, "")
+      .replace(/\b\w/g, (char) => char.toUpperCase());
+
     const mapEmoji = getMapEmoji(match.mapName);
 
     const embed = new EmbedBuilder()
@@ -289,7 +294,7 @@ export const sendMatchFinishNotification = async (match: Match) => {
       .addFields(
         {
           name: "Map",
-          value: `${mapEmoji}  ${match.mapName}`,
+          value: `${mapEmoji}  ${formattedMapName}`,
           inline: true,
         },
         {
