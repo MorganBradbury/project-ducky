@@ -211,6 +211,8 @@ export const getMatchAnalysis = async (matchId: string): Promise<any> => {
         (acc, stat) => acc + stat.winPercentage,
         0
       );
+
+      return;
     } catch (error) {
       console.error(
         `Error fetching map stats for player ${player.nickname}:`,
