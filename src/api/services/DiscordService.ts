@@ -825,13 +825,13 @@ export const createMatchAnalysisEmbed = (
   playersData: any,
   gameData: any
 ) => {
-  console.log("gameData", gameData);
   // Sorting the game data: first by most played times, then by average win percentage if needed
   const sortedMapData = gameData.sort((a: any, b: any) => {
+    const aWinPercentage = parseFloat(a.averageWinPercentage);
+    const bWinPercentage = parseFloat(b.averageWinPercentage);
+
     if (b.totalPlayedTimes === a.totalPlayedTimes) {
-      return (
-        parseFloat(b.averageWinPercentage) - parseFloat(a.averageWinPercentage)
-      );
+      return bWinPercentage - aWinPercentage;
     }
     return b.totalPlayedTimes - a.totalPlayedTimes;
   });
@@ -873,13 +873,12 @@ export const createMatchAnalysisEmbed = (
   // Creating the map stats table content (without map icons)
   const mapDataTable = sortedMapData
     .map((map: any) => {
-      // Ensure averageWinPercentage is a valid number
+      // Ensure averageWinPercentage is a valid number by parsing the string to a float
       const formattedWinPercentage =
-        map.totalPlayedTimes === 0 || isNaN(map.averageWinPercentage)
+        map.totalPlayedTimes === 0 ||
+        isNaN(parseFloat(map.averageWinPercentage))
           ? "N/A"
-          : typeof map.averageWinPercentage === "number"
-          ? map.averageWinPercentage.toFixed(2) // Format to two decimal places
-          : "N/A"; // Default to "N/A" if the value isn't a number
+          : parseFloat(map.averageWinPercentage).toFixed(2); // Convert string to number and format
       return `\`${map.mapName.padEnd(12)} | ${map.totalPlayedTimes
         .toString()
         .padEnd(6)} | ${formattedWinPercentage.padEnd(6)}\``;
