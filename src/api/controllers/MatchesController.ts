@@ -2,7 +2,7 @@ import { Request, Response } from "express";
 import {
   cancelMatch,
   endMatch,
-  sendPrematchAnalysis,
+  getMatchAnalysis,
   startMatch,
 } from "../services/MatchesService"; // Centralized match flow logic
 import { updateVoiceChannelStatus } from "../services/DiscordService";
@@ -39,7 +39,7 @@ export const handleMatchesHook = async (
 
     if (eventId === AcceptedEventTypes.match_created) {
       console.log("Request received for match being configured: ", req.body);
-      //await sendPrematchAnalysis(matchId);
+      await getMatchAnalysis(matchId);
     }
 
     // Match has just started

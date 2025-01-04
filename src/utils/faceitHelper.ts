@@ -19,7 +19,7 @@ export const getTeamFaction = async (
 ): Promise<{ teamId: string; faction: string }> => {
   const allTrackedUsers = await getAllUsers();
   const trackedPlayers = allTrackedUsers.filter((user: SystemUser) =>
-    teams.faction1.roster
+    teams?.faction1?.roster
       .map((player: any) => player.player_id)
       .includes(user.faceitId)
   );
@@ -28,7 +28,7 @@ export const getTeamFaction = async (
     trackedPlayers.length > 0 ? "faction1" : "faction2";
 
   return {
-    teamId: teams[faction].faction_id,
+    teamId: teams[faction]?.faction_id,
     faction,
   };
 };

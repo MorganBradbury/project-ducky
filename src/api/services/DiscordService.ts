@@ -11,6 +11,9 @@ import {
   ButtonBuilder,
   ButtonStyle,
   ActionRowBuilder,
+  ButtonInteraction,
+  ComponentType,
+  Message,
 } from "discord.js";
 import { SystemUser } from "../../types/SystemUser";
 import { FaceitService } from "./FaceitService";
@@ -88,7 +91,8 @@ export const createNewVoiceChannel = async (
 
 const sendEmbedMessage = async (
   embed: EmbedBuilder,
-  components: any[] = []
+  components: any[] = [],
+  channelId: string = config.BOT_UPDATES_CHANNEL_ID
 ) => {
   try {
     if (!client.isReady()) {
@@ -96,9 +100,7 @@ const sendEmbedMessage = async (
       return;
     }
 
-    const channel = (await client.channels.fetch(
-      config.BOT_UPDATES_CHANNEL_ID
-    )) as TextChannel;
+    const channel = (await client.channels.fetch(channelId)) as TextChannel;
 
     if (!channel) {
       console.log(
@@ -107,8 +109,34 @@ const sendEmbedMessage = async (
       return;
     }
 
+    if (channelId === config.MATCHROOM_ANALYSIS_CHANNEL_ID) {
+      // Fetch the last 10 messages from the channel
+      const messages = await channel.messages.fetch({ limit: 4 });
+
+      // Extract the matchId from the embed footer (using data.footer)
+      const matchId = embed.data.footer?.text;
+
+      if (!matchId) {
+        console.error("No matchId found in embed footer!");
+        return;
+      }
+
+      // Check if any of the last 10 messages contain an embed with the same matchId in the footer
+      const duplicate = messages.some((message: Message) => {
+        return message.embeds.some((embedMsg: any) => {
+          console.log(`does ${embed?.data?.footer?.text} include ${matchId}`);
+          return embedMsg.footer?.text?.includes(matchId); // Check for matching matchId in the footer
+        });
+      });
+
+      if (duplicate) {
+        console.log("Duplicate embed found, not sending the embed.");
+        return;
+      }
+    }
+
     // Send the embed with the optional button in the components array
-    await channel.send({
+    return channel.send({
       embeds: [embed],
       components, // If components (buttons) are passed, they will be included
     });
@@ -234,20 +262,13 @@ const getMapEmoji = (mapName: string): string => {
 
 export const sendMatchFinishNotification = async (match: Match) => {
   try {
-    // Get player stats using the getPlayerStats function
     const getPlayerStatsData = await FaceitService.getPlayerStats(
       match.matchId,
       match.trackedTeam.trackedPlayers.map((player) => player.faceitId)
     );
 
-    // Sort the player stats by ADR in descending order
-    const sortedPlayerStats = getPlayerStatsData.sort(
-      (a, b) => parseFloat(b.ADR) - parseFloat(a.ADR)
-    );
-
-    // Construct table rows
     const playerStatsTable = await Promise.all(
-      sortedPlayerStats.map(async (stat) => {
+      getPlayerStatsData.map(async (stat) => {
         const player = match.trackedTeam.trackedPlayers.find(
           (player) => player.faceitId === stat.playerId
         );
@@ -261,18 +282,20 @@ export const sendMatchFinishNotification = async (match: Match) => {
           playerName.length > 11
             ? `${playerName.substring(0, 9)}..`
             : playerName.padEnd(11, " ");
+
         const kda = `${stat.kills}/${stat.deaths}/${stat.assists}`;
+        const paddedKDA = kda.padEnd(8, " ");
+
         const elo =
           `${eloChange?.operator}${eloChange?.difference} (${eloChange?.newElo})`.padEnd(
             3,
             " "
           );
 
-        return `\`${name} ${kda}  ${elo}\``;
+        return `\`${name} ${paddedKDA}  ${elo}\``;
       })
     );
 
-    // Determine win/loss based on finalScore or eloDifference
     const finalScore = await FaceitService.getMatchScore(
       match.matchId,
       match.trackedTeam.faction,
@@ -283,23 +306,26 @@ export const sendMatchFinishNotification = async (match: Match) => {
       match.trackedTeam.faction
     );
 
-    // Get map emoji
+    // Strip 'de_' and capitalize the first letter of the map name
+    const formattedMapName = match.mapName
+      .replace(/^de_/, "")
+      .replace(/\b\w/g, (char) => char.toUpperCase());
+
     const mapEmoji = getMapEmoji(match.mapName);
 
-    // Create the embed without the Match Link
     const embed = new EmbedBuilder()
-      .setTitle(`🚨 New match finished`)
+      .setTitle(`New match finished`)
       .setColor(didTeamWin ? "#00FF00" : "#FF0000")
       .addFields(
         {
           name: "Map",
-          value: `${mapEmoji}  ${match.mapName}`,
+          value: `${mapEmoji}  ${formattedMapName}`,
+          inline: true,
         },
         {
           name: "Match Result",
-          value: `${finalScore.join(" / ") || "N/A"} (${
-            didTeamWin ? "WIN" : "LOSS"
-          })`,
+          value: `${finalScore.join(" / ") || "N/A"}`,
+          inline: true,
         },
         {
           name: "Players and Stats (K/D/A)",
@@ -309,21 +335,13 @@ export const sendMatchFinishNotification = async (match: Match) => {
       .setFooter({ text: "Match result" })
       .setTimestamp();
 
-    // Create the buttons
-    // Create the "More Stats" button and "View matchroom" button
-    const row = new ActionRowBuilder().addComponents(
+    const row = new ActionRowBuilder<ButtonBuilder>().addComponents(
       new ButtonBuilder()
-        .setCustomId("more_stats") // Custom ID for button interaction
-        .setLabel("More Stats") // Button label
-        .setStyle(ButtonStyle.Primary), // Button style for interaction
-
-      new ButtonBuilder()
-        .setURL(`https://www.faceit.com/en/cs2/room/${match.matchId}`) // Set URL for the button
-        .setLabel("View match") // Button label
-        .setStyle(ButtonStyle.Link) // Use Link style for a URL
+        .setURL(`https://www.faceit.com/en/cs2/room/${match.matchId}`)
+        .setLabel("View match")
+        .setStyle(ButtonStyle.Link)
     );
 
-    // Send the embed with the buttons
     await sendEmbedMessage(embed, [row]);
   } catch (error) {
     console.error("Error sending match finish notification:", error);
@@ -659,78 +677,6 @@ export const updateVoiceChannelStatus = async (
   }
 };
 
-export const createPrematchEmbed = (
-  mapStats: PlayerMapsData[],
-  matchId: string
-) => {
-  // Sort by playedTimes (desc) and then winPercentage (desc)
-  const sortedStats = [...mapStats].sort((a, b) => {
-    if (b.playedTimes === a.playedTimes) {
-      return b.winPercentage - a.winPercentage;
-    }
-    return b.playedTimes - a.playedTimes;
-  });
-
-  // Generate the table content
-  const tableRows = sortedStats
-    .map(({ mapName, playedTimes, winPercentage }) => {
-      const formattedWinPercentage =
-        playedTimes === 0 || isNaN(winPercentage)
-          ? "N/A"
-          : winPercentage.toFixed(2);
-      return `\`${mapName.padEnd(12)} | ${playedTimes
-        .toString()
-        .padEnd(6)} | ${formattedWinPercentage.padEnd(6)}\``;
-    })
-    .join("\n");
-
-  // Analysis for most and least played maps
-  const mostPlayedMaps = sortedStats
-    .slice(0, 3)
-    .map((map) => `${getMapEmoji(map.mapName)} ${map.mapName}`)
-    .join("\n ");
-  const leastPlayedMaps = sortedStats
-    .slice(-3)
-    .map((map) => `${getMapEmoji(map.mapName)} ${map.mapName}`)
-    .join("\n ");
-
-  // Create the embed
-  const embed = new EmbedBuilder()
-    .setTitle("Prematch Analysis")
-    .setDescription(
-      "**Map Stats**\n" +
-        "`Map Name     | Played | Win %  `\n" +
-        "`-------------|--------|--------`\n" +
-        tableRows
-    )
-    .addFields(
-      {
-        name: "Captain's most played maps",
-        value: mostPlayedMaps || "No maps found.",
-        inline: false,
-      },
-      {
-        name: "Captain is likely going to ban:",
-        value: leastPlayedMaps || "No maps found.",
-        inline: false,
-      }
-    )
-    .setColor("#00AE86")
-    .setFooter({ text: "Prematch analysis" })
-    .setTimestamp();
-
-  const row = new ActionRowBuilder().addComponents(
-    new ButtonBuilder()
-      .setURL(`https://www.faceit.com/en/cs2/room/${matchId}`) // Set URL for the button
-      .setLabel("View match") // Button label
-      .setStyle(ButtonStyle.Link) // Use Link style for a URL
-  );
-
-  sendEmbedMessage(embed, [row]);
-
-  return embed;
-};
-
 export const updateAllUnicodeNicknames = async () => {
   try {
     const guild = await client.guilds.fetch(config.GUILD_ID); // Fetch the guild
@@ -806,6 +752,147 @@ export const removeAllUnicodeNicknames = async () => {
   } catch (error) {
     console.error("Error fetching members or updating nicknames:", error);
   }
+};
+
+const getSkillLevelEmoji = (faceitLevel: number): string => {
+  const skillLevelEmojis: { [key: number]: string } = {
+    1: "<:level_1:1313100283273936896>",
+    2: "<:level_2:1313100284301545522>",
+    3: "<:level_3:1313100285215903785>",
+    4: "<:level_4:1313100286989959180>",
+    5: "<:level_5:1313100288512622682>",
+    6: "<:level_6:1313100291045851186>",
+    7: "<:level_7:1313100292870377523>",
+    8: "<:level_8:1313100294321868866>",
+    9: "<:level_9:1313100296557432832>",
+    10: "<:level_10:1314528913380081717>", // Added level 10 as well
+  };
+
+  return skillLevelEmojis[faceitLevel] || `:${faceitLevel}:`; // Default to text-based emoji if not found
+};
+
+// Strip 'de_' and capitalize the first letter of the map name
+const formattedMapName = (mapName: string) =>
+  mapName.replace(/^de_/, "").replace(/\b\w/g, (char) => char.toUpperCase());
+
+export const createMatchAnalysisEmbed = (
+  matchId: string,
+  playersData: any,
+  gameData: any
+) => {
+  // Sorting the game data: first by most played times, then by average win percentage if needed
+  const sortedMapData = gameData.sort((a: any, b: any) => {
+    const aWinPercentage = parseFloat(a.averageWinPercentage);
+    const bWinPercentage = parseFloat(b.averageWinPercentage);
+
+    if (b.totalPlayedTimes === a.totalPlayedTimes) {
+      return bWinPercentage - aWinPercentage;
+    }
+    return b.totalPlayedTimes - a.totalPlayedTimes;
+  });
+
+  // Extracting teams and their players
+  const homeFaction = playersData.homeFaction;
+  const enemyFaction = playersData.enemyFaction;
+
+  const homeFactionCaptain = homeFaction.find((player: any) => player.captain);
+  const enemyFactionCaptain = enemyFaction.find(
+    (player: any) => player.captain
+  );
+
+  // Adding skill level icons next to each player name
+  const homePlayers = homeFaction
+    .map(
+      (player: any) =>
+        `${getSkillLevelEmoji(player.faceitLevel)} ${player.nickname}${
+          player.captain ? "*" : ""
+        }`
+    )
+    .join("\n");
+  const enemyPlayers = enemyFaction
+    .map(
+      (player: any) =>
+        `${getSkillLevelEmoji(player.faceitLevel)} ${player.nickname}${
+          player.captain ? "*" : ""
+        }`
+    )
+    .join("\n");
+
+  // Getting most likely picks and bans with map emojis
+  const mostLikelyPicks = sortedMapData
+    .slice(0, 4)
+    .map(
+      (map: any) =>
+        `${getMapEmoji(map.mapName)} ${formattedMapName(map.mapName)}`
+    )
+    .join("\n");
+
+  // Sort maps in ascending order of played times for most likely bans
+  const mostLikelyBans = sortedMapData
+    .slice()
+    .sort((a: any, b: any) => a.totalPlayedTimes - b.totalPlayedTimes) // Sort by least played first
+    .slice(0, 4) // Take the least played 3 maps
+    .map(
+      (map: any) =>
+        `${getMapEmoji(map.mapName)} ${formattedMapName(map.mapName)}`
+    )
+    .join("\n");
+
+  // Creating the map stats table content (without map icons)
+  const mapDataTable = sortedMapData
+    .map((map: any) => {
+      // Ensure averageWinPercentage is a valid number by parsing the string to a float
+      const formattedWinPercentage =
+        map.totalPlayedTimes === 0 ||
+        isNaN(parseFloat(map.averageWinPercentage))
+          ? "N/A"
+          : Math.ceil(parseFloat(map.averageWinPercentage)).toString() + "%"; // Round up the win percentage to nearest whole number
+      return `\`${formattedMapName(map.mapName).padEnd(
+        12
+      )} | ${map.totalPlayedTimes
+        .toString()
+        .padEnd(6)} | ${formattedWinPercentage.padEnd(6)}\``;
+    })
+    .join("\n");
+
+  // Create the embed
+  const embed = new EmbedBuilder()
+    .setTitle("Matchroom Analysis")
+    .addFields(
+      {
+        name: `Team ${homeFactionCaptain.nickname}`,
+        value: homePlayers,
+        inline: true,
+      },
+      {
+        name: `Team ${enemyFactionCaptain.nickname}`,
+        value: enemyPlayers,
+        inline: true,
+      },
+      {
+        name: `Map stats for Team ${enemyFactionCaptain.nickname} (Last 30 games)`,
+        value:
+          "`Map name     | Played | Win % `\n" +
+          "`-------------|--------|-------`\n" +
+          mapDataTable,
+      },
+      { name: "Most likely picks", value: mostLikelyPicks, inline: true },
+      { name: "Most likely bans", value: mostLikelyBans, inline: true }
+    )
+    .setFooter({ text: `${matchId}` })
+    .setColor("#ff5733");
+
+  // Create the "View Match" button
+  const row = new ActionRowBuilder<ButtonBuilder>().addComponents(
+    new ButtonBuilder()
+      .setURL(`https://www.faceit.com/en/cs2/room/${matchId}`)
+      .setLabel("View match")
+      .setStyle(ButtonStyle.Link)
+  );
+
+  // Pass the embed and the button to sendEmbedMessage
+  sendEmbedMessage(embed, [row], config.MATCHROOM_ANALYSIS_CHANNEL_ID);
+  return;
 };
 
 const loginBot = async () => {
