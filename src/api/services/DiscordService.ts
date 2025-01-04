@@ -128,7 +128,7 @@ export const getMatchVoiceChannelId = async (
     if (channel instanceof VoiceChannel) {
       for (const member of channel.members.values()) {
         if (
-          matchingPlayers.some(
+          matchingPlayers?.some(
             (player) => player.discordUsername === member.user.username
           )
         ) {
