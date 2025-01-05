@@ -1,12 +1,5 @@
 import { Client, GatewayIntentBits, Partials } from "discord.js";
 import { config } from "../config";
-import "./events/ready";
-import "./events/interaction";
-import "./events/autoRole";
-import "./events/voiceChannelLive";
-import "./events/messageMentionAI";
-import "./events/leaver";
-
 const client = new Client({
   intents: [
     GatewayIntentBits.Guilds,
