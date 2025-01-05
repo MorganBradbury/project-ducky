@@ -1,10 +1,5 @@
 import { client } from "../bot";
-import {
-  VoiceState,
-  CategoryChannel,
-  VoiceChannel,
-  GuildChannel,
-} from "discord.js";
+import { VoiceState, CategoryChannel, VoiceChannel } from "discord.js";
 import { ChannelIcons } from "../../constants";
 import {
   createNewVoiceChannel,
@@ -71,15 +66,17 @@ client.on(
           return;
         }
 
-        // Fetch the newly created channel and set its position
-        const newChannel = guild.channels.cache.get(
-          newChannelId
-        ) as VoiceChannel;
-        if (newChannel && newChannel.type === 2 && channelIndex !== -1) {
-          await newChannel.setPosition(channelIndex);
-        }
-
-        console.log(`Recreated channel "${newName}" at the correct position.`);
+        // Immediately set the position of the newly created channel
+        await guild.channels.fetch(newChannelId).then(async (newChannel) => {
+          if (newChannel && newChannel.type === 2 && channelIndex !== -1) {
+            await newChannel.setPosition(channelIndex);
+            console.log(
+              `Recreated channel "${newName}" at the correct position.`
+            );
+          } else {
+            console.error("Failed to fetch or reposition the new channel.");
+          }
+        });
       }
     } catch (error) {
       if (error instanceof Error) {
