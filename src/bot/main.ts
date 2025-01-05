@@ -1,4 +1,4 @@
-import { client } from "./bot";
+import client from "./bot";
 import { config } from "../config";
 import "./events/ready";
 import "./events/interaction";
