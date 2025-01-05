@@ -1,4 +1,4 @@
-import { client } from "../bot";
+import client from "../bot";
 import {
   ChatInputCommandInteraction,
   ButtonInteraction,

@@ -1,4 +1,4 @@
-import { client } from "../bot";
+import client from "../bot";
 import OpenAI from "openai";
 import { Message } from "discord.js";
 import { config } from "../../config"; // Adjust the path as needed

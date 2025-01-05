@@ -1,5 +1,5 @@
 import { REST, Routes } from "discord.js";
-import { client } from "../bot";
+import client from "../bot";
 import { config } from "../../config";
 import { commands } from "../commands";
 
