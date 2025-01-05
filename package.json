@@ -5,8 +5,8 @@
   "scripts": {
     "build": "tsc",
     "start-server": "node dist/api/server.js",
-    "start": "node dist/bot/main.js",
-    "dev": "tsc --watch && nodemon dist/bot/main.js"
+    "start": "node dist/bot/bot.js",
+    "dev": "tsc --watch && nodemon dist/bot/bot.js"
   },
   "keywords": [],
   "author": "m0rgnN",
