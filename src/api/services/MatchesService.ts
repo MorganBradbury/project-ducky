@@ -17,7 +17,6 @@ import {
 } from "./DiscordService";
 import { FaceitService } from "./FaceitService";
 import { getScoreStatusText } from "../../utils/faceitHelper";
-import { activeMapPool } from "../../constants";
 
 let workers: Record<string, Worker> = {};
 
