@@ -69,3 +69,7 @@ export const generateOptimizedCaseVariations = (str: string): string[] => [
 export const getScoreStatusText = (mapName: string, score: string = "0:0") => {
   return `LIVE: ${mapName.replace("de_", "").toUpperCase()} (${score})`;
 };
+
+// Strip 'de_' and capitalize the first letter of the map name
+export const formattedMapName = (mapName: string) =>
+  mapName.replace(/^de_/, "").replace(/\b\w/g, (char) => char.toUpperCase());

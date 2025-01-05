@@ -1,6 +1,5 @@
 import { ChatInputCommandInteraction, EmbedBuilder } from "discord.js";
 import { getAllUsers } from "../../../db/commands";
-import { removeAllUnicodeNicknames } from "../../../api/services/DiscordService";
 
 export const listUserIdsCommand = {
   name: "list_tracked_ids",

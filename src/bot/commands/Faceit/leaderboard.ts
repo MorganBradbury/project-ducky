@@ -1,9 +1,5 @@
 import { ChatInputCommandInteraction, EmbedBuilder } from "discord.js";
 import { getAllUsers } from "../../../db/commands";
-import {
-  removeAllUnicodeNicknames,
-  updateAllUnicodeNicknames,
-} from "../../../api/services/DiscordService";
 
 export const leaderboardCommand = {
   name: "leaderboard",

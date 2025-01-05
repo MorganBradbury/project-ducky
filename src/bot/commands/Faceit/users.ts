@@ -1,6 +1,5 @@
 import { ChatInputCommandInteraction, EmbedBuilder } from "discord.js";
 import { getAllUsers } from "../../../db/commands";
-import { removeAllUnicodeNicknames } from "../../../api/services/DiscordService";
 
 export const listUsersCommand = {
   name: "list_users",

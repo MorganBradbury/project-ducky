@@ -7,12 +7,9 @@ import {
   VoiceChannel,
   GuildMember,
   Role,
-  ChannelType,
   ButtonBuilder,
   ButtonStyle,
   ActionRowBuilder,
-  ButtonInteraction,
-  ComponentType,
   Message,
 } from "discord.js";
 import { SystemUser } from "../../types/SystemUser";
@@ -20,18 +17,16 @@ import { FaceitService } from "./FaceitService";
 import axios from "axios";
 import { PermissionFlagsBits } from "discord.js";
 import { config } from "../../config";
-import {
-  removeExistingTag,
-  removeUnicodeChars,
-  toUnicodeStr,
-  updateNickname,
-} from "../../utils/nicknameUtils";
-import { getAllUsers, updateUserElo } from "../../db/commands";
+import { updateNickname } from "../../utils/nicknameUtils";
+import { updateUserElo } from "../../db/commands";
 import { Player } from "../../types/Faceit/Player";
-import { calculateEloDifference } from "../../utils/faceitHelper";
+import {
+  calculateEloDifference,
+  formattedMapName,
+} from "../../utils/faceitHelper";
 import { Match } from "../../types/Faceit/Match";
-import { toUnicode } from "punycode";
 import { numberToUnicode } from "../../utils/unicodeHelper";
+import { getMapEmoji, getSkillLevelEmoji } from "../../constants";
 
 // Initialize the Discord client
 const client = new Client({
@@ -243,21 +238,6 @@ export const deleteVoiceChannel = async (voiceChannelId: string) => {
     );
     return false;
   }
-};
-
-const getMapEmoji = (mapName: string): string => {
-  const mapEmojis: { [key: string]: string } = {
-    de_ancient: "<:de_ancient:1324386141981507656>",
-    de_anubis: "<:de_anubis:1324386143462227990>",
-    de_dust2: "<:de_dust2:1324386144686702592>",
-    de_inferno: "<:de_inferno:1324386146322616392>",
-    de_mirage: "<:de_mirage:1324386148369563719>",
-    de_nuke: "<:de_nuke:1324386149623529553>",
-    de_vertigo: "<:de_vertigo:1324421533262811297>",
-    de_train: "<:de_train:1324434992494940231>",
-  };
-
-  return mapEmojis[mapName.toLowerCase()] || `:${mapName.toLowerCase()}:`; // Default to text-based emoji if not found
 };
 
 export const sendMatchFinishNotification = async (match: Match) => {
@@ -515,110 +495,6 @@ export const updateMinecraftVoiceChannel = async (
   }
 };
 
-/**
- * Updates all voice channels in a Discord server to have the same emoji 🟠 in their names,
- * ignoring specified categories and skipping occupied channels. Channels are reordered alphabetically.
- */
-// Helper function to extract the number from the channel name
-function extractNumberFromName(channelName: string): number | null {
-  const match = channelName.match(/(\d+)/); // Match digits in the name
-  return match ? parseInt(match[0], 10) : null;
-}
-
-// Helper function to reorder voice channels by their name numbers
-async function reorderVoiceChannels(channels: VoiceChannel[]): Promise<void> {
-  const sortedChannels = channels.sort((a, b) => {
-    const aNumber = extractNumberFromName(a.name);
-    const bNumber = extractNumberFromName(b.name);
-
-    // Channels without a number will be pushed to the end
-    if (aNumber === null && bNumber === null) return 0;
-    if (aNumber === null) return 1;
-    if (bNumber === null) return -1;
-
-    return aNumber - bNumber;
-  });
-
-  // Set the positions based on the custom sorted order
-  await Promise.all(
-    sortedChannels.map((channel, index) => {
-      if (channel.position !== index) {
-        return channel.setPosition(index);
-      }
-    })
-  );
-}
-
-export async function resetVoiceChannelStates(): Promise<void> {
-  try {
-    const guildId = process.env.GUILD_ID;
-    if (!guildId) {
-      throw new Error("GUILD_ID is not set in environment variables.");
-    }
-
-    const guild = await client.guilds.fetch(guildId);
-    if (!guild) {
-      throw new Error(`Guild with ID ${guildId} not found.`);
-    }
-
-    const channels = await guild.channels.fetch();
-
-    // Group channels by category (parentId) and filter voice channels
-    const categories: Record<string, VoiceChannel[]> = {};
-
-    channels.forEach((channel) => {
-      if (
-        channel?.type === ChannelType.GuildVoice &&
-        channel.id !== guild.afkChannelId
-      ) {
-        const categoryId = channel.parentId || "no-category";
-
-        // Skip channels in ignored categories
-        if (categoryId !== "no-category") {
-          return;
-        }
-
-        if (!categories[categoryId]) categories[categoryId] = [];
-        categories[categoryId].push(channel as VoiceChannel);
-      }
-    });
-
-    // Process each category
-    for (const [categoryId, voiceChannels] of Object.entries(categories)) {
-      const categoryName = voiceChannels[0]?.parent?.name || "Uncategorized";
-
-      // Rename channels based on occupancy and emojis.
-      const updatedChannels = await Promise.all(
-        voiceChannels.map(async (channel) => {
-          let newName: string;
-          if (channel.members.size > 0) {
-            // Occupied channels: Ensure 🟢 is set
-            newName = `🟢 ${channel.name.replace(/^🟠 |^🟢 /, "")}`; // Replace 🟠 or 🟢 with 🟢
-          } else {
-            // Empty channels: Ensure 🟠 is set
-            newName = `🟠 ${channel.name.replace(/^🟠 |^🟢 /, "")}`; // Replace 🟠 or 🟢 with 🟠
-          }
-
-          // If the name is different, update it
-          if (channel.name !== newName) {
-            console.log(`Renaming channel: ${channel.name} -> ${newName}`);
-            await channel.setName(newName);
-          }
-
-          return channel;
-        })
-      );
-
-      // Reorder the channels based on their numbers in the names
-      await reorderVoiceChannels(updatedChannels);
-    }
-
-    console.log("Voice channels updated and reordered successfully.");
-  } catch (error) {
-    console.error("Error updating voice channels:", error);
-  }
-}
-
 export const getChannelNameById = async (
   channelId: string
 ): Promise<string | null> => {
@@ -676,104 +552,6 @@ export const updateVoiceChannelStatus = async (
     return;
   }
 };
-
-export const updateAllUnicodeNicknames = async () => {
-  try {
-    const guild = await client.guilds.fetch(config.GUILD_ID); // Fetch the guild
-    const members = await guild.members.fetch(); // Fetch all members
-
-    const ownerId = guild.ownerId; // Get the server owner's ID
-
-    // Loop through all members and get their server nickname
-    members.forEach(async (member) => {
-      // Skip the server owner
-      if (member.id === ownerId) {
-        return;
-      }
-
-      const nickname = member.nickname;
-      console.log(`${member.user.tag} has the nickname: ${nickname}`);
-      const findUser = await getAllUsers();
-      const user = findUser.find(
-        (user) => user.discordUsername === member.user.tag
-      );
-
-      // You can now modify the nickname if needed
-      // Example: modify the nickname and update it
-      if (nickname) {
-        const newNickname = `${member.nickname} ${toUnicodeStr(
-          `[${user?.previousElo}]`
-        )}`;
-
-        // If the nickname has changed, update it
-        if (newNickname !== nickname) {
-          member.setNickname(newNickname);
-          console.log(
-            `Updated ${member.user.tag}'s nickname to: ${newNickname}`
-          );
-        }
-      }
-    });
-  } catch (error) {
-    console.error("Error fetching members or updating nicknames:", error);
-  }
-};
-export const removeAllUnicodeNicknames = async () => {
-  try {
-    const guild = await client.guilds.fetch(config.GUILD_ID); // Fetch the guild
-    const members = await guild.members.fetch(); // Fetch all members
-
-    const ownerId = guild.ownerId; // Get the server owner's ID
-
-    // Loop through all members and get their server nickname
-    members.forEach(async (member) => {
-      // Skip the server owner
-      if (member.id === ownerId) {
-        return;
-      }
-
-      const nickname = member.nickname;
-      console.log(`${member.user.tag} has the nickname: ${nickname}`);
-
-      // You can now modify the nickname if needed
-      // Example: modify the nickname and update it
-      if (nickname) {
-        const newNickname = removeUnicodeChars(nickname); // Assuming `removeExistingTag` is your function to modify the nickname
-
-        // If the nickname has changed, update it
-        if (newNickname !== nickname) {
-          member.setNickname(newNickname);
-          console.log(
-            `Updated ${member.user.tag}'s nickname to: ${newNickname}`
-          );
-        }
-      }
-    });
-  } catch (error) {
-    console.error("Error fetching members or updating nicknames:", error);
-  }
-};
-
-const getSkillLevelEmoji = (faceitLevel: number): string => {
-  const skillLevelEmojis: { [key: number]: string } = {
-    1: "<:level_1:1313100283273936896>",
-    2: "<:level_2:1313100284301545522>",
-    3: "<:level_3:1313100285215903785>",
-    4: "<:level_4:1313100286989959180>",
-    5: "<:level_5:1313100288512622682>",
-    6: "<:level_6:1313100291045851186>",
-    7: "<:level_7:1313100292870377523>",
-    8: "<:level_8:1313100294321868866>",
-    9: "<:level_9:1313100296557432832>",
-    10: "<:level_10:1314528913380081717>", // Added level 10 as well
-  };
-
-  return skillLevelEmojis[faceitLevel] || `:${faceitLevel}:`; // Default to text-based emoji if not found
-};
-
-// Strip 'de_' and capitalize the first letter of the map name
-const formattedMapName = (mapName: string) =>
-  mapName.replace(/^de_/, "").replace(/\b\w/g, (char) => char.toUpperCase());
 
 export const createMatchAnalysisEmbed = (
   matchId: string,
