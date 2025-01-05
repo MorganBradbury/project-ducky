@@ -4,7 +4,7 @@ import { ChannelIcons } from "../../constants";
 import {
   createNewVoiceChannel,
   deleteVoiceChannel,
-} from "../../api/services/DiscordService";
+} from "../../api/services/discord-service";
 
 // Event listener for voice state updates
 client.on(

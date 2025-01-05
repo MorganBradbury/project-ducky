@@ -1,8 +1,8 @@
 import { config } from "../config";
-import { SystemUser } from "../types/SystemUser";
+import { SystemUser } from "../types/system-user";
 import mysql, { RowDataPacket } from "mysql2/promise";
 import { SQL_QUERIES } from "./queries";
-import { Match } from "../types/Faceit/Match";
+import { Match } from "../types/Faceit/match1";
 
 // Create a connection pool
 const pool = mysql.createPool({ ...config.MYSQL });

@@ -2,8 +2,8 @@ import express from "express";
 import {
   handleMatchesHook,
   updateLiveScores,
-} from "../controllers/MatchesController";
-import { getPlayerCount } from "../controllers/MinecraftController";
+} from "../controllers/matches-controller";
+import { getPlayerCount } from "../controllers/minecraft-controller";
 
 export const apiRoutes = express.Router();
 

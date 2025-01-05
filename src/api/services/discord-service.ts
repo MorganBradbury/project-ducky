@@ -12,19 +12,19 @@ import {
   ActionRowBuilder,
   Message,
 } from "discord.js";
-import { SystemUser } from "../../types/SystemUser";
-import { FaceitService } from "./FaceitService";
+import { SystemUser } from "../../types/system-user";
+import { FaceitService } from "./faceit-service";
 import axios from "axios";
 import { PermissionFlagsBits } from "discord.js";
 import { config } from "../../config";
 import { updateNickname } from "../../utils/nicknameUtils";
 import { updateUserElo } from "../../db/commands";
-import { Player } from "../../types/Faceit/Player";
+import { Player } from "../../types/Faceit/player1";
 import {
   calculateEloDifference,
   formattedMapName,
 } from "../../utils/faceitHelper";
-import { Match } from "../../types/Faceit/Match";
+import { Match } from "../../types/Faceit/match1";
 import { numberToUnicode } from "../../utils/unicodeHelper";
 import { getMapEmoji, getSkillLevelEmoji } from "../../constants";
 import client from "../../bot/client";

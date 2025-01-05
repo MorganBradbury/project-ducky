@@ -1,13 +1,13 @@
 import axios, { AxiosInstance } from "axios";
 import { config } from "../../config";
-import { getMatchVoiceChannelId } from "./DiscordService";
+import { getMatchVoiceChannelId } from "./discord-service";
 import {
   generateOptimizedCaseVariations,
   getTeamFaction,
   getTrackedPlayers,
 } from "../../utils/faceitHelper";
-import { Player } from "../../types/Faceit/Player";
-import { Match } from "../../types/Faceit/Match";
+import { Player } from "../../types/Faceit/player1";
+import { Match } from "../../types/Faceit/match1";
 import { activeMapPool } from "../../constants";
 
 class FaceitApiClient {

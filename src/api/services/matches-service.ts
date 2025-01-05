@@ -14,8 +14,8 @@ import {
   runEloUpdate,
   sendMatchFinishNotification,
   updateVoiceChannelStatus,
-} from "./DiscordService";
-import { FaceitService } from "./FaceitService";
+} from "./discord-service";
+import { FaceitService } from "./faceit-service";
 import { getScoreStatusText } from "../../utils/faceitHelper";
 
 let workers: Record<string, Worker> = {};

@@ -1,6 +1,6 @@
 import { ChatInputCommandInteraction, EmbedBuilder } from "discord.js";
 import { getAllUsers } from "../../../db/commands";
-import { getMatchAnalysis } from "../../../api/services/MatchesService";
+import { getMatchAnalysis } from "../../../api/services/matches-service";
 
 export const matchAnalysisCommand = {
   name: "match_analysis",

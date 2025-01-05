@@ -1,5 +1,5 @@
 import { ChatInputCommandInteraction, EmbedBuilder } from "discord.js";
-import { minecraftActivePlayers } from "../../../api/services/MinecraftService";
+import { minecraftActivePlayers } from "../../../api/services/minecraft-service";
 
 export const getActivePlayers = {
   name: "active_mc_players",

@@ -4,9 +4,9 @@ import {
   endMatch,
   getMatchAnalysis,
   startMatch,
-} from "../services/MatchesService"; // Centralized match flow logic
-import { updateVoiceChannelStatus } from "../services/DiscordService";
-import { FaceitService } from "../services/FaceitService";
+} from "../services/matches-service"; // Centralized match flow logic
+import { updateVoiceChannelStatus } from "../services/discord-service";
+import { FaceitService } from "../services/faceit-service";
 import { getMatchDataFromDb } from "../../db/commands";
 import { AcceptedEventTypes } from "../../constants";
 import { getScoreStatusText } from "../../utils/faceitHelper";

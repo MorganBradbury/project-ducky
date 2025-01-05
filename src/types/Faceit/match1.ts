@@ -1,4 +1,4 @@
-import { SystemUser } from "../SystemUser";
+import { SystemUser } from "../system-user";
 
 export type Match = {
   matchId: string;

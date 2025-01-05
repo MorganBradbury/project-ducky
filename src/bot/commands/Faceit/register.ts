@@ -1,9 +1,9 @@
 import { ChatInputCommandInteraction, GuildMember } from "discord.js"; // Use specific interaction type
 import { addUser } from "../../../db/commands";
 import { updateNickname } from "../../../utils/nicknameUtils";
-import { FaceitService } from "../../../api/services/FaceitService";
-import { updateServerRoles } from "../../../api/services/DiscordService";
-import { Player } from "../../../types/Faceit/Player";
+import { FaceitService } from "../../../api/services/faceit-service";
+import { updateServerRoles } from "../../../api/services/discord-service";
+import { Player } from "../../../types/Faceit/player1";
 
 export const registerTrackingCommand = {
   name: "track",

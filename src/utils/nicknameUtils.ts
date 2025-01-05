@@ -1,5 +1,5 @@
 import { GuildMember } from "discord.js";
-import { Player } from "../types/Faceit/Player";
+import { Player } from "../types/Faceit/player1";
 import { eloNumbers } from "../constants";
 
 export function removeExistingTag(nickname: string): string {

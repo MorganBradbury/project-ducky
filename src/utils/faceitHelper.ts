@@ -1,6 +1,6 @@
-import { SystemUser } from "../types/SystemUser";
+import { SystemUser } from "../types/system-user";
 import { getAllUsers } from "../db/commands";
-import { FaceitService } from "../api/services/FaceitService";
+import { FaceitService } from "../api/services/faceit-service";
 
 export const getTrackedPlayers = async (teams: any): Promise<SystemUser[]> => {
   const allTrackedUsers = await getAllUsers();
