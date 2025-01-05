@@ -3,7 +3,7 @@ import { addUser } from "../../../db/commands";
 import { updateNickname } from "../../../utils/nicknameUtils";
 import { FaceitService } from "../../../api/services/faceit-service";
 import { updateServerRoles } from "../../../api/services/discord-service";
-import { Player } from "../../../types/Faceit/player1";
+import { Player } from "../../../types/Faceit/player";
 
 export const registerTrackingCommand = {
   name: "track",

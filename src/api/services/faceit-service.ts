@@ -6,8 +6,8 @@ import {
   getTeamFaction,
   getTrackedPlayers,
 } from "../../utils/faceitHelper";
-import { Player } from "../../types/Faceit/player1";
-import { Match } from "../../types/Faceit/match1";
+import { Player } from "../../types/Faceit/player";
+import { Match } from "../../types/Faceit/match";
 import { activeMapPool } from "../../constants";
 
 class FaceitApiClient {

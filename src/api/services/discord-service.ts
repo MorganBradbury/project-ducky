@@ -19,12 +19,12 @@ import { PermissionFlagsBits } from "discord.js";
 import { config } from "../../config";
 import { updateNickname } from "../../utils/nicknameUtils";
 import { updateUserElo } from "../../db/commands";
-import { Player } from "../../types/Faceit/player1";
+import { Player } from "../../types/Faceit/player";
 import {
   calculateEloDifference,
   formattedMapName,
 } from "../../utils/faceitHelper";
-import { Match } from "../../types/Faceit/match1";
+import { Match } from "../../types/Faceit/match";
 import { numberToUnicode } from "../../utils/unicodeHelper";
 import { getMapEmoji, getSkillLevelEmoji } from "../../constants";
 import client from "../../bot/client";
