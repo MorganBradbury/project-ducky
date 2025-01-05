@@ -2,7 +2,7 @@ import { REST, Routes, Interaction } from "discord.js";
 import client from "./client";
 import { config } from "../config";
 import { commands, commandsMap } from "./commands";
-import "./events/autorole1";
+import "./events/autorole";
 import "./events/voicestates";
 import "./events/ai";
 import "./events/leaver";
