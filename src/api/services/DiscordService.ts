@@ -27,7 +27,7 @@ import {
 import { Match } from "../../types/Faceit/Match";
 import { numberToUnicode } from "../../utils/unicodeHelper";
 import { getMapEmoji, getSkillLevelEmoji } from "../../constants";
-import client from "../../bot/bot";
+import client from "../../bot/client";
 
 // Function to create a new voice channel in a specific category
 export const createNewVoiceChannel = async (

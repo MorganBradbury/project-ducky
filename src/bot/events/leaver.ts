@@ -1,5 +1,5 @@
 import { GuildMember, TextChannel } from "discord.js";
-import client from "../bot";
+import client from "../client";
 
 client.on("guildMemberRemove", async (member) => {
   try {
