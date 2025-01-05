@@ -41,6 +41,18 @@ const client = new Client({
   partials: [Partials.Message, Partials.Channel],
 });
 
+const loginBot = async () => {
+  try {
+    if (!client.isReady()) {
+      await client.login(config.DISCORD_BOT_TOKEN);
+    }
+  } catch (error) {
+    console.error("Error logging in to Discord:", error);
+  }
+};
+// Log in to the Discord client
+loginBot();
+
 // Function to create a new voice channel in a specific category
 export const createNewVoiceChannel = async (
   channelName: string,
@@ -672,15 +684,3 @@ export const createMatchAnalysisEmbed = (
   sendEmbedMessage(embed, [row], config.MATCHROOM_ANALYSIS_CHANNEL_ID);
   return;
 };
-
-const loginBot = async () => {
-  try {
-    if (!client.isReady()) {
-      await client.login(config.DISCORD_BOT_TOKEN);
-    }
-  } catch (error) {
-    console.error("Error logging in to Discord:", error);
-  }
-};
-// Log in to the Discord client
-loginBot();
