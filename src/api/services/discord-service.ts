@@ -132,8 +132,10 @@ const sendEmbedMessage = async (
 export const getMatchVoiceChannelId = async (
   matchingPlayers: SystemUser[]
 ): Promise<string | null> => {
+  console.log("matches", matchingPlayers);
   const guild = await client.guilds.fetch(config.GUILD_ID);
   const channels = await guild.channels.fetch();
+  console.log("finding channels", channels);
 
   for (const [channelId, channel] of channels) {
     if (channel instanceof VoiceChannel) {
