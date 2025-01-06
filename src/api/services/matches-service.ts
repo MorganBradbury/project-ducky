@@ -127,14 +127,14 @@ export const getMatchAnalysis = async (matchId: string): Promise<any> => {
 
   // Assuming matchroomPlayers.homeFaction is an object with a playerId array
   const totalTrackedInGame = allTrackedUsers.filter((user) =>
-    matchroomPlayers.homeFaction.some(
+    matchroomPlayers?.homeFaction?.some(
       (player) => player.playerId === user.faceitId
     )
   ).length;
 
   // Check if there are 2 or more tracked users or if the captain exists in the tracked users
-  const isCaptainInGame = matchroomPlayers.homeFaction.some((player) =>
-    allTrackedUsers.some(
+  const isCaptainInGame = matchroomPlayers?.homeFaction?.some((player) =>
+    allTrackedUsers?.some(
       (user) => user.faceitId === player.playerId && player.captain
     )
   );
