@@ -4,20 +4,20 @@ import client from "../client";
 client.on("guildMemberAdd", async (member: GuildMember) => {
   try {
     // Replace with your role ID
-    const roleId = "1309629025177698305";
+    // const roleId = "1309629025177698305";
 
-    // Fetch the role by ID
-    const role = member.guild.roles.cache.get(roleId);
-    if (!role) {
-      console.error(
-        `Role with ID "${roleId}" not found in guild "${member.guild.name}".`
-      );
-      return;
-    }
+    // // Fetch the role by ID
+    // const role = member.guild.roles.cache.get(roleId);
+    // if (!role) {
+    //   console.error(
+    //     `Role with ID "${roleId}" not found in guild "${member.guild.name}".`
+    //   );
+    //   return;
+    // }
 
-    // Assign the role
-    await member.roles.add(role);
-    console.log(`Assigned role "${role.name}" to ${member.user.tag}.`);
+    // // Assign the role
+    // await member.roles.add(role);
+    // console.log(`Assigned role "${role.name}" to ${member.user.tag}.`);
 
     // Fetch the general channel to send the public message (adjust channel name or ID as needed)
     const generalChannel = member.guild.channels.cache.find(
