@@ -133,22 +133,25 @@ export const getMatchVoiceChannelId = async (
   matchingPlayers: SystemUser[]
 ): Promise<string | null> => {
   console.log("matches", matchingPlayers);
+
   const guild = await client.guilds.fetch(config.GUILD_ID);
   const channels = await guild.channels.fetch();
+
   console.log("finding channels", channels);
 
-  for (const [channelId, channel] of channels) {
+  // Iterate over channels
+  for (const channel of channels.values()) {
     if (channel instanceof VoiceChannel) {
-      for (const member of channel.members.values()) {
-        if (
-          matchingPlayers?.some(
+      // Check if any member in this channel matches the condition
+      const hasMatchingMember = Array.from(channel.members.values()).some(
+        (member) =>
+          matchingPlayers.some(
             (player) => player.discordUsername === member.user.username
           )
-        ) {
-          return channelId;
-        } else {
-          return null;
-        }
+      );
+
+      if (hasMatchingMember) {
+        return channel.id;
       }
     }
   }

@@ -102,6 +102,9 @@ class FaceitApiClient {
         return null;
       }
 
+      const voiceChannelId =
+        (await getMatchVoiceChannelId(trackedTeamPlayers)) || undefined;
+
       return {
         matchId: matchId,
         mapName: response.data.voting.map.pick[0] || null,
@@ -110,8 +113,7 @@ class FaceitApiClient {
           faction: trackedTeamFaction.faction,
           trackedPlayers: trackedTeamPlayers,
         },
-        voiceChannelId:
-          (await getMatchVoiceChannelId(trackedTeamPlayers)) || undefined,
+        voiceChannelId,
       };
     } catch (error) {
       console.error(`Error fetching match details for ${matchId}:`, error);
