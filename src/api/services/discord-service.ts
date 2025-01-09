@@ -137,8 +137,6 @@ export const getMatchVoiceChannelId = async (
   const guild = await client.guilds.fetch(config.GUILD_ID);
   const channels = await guild.channels.fetch();
 
-  console.log("finding channels", channels);
-
   // Iterate over channels
   for (const channel of channels.values()) {
     if (channel instanceof VoiceChannel) {
