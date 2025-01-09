@@ -109,6 +109,7 @@ export const cancelMatch = async (matchId: string) => {
 };
 
 export const getMatchAnalysis = async (matchId: string): Promise<any> => {
+  console.log("Received request for matchAnalysis: 112");
   // Does match exist in DB already. If so, return.
   const doesExist = await checkMatchExists(matchId);
   if (doesExist) {

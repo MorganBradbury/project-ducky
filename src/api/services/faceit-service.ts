@@ -214,8 +214,9 @@ class FaceitApiClient {
     for (let attempt = 1; attempt <= maxRetries; attempt++) {
       try {
         const queryUrl = `/matches/${matchId}`;
+        console.log("queryUrl", queryUrl);
         const response = await this.client.get(queryUrl);
-
+        console.log("response data", response.data);
         if (
           response.status !== 200 ||
           !response.data ||
@@ -227,8 +228,15 @@ class FaceitApiClient {
 
         const { teams } = response.data;
         const trackedTeamFaction = await getTeamFaction(teams);
+        console.log("trackedteamfaction", trackedTeamFaction);
         const enemyFactionName =
           trackedTeamFaction.faction === "faction1" ? "faction2" : "faction1";
+
+        console.log(
+          "mapteamdata for1...",
+          teams[trackedTeamFaction.faction]?.roster
+        );
+        console.log("mapteamdata for2...", teams[enemyFactionName]?.roster);
 
         const mapTeamData = (teamFaction: string) =>
           teams[teamFaction]?.roster.map((player: any) => ({
@@ -237,6 +245,8 @@ class FaceitApiClient {
             captain: teams[teamFaction].leader === player.player_id,
             nickname: player.nickname,
           }));
+
+        console.log("ggggg", mapTeamData(trackedTeamFaction.faction));
 
         return {
           homeFaction: mapTeamData(trackedTeamFaction.faction),
