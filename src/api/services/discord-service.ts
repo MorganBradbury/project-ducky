@@ -550,11 +550,13 @@ export const createMatchAnalysisEmbed = (
   gameData: any
 ) => {
   // Calculate weighted scores and add them to each map object
-  const scoredMapData = gameData.map((map: any) => ({
-    ...map,
-    score:
-      map.totalPlayedTimes * 0.7 + parseFloat(map.averageWinPercentage) * 0.3,
-  }));
+  const scoredMapData = gameData
+    .map((map: any) => ({
+      ...map,
+      score:
+        map.totalPlayedTimes * 0.7 + parseFloat(map.averageWinPercentage) * 0.3,
+    }))
+    .sort((a: any, b: any) => b.score - a.score);
 
   // Sort maps by descending score for the most likely picks
   const mostLikelyPicks = scoredMapData
@@ -576,13 +578,8 @@ export const createMatchAnalysisEmbed = (
     )
     .join("\n");
 
-  // Sort maps for the stats table by descending score
-  const sortedMapData = scoredMapData.sort(
-    (a: any, b: any) => b.score - a.score
-  );
-
   // Create the map stats table content
-  const mapDataTable = sortedMapData
+  const mapDataTable = scoredMapData
     .map((map: any) => {
       const formattedWinPercentage =
         map.totalPlayedTimes === 0 ||
