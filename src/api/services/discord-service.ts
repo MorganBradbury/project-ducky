@@ -558,7 +558,7 @@ export const createMatchAnalysisEmbed = (
 
   // Sort maps by descending score for the most likely picks
   const sortedByScore = scoredMapData.sort(
-    (a: any, b: any) => b.score - a.score
+    (a: any, b: any) => a.score - b.score
   );
 
   // Sort maps by descending score for the most likely picks
