@@ -556,8 +556,6 @@ export const createMatchAnalysisEmbed = (
       map.totalPlayedTimes * 0.7 + parseFloat(map.averageWinPercentage) * 0.3,
   }));
 
-
-
   // Sort maps by descending score for the most likely picks
   const mostLikelyPicks = scoredMapData
     .slice(0, 4) // Take top 4 maps
@@ -568,7 +566,7 @@ export const createMatchAnalysisEmbed = (
     .join("\n");
 
   // Sort maps by ascending score for the most likely bans
-  const mostLikelyBans = 
+  const mostLikelyBans = scoredMapData
     .slice(0, 4) // Take bottom 4 maps
     .map(
       (map: any) =>
