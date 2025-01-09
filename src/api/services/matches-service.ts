@@ -119,7 +119,7 @@ export const getMatchAnalysis = async (matchId: string): Promise<any> => {
   // If match is ready for analysis, retrieve all players from the matchroom and their level.
   const matchroomPlayers = await FaceitService.getMatchPlayers(matchId);
   console.log("matchroomPlayers", matchroomPlayers);
-  if (!matchroomPlayers) {
+  if (matchroomPlayers?.homeFaction === undefined) {
     return;
   }
 
