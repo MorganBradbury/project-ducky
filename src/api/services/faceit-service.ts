@@ -208,8 +208,8 @@ class FaceitApiClient {
       nickname: string;
     }>;
   } | null> {
-    const maxRetries = 15; // Adjust retries for faster failover
-    const retryDelay = 1000; // 1 second for faster polling
+    const maxRetries = 15; // Retry up to 15 times
+    const retryDelay = 1000; // Wait 1 second between retries
 
     for (let attempt = 1; attempt <= maxRetries; attempt++) {
       try {
@@ -217,6 +217,7 @@ class FaceitApiClient {
         console.log("queryUrl", queryUrl);
         const response = await this.client.get(queryUrl);
         console.log("response data", response.data);
+
         if (
           response.status !== 200 ||
           !response.data ||
@@ -227,6 +228,19 @@ class FaceitApiClient {
         }
 
         const { teams } = response.data;
+
+        if (!teams.faction1) {
+          console.log(
+            `Attempt ${attempt}: faction1 data is undefined or null.`
+          );
+          if (attempt === maxRetries) {
+            console.error("Max retries reached without valid faction1 data.");
+            return null;
+          }
+          await new Promise((resolve) => setTimeout(resolve, retryDelay));
+          continue;
+        }
+
         const trackedTeamFaction = await getTeamFaction(teams);
         console.log("trackedteamfaction", trackedTeamFaction);
         const enemyFactionName =
