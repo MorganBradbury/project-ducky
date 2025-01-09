@@ -556,7 +556,7 @@ export const createMatchAnalysisEmbed = (
       score:
         map.totalPlayedTimes * 0.7 + parseFloat(map.averageWinPercentage) * 0.3,
     }))
-    .sort((a: any, b: any) => b.score - a.score);
+    .sort((a: any, b: any) => a.score - b.score);
 
   // Sort maps by descending score for the most likely picks
   const mostLikelyPicks = scoredMapData
