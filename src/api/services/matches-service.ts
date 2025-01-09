@@ -16,7 +16,11 @@ import {
   updateVoiceChannelStatus,
 } from "./discord-service";
 import { FaceitService } from "./faceit-service";
-import { getScoreStatusText } from "../../utils/faceitHelper";
+import {
+  aggregateEnemyFactionData,
+  formatMapData,
+  getScoreStatusText,
+} from "../../utils/faceitHelper";
 
 let workers: Record<string, Worker> = {};
 
@@ -109,134 +113,22 @@ export const cancelMatch = async (matchId: string) => {
 };
 
 export const getMatchAnalysis = async (matchId: string): Promise<any> => {
-  console.log("Received request for matchAnalysis: 112");
-  // Does match exist in DB already. If so, return.
-  const doesExist = await checkMatchExists(matchId);
-  if (doesExist) {
-    console.log("getMatchAnalysis, game already exists", matchId);
+  if (await checkMatchExists(matchId)) {
     return;
   }
 
-  // If match is ready for analysis, retrieve all players from the matchroom and their level.
   const matchroomPlayers = await FaceitService.getMatchPlayers(matchId);
-  console.log("matchroomPlayers", matchroomPlayers);
-  if (matchroomPlayers?.homeFaction === undefined) {
-    return;
-  }
+  if (!matchroomPlayers?.homeFaction) return;
 
-  const allTrackedUsers = await getAllUsers();
+  const enemyFactionMapData = await aggregateEnemyFactionData(
+    matchroomPlayers.enemyFaction
+  );
+  if (!enemyFactionMapData) return;
 
-  // Assuming matchroomPlayers.homeFaction is an object with a playerId array
-  const totalTrackedInGame = allTrackedUsers.filter((user) =>
-    matchroomPlayers?.homeFaction?.some(
-      (player) => player.playerId === user.faceitId
-    )
-  ).length;
-
-  // Check if there are 2 or more tracked users or if the captain exists in the tracked users
-  const isCaptainInGame = matchroomPlayers?.homeFaction?.some((player) =>
-    allTrackedUsers?.some(
-      (user) => user.faceitId === player.playerId && player.captain
-    )
+  const formattedMapData = formatMapData(
+    enemyFactionMapData.mapStats,
+    matchroomPlayers.enemyFaction.length
   );
 
-  if (totalTrackedInGame < 2 && !isCaptainInGame) {
-    console.log(
-      `Match only contains ${totalTrackedInGame} tracked users, so not sending analysis`,
-      matchId
-    );
-    return;
-  }
-
-  // Initialize variables to store aggregated data
-  const enemyFactionMapData: {
-    totalPlayedTimes: number;
-    totalWins: number;
-    totalWinPercentage: number;
-    mapStats: Map<
-      string,
-      {
-        totalPlayedTimes: number;
-        totalWins: number;
-        totalWinPercentage: number;
-      }
-    >;
-  } = {
-    totalPlayedTimes: 0,
-    totalWins: 0,
-    totalWinPercentage: 0,
-    mapStats: new Map(),
-  };
-
-  // Loop through the enemyFaction players to get their map stats
-  for (const player of matchroomPlayers.enemyFaction) {
-    try {
-      // Get the map stats for the player
-      const playerMapStats = await FaceitService.getMapStatsByPlayer(
-        player.playerId
-      );
-      if (!playerMapStats) {
-        return;
-      }
-
-      // Loop through the player's map stats and aggregate the data
-      playerMapStats.forEach((mapStat) => {
-        if (!enemyFactionMapData.mapStats.has(mapStat.mapName)) {
-          enemyFactionMapData.mapStats.set(mapStat.mapName, {
-            totalPlayedTimes: 0,
-            totalWins: 0,
-            totalWinPercentage: 0,
-          });
-        }
-
-        // Aggregate map data
-        const mapData = enemyFactionMapData.mapStats.get(mapStat.mapName)!;
-        mapData.totalPlayedTimes += mapStat.playedTimes;
-        mapData.totalWins += mapStat.wins;
-        mapData.totalWinPercentage += mapStat.winPercentage;
-
-        // Update the map data back in the Map
-        enemyFactionMapData.mapStats.set(mapStat.mapName, mapData);
-      });
-
-      // Aggregate total data
-      enemyFactionMapData.totalPlayedTimes += playerMapStats.reduce(
-        (acc, stat) => acc + stat.playedTimes,
-        0
-      );
-      enemyFactionMapData.totalWins += playerMapStats.reduce(
-        (acc, stat) => acc + stat.wins,
-        0
-      );
-      enemyFactionMapData.totalWinPercentage += playerMapStats.reduce(
-        (acc, stat) => acc + stat.winPercentage,
-        0
-      );
-    } catch (error) {
-      console.error(
-        `Error fetching map stats for player ${player.nickname}:`,
-        error
-      );
-    }
-  }
-
-  // Calculate average win percentage for the enemy faction
-  const playerCount = matchroomPlayers.enemyFaction.length;
-  enemyFactionMapData.totalWinPercentage /= playerCount;
-
-  // Prepare data for embed or output
-  const formattedMapData = Array.from(
-    enemyFactionMapData.mapStats.entries()
-  ).map(([mapName, stats]) => ({
-    mapName,
-    totalPlayedTimes: stats.totalPlayedTimes,
-    totalWins: stats.totalWins,
-    averageWinPercentage: (stats.totalWinPercentage / playerCount).toFixed(2),
-  }));
-
-  console.log("formattedMapData", formattedMapData);
-
   createMatchAnalysisEmbed(matchId, matchroomPlayers, formattedMapData);
-
-  return;
 };

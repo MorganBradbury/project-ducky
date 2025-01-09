@@ -214,9 +214,7 @@ class FaceitApiClient {
     for (let attempt = 1; attempt <= maxRetries; attempt++) {
       try {
         const queryUrl = `/matches/${matchId}`;
-        console.log("queryUrl", queryUrl);
         const response = await this.client.get(queryUrl);
-        console.log("response data", response.data);
 
         if (
           response.status !== 200 ||

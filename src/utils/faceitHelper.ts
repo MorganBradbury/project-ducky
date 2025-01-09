@@ -73,3 +73,65 @@ export const getScoreStatusText = (mapName: string, score: string = "0:0") => {
 // Strip 'de_' and capitalize the first letter of the map name
 export const formattedMapName = (mapName: string) =>
   mapName.replace(/^de_/, "").replace(/\b\w/g, (char) => char.toUpperCase());
+
+export const aggregateEnemyFactionData = async (enemyFaction: any[]) => {
+  const mapStats = new Map<
+    string,
+    { totalPlayedTimes: number; totalWins: number; totalWinPercentage: number }
+  >();
+  let totalPlayedTimes = 0,
+    totalWins = 0,
+    totalWinPercentage = 0;
+
+  for (const player of enemyFaction) {
+    try {
+      const playerMapStats = await FaceitService.getMapStatsByPlayer(
+        player.playerId
+      );
+      if (!playerMapStats) return null;
+
+      playerMapStats.forEach((mapStat) => {
+        if (!mapStats.has(mapStat.mapName)) {
+          mapStats.set(mapStat.mapName, {
+            totalPlayedTimes: 0,
+            totalWins: 0,
+            totalWinPercentage: 0,
+          });
+        }
+        const mapData = mapStats.get(mapStat.mapName)!;
+        mapData.totalPlayedTimes += mapStat.playedTimes;
+        mapData.totalWins += mapStat.wins;
+        mapData.totalWinPercentage += mapStat.winPercentage;
+      });
+
+      totalPlayedTimes += playerMapStats.reduce(
+        (acc, stat) => acc + stat.playedTimes,
+        0
+      );
+      totalWins += playerMapStats.reduce((acc, stat) => acc + stat.wins, 0);
+      totalWinPercentage += playerMapStats.reduce(
+        (acc, stat) => acc + stat.winPercentage,
+        0
+      );
+    } catch (error) {
+      console.error(
+        `Error fetching map stats for player ${player.nickname}:`,
+        error
+      );
+    }
+  }
+
+  return { totalPlayedTimes, totalWins, totalWinPercentage, mapStats };
+};
+
+export const formatMapData = (
+  mapStats: Map<string, any>,
+  playerCount: number
+) => {
+  return Array.from(mapStats.entries()).map(([mapName, stats]) => ({
+    mapName,
+    totalPlayedTimes: stats.totalPlayedTimes,
+    totalWins: stats.totalWins,
+    averageWinPercentage: (stats.totalWinPercentage / playerCount).toFixed(2),
+  }));
+};
