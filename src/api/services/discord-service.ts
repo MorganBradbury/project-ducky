@@ -556,14 +556,10 @@ export const createMatchAnalysisEmbed = (
       map.totalPlayedTimes * 0.7 + parseFloat(map.averageWinPercentage) * 0.3,
   }));
 
-  // Sort maps by descending score for the most likely picks
-  const sortedByScore = scoredMapData.sort(
-    (a: any, b: any) => a.score - b.score
-  );
+
 
   // Sort maps by descending score for the most likely picks
-  const mostLikelyPicks = sortedByScore
-    .sort((a: any, b: any) => b.score - a.score) // Sort by highest score
+  const mostLikelyPicks = scoredMapData
     .slice(0, 4) // Take top 4 maps
     .map(
       (map: any) =>
@@ -572,8 +568,7 @@ export const createMatchAnalysisEmbed = (
     .join("\n");
 
   // Sort maps by ascending score for the most likely bans
-  const mostLikelyBans = sortedByScore
-    .sort((a: any, b: any) => a.score - b.score) // Sort by lowest score
+  const mostLikelyBans = 
     .slice(0, 4) // Take bottom 4 maps
     .map(
       (map: any) =>
@@ -582,7 +577,7 @@ export const createMatchAnalysisEmbed = (
     .join("\n");
 
   // Create the map stats table content
-  const mapDataTable = sortedByScore
+  const mapDataTable = scoredMapData
     .map((map: any) => {
       const formattedWinPercentage =
         map.totalPlayedTimes === 0 ||
