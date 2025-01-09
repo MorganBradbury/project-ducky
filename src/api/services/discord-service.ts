@@ -549,16 +549,53 @@ export const createMatchAnalysisEmbed = (
   playersData: any,
   gameData: any
 ) => {
-  // Sorting the game data: first by most played times, then by average win percentage if needed
-  const sortedMapData = gameData.sort((a: any, b: any) => {
-    const aWinPercentage = parseFloat(a.averageWinPercentage);
-    const bWinPercentage = parseFloat(b.averageWinPercentage);
+  // Calculate weighted scores and add them to each map object
+  const scoredMapData = gameData.map((map: any) => ({
+    ...map,
+    score:
+      map.totalPlayedTimes * 0.7 + parseFloat(map.averageWinPercentage) * 0.3,
+  }));
 
-    if (b.totalPlayedTimes === a.totalPlayedTimes) {
-      return bWinPercentage - aWinPercentage;
-    }
-    return b.totalPlayedTimes - a.totalPlayedTimes;
-  });
+  // Sort maps by descending score for the most likely picks
+  const mostLikelyPicks = scoredMapData
+    .sort((a: any, b: any) => b.score - a.score) // Sort by highest score
+    .slice(0, 4) // Take top 4 maps
+    .map(
+      (map: any) =>
+        `${getMapEmoji(map.mapName)} ${formattedMapName(map.mapName)}`
+    )
+    .join("\n");
+
+  // Sort maps by ascending score for the most likely bans
+  const mostLikelyBans = scoredMapData
+    .sort((a: any, b: any) => a.score - b.score) // Sort by lowest score
+    .slice(0, 4) // Take bottom 4 maps
+    .map(
+      (map: any) =>
+        `${getMapEmoji(map.mapName)} ${formattedMapName(map.mapName)}`
+    )
+    .join("\n");
+
+  // Sort maps for the stats table by descending score
+  const sortedMapData = scoredMapData.sort(
+    (a: any, b: any) => b.score - a.score
+  );
+
+  // Create the map stats table content
+  const mapDataTable = sortedMapData
+    .map((map: any) => {
+      const formattedWinPercentage =
+        map.totalPlayedTimes === 0 ||
+        isNaN(parseFloat(map.averageWinPercentage))
+          ? "N/A"
+          : Math.ceil(parseFloat(map.averageWinPercentage)).toString() + "%"; // Round up win percentage
+      return `\`${formattedMapName(map.mapName).padEnd(
+        12
+      )} | ${map.totalPlayedTimes
+        .toString()
+        .padEnd(6)} | ${formattedWinPercentage.padEnd(6)}\``;
+    })
+    .join("\n");
 
   // Extracting teams and their players
   const homeFaction = playersData.homeFaction;
@@ -587,43 +624,6 @@ export const createMatchAnalysisEmbed = (
     )
     .join("\n");
 
-  // Getting most likely picks and bans with map emojis
-  const mostLikelyPicks = sortedMapData
-    .slice(0, 4)
-    .map(
-      (map: any) =>
-        `${getMapEmoji(map.mapName)} ${formattedMapName(map.mapName)}`
-    )
-    .join("\n");
-
-  // Sort maps in ascending order of played times for most likely bans
-  const mostLikelyBans = sortedMapData
-    .slice()
-    .sort((a: any, b: any) => a.totalPlayedTimes - b.totalPlayedTimes) // Sort by least played first
-    .slice(0, 4) // Take the least played 3 maps
-    .map(
-      (map: any) =>
-        `${getMapEmoji(map.mapName)} ${formattedMapName(map.mapName)}`
-    )
-    .join("\n");
-
-  // Creating the map stats table content (without map icons)
-  const mapDataTable = sortedMapData
-    .map((map: any) => {
-      // Ensure averageWinPercentage is a valid number by parsing the string to a float
-      const formattedWinPercentage =
-        map.totalPlayedTimes === 0 ||
-        isNaN(parseFloat(map.averageWinPercentage))
-          ? "N/A"
-          : Math.ceil(parseFloat(map.averageWinPercentage)).toString() + "%"; // Round up the win percentage to nearest whole number
-      return `\`${formattedMapName(map.mapName).padEnd(
-        12
-      )} | ${map.totalPlayedTimes
-        .toString()
-        .padEnd(6)} | ${formattedWinPercentage.padEnd(6)}\``;
-    })
-    .join("\n");
-
   // Create the embed
   const embed = new EmbedBuilder()
     .setTitle("Matchroom Analysis")
@@ -641,7 +641,7 @@ export const createMatchAnalysisEmbed = (
       {
         name: `Map stats for Team ${enemyFactionCaptain.nickname} (Last 30 games)`,
         value:
-          "`Map name     | Played | Win % `\n" +
+          "`Map name     | Played | chance % `\n" +
           "`-------------|--------|-------`\n" +
           mapDataTable,
       },
