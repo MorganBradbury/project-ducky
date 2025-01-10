@@ -415,6 +415,53 @@ export const updateServerRoles = async (
   }
 };
 
+export const updateLinkedRole = async (
+  member: GuildMember,
+  removeRoleId: string, // Role to remove
+  addRoleId: string // Role to add
+) => {
+  try {
+    if (!member) {
+      console.error("Member data is missing.");
+      return;
+    }
+
+    // Get the guild
+    const guild = await client.guilds.fetch(config.GUILD_ID);
+    if (!guild) {
+      console.error("Guild not found.");
+      return;
+    }
+
+    // Fetch the roles by their IDs
+    const removeRole = await guild.roles.fetch(removeRoleId);
+    const addRole = await guild.roles.fetch(addRoleId);
+
+    if (!removeRole || !addRole) {
+      console.error("One or both roles not found.");
+      return;
+    }
+
+    // Remove the role if the member has it
+    if (member.roles.cache.has(removeRole.id)) {
+      await member.roles.remove(removeRole);
+      console.log(
+        `Removed role ${removeRole.name} from member ${member.user.tag}.`
+      );
+    }
+
+    // Add the new role
+    if (!member.roles.cache.has(addRole.id)) {
+      await member.roles.add(addRole);
+      console.log(
+        `Assigned role ${addRole.name} to member ${member.user.tag}.`
+      );
+    }
+  } catch (error) {
+    console.error("Error updating roles:", error);
+  }
+};
+
 // Function to manage the Minecraft voice channel
 export const updateMinecraftVoiceChannel = async (
   playerCount: number // This is the number of active players
