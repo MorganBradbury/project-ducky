@@ -26,8 +26,8 @@ client.on("guildMemberAdd", async (member: GuildMember) => {
       return;
     }
 
-    // Send a message to the channel
-    const customMessage = "Welcome to the server!"; // Replace with the message you want to send
+    // Send a custom message mentioning the user
+    const customMessage = `👋 Hi <@${member.user.id}>, welcome to the Discord! If you wish to gain access to the server, please send a message with your FACEIT name in this channel. It is case sensitive.`;
     await (channel as TextChannel).send(customMessage);
     console.log(`Sent welcome message to channel ${channelId}`);
   } catch (error) {

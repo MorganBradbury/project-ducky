@@ -13,6 +13,7 @@ const monitoredChannelId = "1327303978223931462"; // Replace with the ID of the 
 // Listen for messages in the server
 client.on("messageCreate", async (message) => {
   console.log("message received", message.channel.id);
+
   // Ignore messages not from the monitored channel
   if (message.channel.id !== monitoredChannelId) return;
 
@@ -30,7 +31,7 @@ client.on("messageCreate", async (message) => {
     const player: Player | null = await FaceitService?.getPlayer(faceitName);
 
     if (!player) {
-      // Send an error reply
+      // Send an error reply and return early without deleting any message
       await message.reply(
         `Invalid FACEIT nickname. Please make sure you are entering your name correctly. It is CASE SENSITIVE.`
       );
@@ -42,6 +43,7 @@ client.on("messageCreate", async (message) => {
       return;
     }
 
+    // Add the user to the database and update roles/nicknames
     await addUser(
       userTag,
       player.faceitName,
@@ -49,7 +51,6 @@ client.on("messageCreate", async (message) => {
       player.gamePlayerId,
       player.id
     );
-    // Update nickname and roles
     await updateNickname(message.member, player);
     await updateServerRoles(message.member, player);
     await updateLinkedRole(
@@ -58,14 +59,34 @@ client.on("messageCreate", async (message) => {
       "1327302146814775369"
     );
 
-    // Confirm success to the user
-    await message.reply(
-      `FACEIT account successfully added! Tracked player: **${player.faceitName}** with **${player.faceitElo} ELO**.`
+    console.log(`User added to tracker: ${faceitName}`);
+
+    // Now, delete all messages in the channel containing the user's ID
+    const channel = message.channel;
+    const messages = await channel.messages.fetch({ limit: 100 }); // Adjust the number as needed
+
+    // Delete any messages containing the user's ID
+    const messagesToDelete = messages.filter(
+      (msg) =>
+        msg.content.includes(message.author.id) ||
+        msg.author.id === message.author.id
     );
 
-    console.log(`User added to tracker: ${faceitName}`);
+    await Promise.all(
+      messagesToDelete.map(async (msg) => {
+        try {
+          await msg.delete();
+          console.log(`Deleted message from ${msg.author.tag}`);
+        } catch (error) {
+          console.error(
+            `Error deleting message from ${msg.author.tag}:`,
+            error
+          );
+        }
+      })
+    );
   } catch (error) {
-    console.error("Error updating FACEIT level:", error);
+    console.error("Error processing message:", error);
     await message.reply({ content: `An error occurred: ${error}` });
   }
 });
