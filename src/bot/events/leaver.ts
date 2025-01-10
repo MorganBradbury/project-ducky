@@ -21,7 +21,7 @@ client.on("guildMemberRemove", async (member) => {
     }
 
     await generalChannel.send(
-      `Goodbye, <@${member.user.id}> 👋 You will be missed.`
+      `👋 Goodbye, <@${member.user.id}>. You will be missed.`
     );
     await deleteUser(member.user.username);
   } catch (error) {
