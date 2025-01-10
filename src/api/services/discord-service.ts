@@ -708,13 +708,15 @@ export const createLiveScoreCard = async (match: Match) => {
     .setColor("#464dd4");
 
   // Pass the embed and the button to sendEmbedMessage
-  sendEmbedMessage(embed, [], "1327270449628839946");
+  sendEmbedMessage(embed, [], config.BOT_LIVE_SCORE_CARDS_CHANNEL);
   return;
 };
 
 export const updateLiveScoreCard = async (match: Match) => {
   // Get the Discord client and fetch the channel
-  const channel = await client.channels.fetch("1327270449628839946");
+  const channel = await client.channels.fetch(
+    config.BOT_LIVE_SCORE_CARDS_CHANNEL
+  );
   if (!channel || !channel.isTextBased()) {
     console.error("Invalid channel or not a text-based channel.");
     return;
@@ -767,7 +769,7 @@ export const updateLiveScoreCard = async (match: Match) => {
 export const deleteMatchCards = async (matchId: string) => {
   const channelIDs = [
     config.MATCHROOM_ANALYSIS_CHANNEL_ID,
-    "1327270449628839946",
+    config.BOT_LIVE_SCORE_CARDS_CHANNEL,
   ];
   for (const channelId of channelIDs) {
     try {
