@@ -10,6 +10,10 @@ client.on("guildMemberRemove", async (member) => {
       return;
     }
 
+    setTimeout(async () => {
+      await deleteUser(member.user.username);
+    }, 4000);
+
     // Fetch the general channel to send the public message (adjust channel name or ID as needed)
     const generalChannel = member.guild.channels.cache.find(
       (channel) => channel.name === "counter-strike" && channel.isTextBased()
@@ -23,10 +27,6 @@ client.on("guildMemberRemove", async (member) => {
     await generalChannel.send(
       `👋 Goodbye, <@${member.user.id}>. You will be missed.`
     );
-
-    setTimeout(async () => {
-      await deleteUser(member.user.username);
-    }, 4000);
   } catch (error) {
     console.error(
       `Error processing guildMemberRemove event for ${member.user.tag}:`,
