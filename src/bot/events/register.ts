@@ -66,7 +66,7 @@ client.on("messageCreate", async (message) => {
 
     // Now, delete all messages in the channel containing the user's ID
     const channel = message.channel;
-    const messages = await channel.messages.fetch({ limit: 100 }); // Adjust the number as needed
+    const messages = await channel.messages.fetch({ limit: 15 }); // Adjust the number as needed
 
     // Find messages to delete: any message containing the user's ID, from the user, or containing "Invalid FACEIT nickname"
     const messagesToDelete = messages.filter(
