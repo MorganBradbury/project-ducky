@@ -31,11 +31,13 @@ client.on("messageCreate", async (message) => {
   const hasMentions = message.mentions.users.size > 0;
 
   // Logic to delete the message
-  if (hasRole && !hasMentions) {
-    await message.delete();
-    console.log(
-      `Message deleted because author has role ${roleIdToCheck} but the message didn't contain mentions.`
-    );
+  if (hasRole) {
+    if (!hasMentions) {
+      await message.delete();
+      console.log(
+        `Message deleted because author has role ${roleIdToCheck} but the message didn't contain mentions.`
+      );
+    }
     return;
   }
 
