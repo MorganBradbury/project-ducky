@@ -33,12 +33,11 @@ client.on("messageCreate", async (message) => {
 
     if (!player) {
       // Send an error reply and return early without deleting any message
-      const replyMessage = await message.reply(
+      await message.reply(
         `Invalid FACEIT nickname. Please make sure you are entering your name correctly. It is CASE SENSITIVE.`
       );
 
       // Delete the "Invalid FACEIT nickname" message
-      await replyMessage.delete();
       return;
     }
 
@@ -112,7 +111,7 @@ client.on("messageCreate", async (message) => {
     if (welcomeChannel && welcomeChannel.isTextBased()) {
       const totalUsers = message.guild?.memberCount;
       await (welcomeChannel as TextChannel).send(
-        `👋 Hi <@${message.author.id}>, welcome to the club. You are duck #${totalUsers}.`
+        `👋  Hi <@${message.author.id}>. Welcome to Duckclub. You are duck #${totalUsers}.`
       );
       console.log(`Sent welcome message to channel ${welcomeChannelId}`);
     }
