@@ -120,6 +120,30 @@ export const getMatchAnalysis = async (matchId: string): Promise<any> => {
   const matchroomPlayers = await FaceitService.getMatchPlayers(matchId);
   if (!matchroomPlayers?.homeFaction) return;
 
+  const allTrackedUsers = await getAllUsers();
+  const trackedFaceitIds = new Set(
+    allTrackedUsers.map((user) => user.faceitId)
+  );
+
+  // Calculate total tracked users in the game
+  const totalTrackedInGame =
+    matchroomPlayers?.homeFaction?.filter((player) =>
+      trackedFaceitIds.has(player.playerId)
+    ).length || 0;
+
+  // Check if there is a captain among the tracked users
+  const isCaptainInGame = matchroomPlayers?.homeFaction?.some(
+    (player) => trackedFaceitIds.has(player.playerId) && player.captain
+  );
+
+  if (totalTrackedInGame < 2 && !isCaptainInGame) {
+    console.log(
+      `Match only contains ${totalTrackedInGame} tracked users, so not sending analysis`,
+      matchId
+    );
+    return;
+  }
+
   const enemyFactionMapData = await aggregateEnemyFactionData(
     matchroomPlayers.enemyFaction
   );
