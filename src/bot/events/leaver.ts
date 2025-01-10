@@ -23,7 +23,10 @@ client.on("guildMemberRemove", async (member) => {
     await generalChannel.send(
       `👋 Goodbye, <@${member.user.id}>. You will be missed.`
     );
-    await deleteUser(member.user.username);
+
+    setTimeout(async () => {
+      await deleteUser(member.user.username);
+    }, 4000);
   } catch (error) {
     console.error(
       `Error processing guildMemberRemove event for ${member.user.tag}:`,
