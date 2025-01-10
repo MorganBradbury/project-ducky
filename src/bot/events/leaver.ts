@@ -1,5 +1,6 @@
 import { GuildMember, TextChannel } from "discord.js";
 import client from "../client";
+import { deleteUser } from "../../db/commands";
 
 client.on("guildMemberRemove", async (member) => {
   try {
@@ -22,6 +23,7 @@ client.on("guildMemberRemove", async (member) => {
     await generalChannel.send(
       `Goodbye, <@${member.user.id}> 👋 You will be missed.`
     );
+    await deleteUser(member.user.username);
   } catch (error) {
     console.error(
       `Error processing guildMemberRemove event for ${member.user.tag}:`,
