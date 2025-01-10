@@ -11,6 +11,7 @@ import {
   ButtonStyle,
   ActionRowBuilder,
   Message,
+  ThreadChannel,
 } from "discord.js";
 import { SystemUser } from "../../types/system-user";
 import { FaceitService } from "./faceit-service";
@@ -75,7 +76,8 @@ export const createNewVoiceChannel = async (
 const sendEmbedMessage = async (
   embed: EmbedBuilder,
   components: any[] = [],
-  channelId: string = config.BOT_UPDATES_CHANNEL_ID
+  channelId: string = config.BOT_UPDATES_CHANNEL_ID,
+  threadId?: string // Optional thread ID parameter
 ) => {
   try {
     if (!client.isReady()) {
@@ -86,15 +88,27 @@ const sendEmbedMessage = async (
     const channel = (await client.channels.fetch(channelId)) as TextChannel;
 
     if (!channel) {
-      console.log(
-        `Channel with ID ${config.BOT_UPDATES_CHANNEL_ID} not found.`
-      );
+      console.log(`Channel with ID ${channelId} not found.`);
       return;
     }
 
+    let targetChannelOrThread: TextChannel | ThreadChannel = channel;
+
+    // If a threadId is provided, fetch the thread and use it as the target
+    if (threadId) {
+      const thread = await channel.threads.fetch(threadId);
+      if (!thread || thread.archived) {
+        console.error(`Thread with ID ${threadId} not found or is archived.`);
+        return;
+      }
+      targetChannelOrThread = thread;
+    }
+
     if (channelId === config.MATCHROOM_ANALYSIS_CHANNEL_ID) {
-      // Fetch the last 10 messages from the channel
-      const messages = await channel.messages.fetch({ limit: 4 });
+      // Fetch the last 10 messages from the target (channel or thread)
+      const messages = await targetChannelOrThread.messages.fetch({
+        limit: 10,
+      });
 
       // Extract the matchId from the embed footer (using data.footer)
       const matchId = embed.data.footer?.text;
@@ -107,7 +121,7 @@ const sendEmbedMessage = async (
       // Check if any of the last 10 messages contain an embed with the same matchId in the footer
       const duplicate = messages.some((message: Message) => {
         return message.embeds.some((embedMsg: any) => {
-          console.log(`does ${embed?.data?.footer?.text} include ${matchId}`);
+          console.log(`Does ${embed?.data?.footer?.text} include ${matchId}?`);
           return embedMsg.footer?.text?.includes(matchId); // Check for matching matchId in the footer
         });
       });
@@ -119,12 +133,12 @@ const sendEmbedMessage = async (
     }
 
     // Send the embed with the optional button in the components array
-    return channel.send({
+    return targetChannelOrThread.send({
       embeds: [embed],
       components, // If components (buttons) are passed, they will be included
     });
   } catch (error) {
-    console.error("Error sending message to Discord channel:", error);
+    console.error("Error sending message to Discord channel or thread:", error);
   }
 };
 
@@ -321,7 +335,12 @@ export const sendMatchFinishNotification = async (match: Match) => {
     //     .setStyle(ButtonStyle.Link)
     // );
 
-    await sendEmbedMessage(embed, []);
+    await sendEmbedMessage(
+      embed,
+      [],
+      config.BOT_UPDATES_CHANNEL_ID,
+      "1327352739893739632"
+    );
   } catch (error) {
     console.error("Error sending match finish notification:", error);
   }
