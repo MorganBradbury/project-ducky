@@ -21,31 +21,45 @@ client.on("messageCreate", async (message) => {
   // Ignore messages from the bot itself
   if (message.author.bot) return;
 
-  // Check if the author has the specific role ID
+  // Role ID to check
   const roleIdToCheck = "1327302146814775369";
-  if (message.member?.roles.cache.has(roleIdToCheck)) {
+
+  // Check if the author has the specified role
+  const hasRole = message.member?.roles.cache.has(roleIdToCheck);
+
+  // Check if the message mentions another user
+  const hasMentions = message.mentions.users.size > 0;
+
+  // Logic to delete the message
+  if (hasRole && !hasMentions) {
     await message.delete();
-    console.log(`Message from user with role ${roleIdToCheck} deleted.`);
+    console.log(
+      `Message deleted because author has role ${roleIdToCheck} but the message didn't contain mentions.`
+    );
     return;
   }
 
-  // Get the Discord tag and message content
+  if (!hasRole) {
+    await message.delete();
+    console.log(
+      `Message deleted because author does not have role ${roleIdToCheck}.`
+    );
+    return;
+  }
+
+  // Proceed with further logic if the message isn't deleted
   const userTag = message.author.tag; // The user's Discord tag (e.g., username#1234)
   const faceitName = message.content; // The content of the message
 
-  // Log the information
   console.log(`Message from ${userTag}: ${faceitName}`);
 
   try {
     const player: Player | null = await FaceitService?.getPlayer(faceitName);
 
     if (!player) {
-      // Send an error reply and return early without deleting any message
       await message.reply(
         `Invalid FACEIT nickname. Please make sure you are entering your name correctly. It is CASE SENSITIVE.`
       );
-
-      // Delete the "Invalid FACEIT nickname" message
       return;
     }
 
@@ -74,9 +88,9 @@ client.on("messageCreate", async (message) => {
 
     // Now, delete all messages in the channel containing the user's ID
     const channel = message.channel;
-    const messages = await channel.messages.fetch({ limit: 15 }); // Adjust the number as needed
+    const messages = await channel.messages.fetch({ limit: 15 });
 
-    // Find messages to delete: any message containing the user's ID, from the user, or containing "Invalid FACEIT nickname"
+    // Find messages to delete: any message containing the user's ID, from the user, or containing specific keywords
     const messagesToDelete = messages.filter(
       (msg) =>
         msg.content.includes(message.author.id) ||
@@ -88,12 +102,10 @@ client.on("messageCreate", async (message) => {
     await Promise.all(
       messagesToDelete.map(async (msg) => {
         try {
-          // Delete the message itself
           await msg.delete();
           console.log(`Deleted message from ${msg.author.tag}`);
 
-          // If the message is a reply, delete the referenced message as well
-          if (msg.reference && msg.reference.messageId) {
+          if (msg.reference?.messageId) {
             const referencedMessage = await channel.messages.fetch(
               msg.reference.messageId
             );
@@ -113,10 +125,10 @@ client.on("messageCreate", async (message) => {
       })
     );
 
-    // Send a welcome message to the specific channel
-    const welcomeChannelId = "1309222763994808370"; // The channel to send the welcome message
+    // Send a welcome message
+    const welcomeChannelId = "1309222763994808370";
     const welcomeChannel = await client.channels.fetch(welcomeChannelId);
-    if (welcomeChannel && welcomeChannel.isTextBased()) {
+    if (welcomeChannel?.isTextBased()) {
       const totalUsers = message.guild?.memberCount;
       await (welcomeChannel as TextChannel).send(
         `👋  Hi <@${message.author.id}>. Welcome to Duckclub. You are duck #${totalUsers}.`
