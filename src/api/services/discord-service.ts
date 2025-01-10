@@ -670,10 +670,7 @@ export const createMatchAnalysisEmbed = (
 export const createLiveScoreCard = async (match: Match) => {
   // Adding skill level icons next to each player name
   const homePlayers = match.trackedTeam.trackedPlayers
-    .map(
-      (player: any) =>
-        `${getSkillLevelEmoji(player.faceitLevel)} ${player.nickname}`
-    )
+    .map((player: any) => `${player.faceitUsername}`)
     .join("\n");
 
   const matchScore = await FaceitService.getMatchScore(
