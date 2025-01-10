@@ -4,12 +4,6 @@ import { deleteUser } from "../../db/commands";
 
 client.on("guildMemberRemove", async (member) => {
   try {
-    // Check if the member is a full GuildMember, as it might be a PartialGuildMember
-    if (!(member instanceof GuildMember)) {
-      console.error("The member is not a full GuildMember.");
-      return;
-    }
-
     setTimeout(async () => {
       await deleteUser(member.user.username);
     }, 4000);
