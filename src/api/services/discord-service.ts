@@ -335,12 +335,7 @@ export const sendMatchFinishNotification = async (match: Match) => {
     //     .setStyle(ButtonStyle.Link)
     // );
 
-    await sendEmbedMessage(
-      embed,
-      [],
-      config.BOT_UPDATES_CHANNEL_ID,
-      "1327352739893739632"
-    );
+    await sendEmbedMessage(embed, [], config.BOT_UPDATES_CHANNEL_ID);
   } catch (error) {
     console.error("Error sending match finish notification:", error);
   }
