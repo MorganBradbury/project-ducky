@@ -6,6 +6,7 @@ import "./events/auto-role";
 import "./events/manage-voice-states";
 import "./events/ai";
 import "./events/leaver";
+import "./events/register";
 
 // Refresh commands and log ready status
 client.once("ready", async () => {
