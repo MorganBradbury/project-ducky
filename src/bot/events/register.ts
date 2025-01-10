@@ -65,7 +65,7 @@ client.on("messageCreate", async (message) => {
     const channel = message.channel;
     const messages = await channel.messages.fetch({ limit: 100 }); // Adjust the number as needed
 
-    // Delete any messages containing the user's ID
+    // Find messages to delete: any message containing the user's ID or from the user
     const messagesToDelete = messages.filter(
       (msg) =>
         msg.content.includes(message.author.id) ||
@@ -75,8 +75,22 @@ client.on("messageCreate", async (message) => {
     await Promise.all(
       messagesToDelete.map(async (msg) => {
         try {
+          // Delete the message itself
           await msg.delete();
           console.log(`Deleted message from ${msg.author.tag}`);
+
+          // If the message is a reply, delete the referenced message as well
+          if (msg.reference && msg.reference.messageId) {
+            const referencedMessage = await channel.messages.fetch(
+              msg.reference.messageId
+            );
+            if (referencedMessage) {
+              await referencedMessage.delete();
+              console.log(
+                `Deleted referenced message from ${referencedMessage.author.tag}`
+              );
+            }
+          }
         } catch (error) {
           console.error(
             `Error deleting message from ${msg.author.tag}:`,
