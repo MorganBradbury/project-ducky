@@ -158,40 +158,85 @@ class FaceitApiClient {
     matchId: string,
     playerIds: string[]
   ): Promise<PlayerStats[]> {
-    try {
-      // Call the Faceit API to get the match stats
-      const queryUrl = `/matches/${matchId}/stats`;
-      const response = await this.client.get(queryUrl);
-      const rounds = response.data.rounds;
+    const maxAttempts = 5;
+    const retryDelay = 2000; // 2 seconds
 
-      // Flatten all player stats into an array
-      const allPlayerStats: PlayerStats[] = rounds.flatMap((round: any) =>
-        round.teams.flatMap((team: any) =>
-          team.players.map((player: any) => ({
-            playerId: player.player_id,
-            kills: player.player_stats.Kills,
-            deaths: player.player_stats.Deaths,
-            assists: player.player_stats.Assists,
-          }))
-        )
-      );
+    for (let attempt = 1; attempt <= maxAttempts; attempt++) {
+      try {
+        console.log(
+          `Fetching player stats (attempt ${attempt}/${maxAttempts})`
+        );
 
-      // Loop through trackedPlayers and match them with the corresponding stats
-      const playerStatsInOrder: PlayerStats[] = playerIds
-        .map((playerId) => {
-          // Find the player's stats from allPlayerStats
-          const playerStats = allPlayerStats.find(
-            (stat) => stat.playerId === playerId
+        // Call the Faceit API to get the match stats
+        const queryUrl = `/matches/${matchId}/stats`;
+        const response = await this.client.get(queryUrl);
+
+        // Check if response.data or rounds is undefined
+        if (!response?.data || !response.data.rounds) {
+          console.warn(
+            `Attempt ${attempt} failed: Data or rounds undefined in response`
           );
-          return playerStats ? playerStats : null;
-        })
-        .filter((stats) => stats !== null); // Filter out any null results
 
-      return playerStatsInOrder;
-    } catch (error) {
-      console.error("Error fetching player stats:", error);
-      throw new Error("Failed to fetch player stats");
+          if (attempt < maxAttempts) {
+            await new Promise((resolve) => setTimeout(resolve, retryDelay));
+            continue;
+          } else {
+            console.error("Max retry attempts reached. Data still undefined.");
+            throw new Error("Failed to fetch player stats: Data undefined");
+          }
+        }
+
+        const rounds = response.data.rounds;
+
+        // Flatten all player stats into an array
+        const allPlayerStats: PlayerStats[] = rounds.flatMap((round: any) =>
+          round.teams.flatMap((team: any) =>
+            team.players.map((player: any) => ({
+              playerId: player.player_id,
+              kills: player.player_stats.Kills,
+              deaths: player.player_stats.Deaths,
+              assists: player.player_stats.Assists,
+            }))
+          )
+        );
+
+        // Loop through trackedPlayers and match them with the corresponding stats
+        const playerStatsInOrder: PlayerStats[] = playerIds
+          .map((playerId) => {
+            // Find the player's stats from allPlayerStats
+            const playerStats = allPlayerStats.find(
+              (stat) => stat.playerId === playerId
+            );
+            return playerStats ? playerStats : null;
+          })
+          .filter((stats) => stats !== null); // Filter out any null results
+
+        if (playerStatsInOrder.length > 0) {
+          return playerStatsInOrder;
+        }
+
+        console.warn(
+          `Attempt ${attempt} failed: No valid player stats found in response`
+        );
+
+        if (attempt < maxAttempts) {
+          await new Promise((resolve) => setTimeout(resolve, retryDelay));
+        }
+      } catch (error) {
+        console.error(`Attempt ${attempt} failed with error:`, error);
+
+        if (attempt < maxAttempts) {
+          await new Promise((resolve) => setTimeout(resolve, retryDelay));
+        } else {
+          console.error(
+            "Max retry attempts reached. Failed to fetch player stats."
+          );
+          throw new Error("Failed to fetch player stats after max attempts");
+        }
+      }
     }
+
+    throw new Error("Unexpected failure in getPlayerStats");
   }
 
   async getMatchPlayers(matchId: string): Promise<{
