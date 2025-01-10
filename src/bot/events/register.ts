@@ -21,6 +21,14 @@ client.on("messageCreate", async (message) => {
   // Ignore messages from the bot itself
   if (message.author.bot) return;
 
+  // Check if the author has the specific role ID
+  const roleIdToCheck = "1327302146814775369";
+  if (message.member?.roles.cache.has(roleIdToCheck)) {
+    await message.delete();
+    console.log(`Message from user with role ${roleIdToCheck} deleted.`);
+    return;
+  }
+
   // Get the Discord tag and message content
   const userTag = message.author.tag; // The user's Discord tag (e.g., username#1234)
   const faceitName = message.content; // The content of the message
