@@ -301,6 +301,11 @@ export const sendMatchFinishNotification = async (match: Match) => {
           value: `${finalScore.join(" / ") || "N/A"}`,
           inline: true,
         },
+
+        {
+          name: "Link to match",
+          value: `[Click here](https://www.faceit.com/en/cs2/room/${match?.matchId})`,
+        },
         {
           name: "Players and Stats (K/D/A)",
           value: `${playerStatsTable.join("\n")}`,
@@ -309,14 +314,14 @@ export const sendMatchFinishNotification = async (match: Match) => {
       .setFooter({ text: "Match result" })
       .setTimestamp();
 
-    const row = new ActionRowBuilder<ButtonBuilder>().addComponents(
-      new ButtonBuilder()
-        .setURL(`https://www.faceit.com/en/cs2/room/${match.matchId}`)
-        .setLabel("View match")
-        .setStyle(ButtonStyle.Link)
-    );
+    // const row = new ActionRowBuilder<ButtonBuilder>().addComponents(
+    //   new ButtonBuilder()
+    //     .setURL(`https://www.faceit.com/en/cs2/room/${match.matchId}`)
+    //     .setLabel("View match")
+    //     .setStyle(ButtonStyle.Link)
+    // );
 
-    await sendEmbedMessage(embed, [row]);
+    await sendEmbedMessage(embed, []);
   } catch (error) {
     console.error("Error sending match finish notification:", error);
   }
