@@ -741,8 +741,18 @@ export const updateLiveScoreCard = async (match: Match) => {
   );
   const newScore = `${ChannelIcons.Active} ${matchScore.join(":")}`;
 
-  // Extract the embed and update the score
+  // Extract the embed and find the current score
   const embed = targetMessage.embeds[0];
+  const currentScoreField = embed.fields.find(
+    (field) => field.name === "Live score"
+  );
+
+  // If the score hasn't changed, skip the update
+  if (currentScoreField?.value === newScore) {
+    return;
+  }
+
+  // Update the embed with the new score
   const updatedEmbed = EmbedBuilder.from(embed).setFields(
     embed.fields.map((field) =>
       field.name === "Live score" ? { ...field, value: newScore } : field
@@ -777,9 +787,6 @@ export const deleteMatchCards = async (matchId: string) => {
       );
 
       if (!targetMessage) {
-        console.warn(
-          `No message found with matchId: ${matchId} in channel ${channelId}`
-        );
         continue; // Skip to the next channel
       }
 
