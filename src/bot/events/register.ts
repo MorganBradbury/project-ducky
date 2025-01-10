@@ -41,14 +41,6 @@ client.on("messageCreate", async (message) => {
     return;
   }
 
-  if (!hasRole) {
-    await message.delete();
-    console.log(
-      `Message deleted because author does not have role ${roleIdToCheck}.`
-    );
-    return;
-  }
-
   // Proceed with further logic if the message isn't deleted
   const userTag = message.author.tag; // The user's Discord tag (e.g., username#1234)
   const faceitName = message.content; // The content of the message
