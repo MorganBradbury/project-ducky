@@ -1,3 +1,4 @@
+import { TextChannel } from "discord.js";
 import {
   updateLinkedRole,
   updateServerRoles,
@@ -32,9 +33,12 @@ client.on("messageCreate", async (message) => {
 
     if (!player) {
       // Send an error reply and return early without deleting any message
-      await message.reply(
+      const replyMessage = await message.reply(
         `Invalid FACEIT nickname. Please make sure you are entering your name correctly. It is CASE SENSITIVE.`
       );
+
+      // Delete the "Invalid FACEIT nickname" message
+      await replyMessage.delete();
       return;
     }
 
@@ -65,11 +69,13 @@ client.on("messageCreate", async (message) => {
     const channel = message.channel;
     const messages = await channel.messages.fetch({ limit: 100 }); // Adjust the number as needed
 
-    // Find messages to delete: any message containing the user's ID or from the user
+    // Find messages to delete: any message containing the user's ID, from the user, or containing "Invalid FACEIT nickname"
     const messagesToDelete = messages.filter(
       (msg) =>
         msg.content.includes(message.author.id) ||
-        msg.author.id === message.author.id
+        msg.author.id === message.author.id ||
+        msg.content.includes("Invalid FACEIT nickname") ||
+        msg.content.includes("An error occurred")
     );
 
     await Promise.all(
@@ -99,6 +105,17 @@ client.on("messageCreate", async (message) => {
         }
       })
     );
+
+    // Send a welcome message to the specific channel
+    const welcomeChannelId = "1309222763994808370"; // The channel to send the welcome message
+    const welcomeChannel = await client.channels.fetch(welcomeChannelId);
+    if (welcomeChannel && welcomeChannel.isTextBased()) {
+      const totalUsers = message.guild?.memberCount;
+      await (welcomeChannel as TextChannel).send(
+        `👋 Hi <@${message.author.id}>, welcome to the club. You are duck #${totalUsers}.`
+      );
+      console.log(`Sent welcome message to channel ${welcomeChannelId}`);
+    }
   } catch (error) {
     console.error("Error processing message:", error);
     await message.reply({ content: `An error occurred: ${error}` });
