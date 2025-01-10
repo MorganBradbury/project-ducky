@@ -5,7 +5,10 @@ import {
   getMatchAnalysis,
   startMatch,
 } from "../services/matches-service"; // Centralized match flow logic
-import { updateVoiceChannelStatus } from "../services/discord-service";
+import {
+  updateLiveScoreCard,
+  updateVoiceChannelStatus,
+} from "../services/discord-service";
 import { FaceitService } from "../services/faceit-service";
 import { getMatchDataFromDb } from "../../db/commands";
 import { AcceptedEventTypes } from "../../constants";
@@ -89,6 +92,8 @@ export const updateLiveScores = async (
     const status = await getScoreStatusText(match.mapName, liveScore.join(":"));
     await updateVoiceChannelStatus(match.voiceChannelId, status);
   }
+
+  await updateLiveScoreCard(match);
 
   res.status(200).json({ message: "Live scores updated successfully" });
 };

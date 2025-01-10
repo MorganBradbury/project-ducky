@@ -26,7 +26,7 @@ import {
 } from "../../utils/faceitHelper";
 import { Match } from "../../types/Faceit/match";
 import { numberToUnicode } from "../../utils/unicodeHelper";
-import { getMapEmoji, getSkillLevelEmoji } from "../../constants";
+import { ChannelIcons, getMapEmoji, getSkillLevelEmoji } from "../../constants";
 import client from "../../bot/client";
 
 // Function to create a new voice channel in a specific category
@@ -665,4 +665,137 @@ export const createMatchAnalysisEmbed = (
   // Pass the embed and the button to sendEmbedMessage
   sendEmbedMessage(embed, [row], config.MATCHROOM_ANALYSIS_CHANNEL_ID);
   return;
+};
+
+export const createLiveScoreCard = async (match: Match) => {
+  // Adding skill level icons next to each player name
+  const homePlayers = match.trackedTeam.trackedPlayers
+    .map(
+      (player: any) =>
+        `${getSkillLevelEmoji(player.faceitLevel)} ${player.nickname}`
+    )
+    .join("\n");
+
+  const matchScore = await FaceitService.getMatchScore(
+    match.matchId,
+    match.trackedTeam.faction,
+    false
+  );
+
+  // Create the embed
+  const embed = new EmbedBuilder()
+    .setTitle("Live match")
+    .addFields(
+      {
+        name: `Players in game`,
+        value: homePlayers,
+        inline: true,
+      },
+      {
+        name: `Map`,
+        value: `${getMapEmoji(match.mapName)} ${formattedMapName(
+          match.mapName
+        )}`,
+        inline: true,
+      },
+      {
+        name: "Live score",
+        value: `${ChannelIcons.Active} ${matchScore.join(":")}`,
+      },
+      {
+        name: "Link to match",
+        value: `[Click here](https://www.faceit.com/en/cs2/room/${match?.matchId})`,
+      }
+    )
+    .setFooter({ text: `${match.matchId}` })
+    .setColor("#464dd4");
+
+  // Pass the embed and the button to sendEmbedMessage
+  sendEmbedMessage(embed, [], "1327270449628839946");
+  return;
+};
+
+export const updateLiveScoreCard = async (match: Match) => {
+  // Get the Discord client and fetch the channel
+  const channel = await client.channels.fetch("1327270449628839946");
+  if (!channel || !channel.isTextBased()) {
+    console.error("Invalid channel or not a text-based channel.");
+    return;
+  }
+
+  // Fetch the last 10 messages from the channel
+  const messages = await channel.messages.fetch({ limit: 10 });
+
+  // Find the message with the embed containing the matchId in its footer
+  const targetMessage = messages.find((message) =>
+    message.embeds.some((embed) => embed.footer?.text === match.matchId)
+  );
+
+  if (!targetMessage) {
+    console.error(`No message found with matchId: ${match.matchId}`);
+    return;
+  }
+
+  // Retrieve the latest match score
+  const matchScore = await FaceitService.getMatchScore(
+    match.matchId,
+    match.trackedTeam.faction,
+    false
+  );
+  const newScore = `${ChannelIcons.Active} ${matchScore.join(":")}`;
+
+  // Extract the embed and update the score
+  const embed = targetMessage.embeds[0];
+  const updatedEmbed = EmbedBuilder.from(embed).setFields(
+    embed.fields.map((field) =>
+      field.name === "Live score" ? { ...field, value: newScore } : field
+    )
+  );
+
+  // Edit the message with the updated embed
+  await targetMessage.edit({ embeds: [updatedEmbed] });
+  console.log(`Live score updated for matchId: ${match.matchId}`);
+};
+
+export const deleteMatchCards = async (matchId: string) => {
+  const channelIDs = [
+    config.MATCHROOM_ANALYSIS_CHANNEL_ID,
+    "1327270449628839946",
+  ];
+  for (const channelId of channelIDs) {
+    try {
+      // Fetch the Discord channel
+      const channel = await client.channels.fetch(channelId);
+      if (!channel || !channel.isTextBased()) {
+        console.error(`Channel ${channelId} is invalid or not text-based.`);
+        continue; // Skip to the next channel
+      }
+
+      // Fetch the last 10 messages from the channel
+      const messages = await channel.messages.fetch({ limit: 10 });
+
+      // Find the message with the embed containing the matchId in its footer
+      const targetMessage = messages.find((message) =>
+        message.embeds.some((embed) => embed.footer?.text === matchId)
+      );
+
+      if (!targetMessage) {
+        console.warn(
+          `No message found with matchId: ${matchId} in channel ${channelId}`
+        );
+        continue; // Skip to the next channel
+      }
+
+      // Delete the message
+      await targetMessage.delete();
+      console.log(
+        `Live score card deleted for matchId: ${matchId} in channel ${channelId}`
+      );
+    } catch (error) {
+      console.error(
+        `Failed to delete match card in channel ${channelId}:`,
+        error
+      );
+    }
+  }
 };

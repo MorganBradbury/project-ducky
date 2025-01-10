@@ -10,7 +10,9 @@ import {
   updateMatchProcessed,
 } from "../../db/commands";
 import {
+  createLiveScoreCard,
   createMatchAnalysisEmbed,
+  deleteMatchCards,
   runEloUpdate,
   sendMatchFinishNotification,
   updateVoiceChannelStatus,
@@ -43,15 +45,21 @@ export const startMatch = async (matchId: string) => {
 
   // If the players are in a voice channel. Create a JS Worker to update the live score in the status of the channel.
   if (match?.voiceChannelId) {
-    console.log("worker started for", { matchId, vcid: match?.voiceChannelId });
     const scoreStatus = await getScoreStatusText(match.mapName);
     await updateVoiceChannelStatus(match.voiceChannelId, scoreStatus);
-    const worker = new Worker(path.resolve(__dirname, "../worker.js"));
-    worker.postMessage({ type: "start", matchId: matchId });
-    workers[matchId] = worker;
   }
 
+  await createLiveScoreCard(match);
+
   await insertMatch(match);
+
+  console.log("worker started for", {
+    matchId,
+    vcid: match?.voiceChannelId || "Not in VC",
+  });
+  const worker = new Worker(path.resolve(__dirname, "../worker.js"));
+  worker.postMessage({ type: "start", matchId: matchId });
+  workers[matchId] = worker;
 };
 
 export const endMatch = async (matchId: string) => {
@@ -85,6 +93,8 @@ export const endMatch = async (matchId: string) => {
   if (match?.voiceChannelId) {
     await updateVoiceChannelStatus(match.voiceChannelId, "");
   }
+
+  await deleteMatchCards(matchId);
 };
 
 export const cancelMatch = async (matchId: string) => {
@@ -110,6 +120,8 @@ export const cancelMatch = async (matchId: string) => {
   if (match?.voiceChannelId) {
     await updateVoiceChannelStatus(match.voiceChannelId, "");
   }
+
+  await deleteMatchCards(matchId);
 };
 
 export const getMatchAnalysis = async (matchId: string): Promise<any> => {
