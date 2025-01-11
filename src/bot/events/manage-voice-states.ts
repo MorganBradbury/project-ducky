@@ -1,10 +1,10 @@
 import client from "../client";
-import { VoiceState, CategoryChannel, VoiceChannel } from "discord.js";
+import { VoiceState, CategoryChannel } from "discord.js";
 import { ChannelIcons } from "../../constants";
 import {
-  createNewVoiceChannel,
-  deleteVoiceChannel,
-} from "../../api/services/discord-service";
+  createChannel,
+  deleteChannel,
+} from "../../api/services/discord/channel-service";
 
 // Event listener for voice state updates
 client.on(
@@ -49,7 +49,7 @@ client.on(
           .findIndex((child) => child.id === leftChannel.id);
 
         // Delete the empty channel
-        const deleted = await deleteVoiceChannel(leftChannel.id);
+        const deleted = await deleteChannel(leftChannel.id);
         if (!deleted) {
           console.error(`Failed to delete channel: ${leftChannel.name}`);
           return;
@@ -59,7 +59,10 @@ client.on(
         const newName = `${ChannelIcons.Inactive} ${leftChannel.name
           .replace(/^\p{Emoji_Presentation}/u, "")
           .trimStart()}`;
-        const newChannelId = await createNewVoiceChannel(newName, parent.id);
+        const newChannelId = await createChannel({
+          channelName: newName,
+          categoryId: parent.id,
+        });
 
         if (!newChannelId) {
           console.error("Failed to create a new voice channel.");
@@ -67,7 +70,7 @@ client.on(
         }
 
         // Immediately set the position of the newly created channel
-        await guild.channels.fetch(newChannelId).then(async (newChannel) => {
+        await guild.channels.fetch(newChannelId.id).then(async (newChannel) => {
           if (newChannel && newChannel.type === 2 && channelIndex !== -1) {
             await newChannel.setPosition(channelIndex);
             console.log(
