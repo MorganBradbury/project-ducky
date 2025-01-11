@@ -1,5 +1,6 @@
 import axios, { AxiosInstance } from "axios";
 import { config } from "../../config";
+import { getMatchVoiceChannelId } from "./discord-service";
 import {
   generateOptimizedCaseVariations,
   getTeamFaction,
@@ -8,7 +9,6 @@ import {
 import { Player } from "../../types/Faceit/player";
 import { Match } from "../../types/Faceit/match";
 import { activeMapPool } from "../../constants";
-import { findActiveVoiceChannel } from "./discord/channel-service";
 
 class FaceitApiClient {
   private client: AxiosInstance;
@@ -102,8 +102,8 @@ class FaceitApiClient {
         return null;
       }
 
-      const activeVoiceChannel =
-        (await findActiveVoiceChannel(trackedTeamPlayers)) || undefined;
+      const voiceChannelId =
+        (await getMatchVoiceChannelId(trackedTeamPlayers)) || undefined;
 
       return {
         matchId: matchId,
@@ -113,7 +113,7 @@ class FaceitApiClient {
           faction: trackedTeamFaction.faction,
           trackedPlayers: trackedTeamPlayers,
         },
-        voiceChannelId: activeVoiceChannel?.id,
+        voiceChannelId,
       };
     } catch (error) {
       console.error(`Error fetching match details for ${matchId}:`, error);
