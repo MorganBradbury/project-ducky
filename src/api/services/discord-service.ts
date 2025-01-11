@@ -916,10 +916,8 @@ export async function sendNewUserNotification(
 
     // Update the embed to reflect completion
     const completedEmbed = new EmbedBuilder()
-      .setTitle("New user added")
-      .setDescription(
-        `✅  **${userName}** has been added to the Webhook (${faceitId})`
-      )
+      .setTitle("New user added to Webhook")
+      .setDescription(`🚥  **${userName}** (${faceitId})`)
       .setColor("#58b436");
 
     await interaction.update({
