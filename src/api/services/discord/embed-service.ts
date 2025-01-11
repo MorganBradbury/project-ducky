@@ -23,7 +23,7 @@ export const sendEmbed = async (props: Embed): Promise<Message | null> => {
     // Fetch the channel by ID
     const guild = await client.guilds.fetch(config.GUILD_ID);
     if (!guild) {
-      console.error("Guid not found", config.GUILD_ID);
+      console.error("Guild not found", config.GUILD_ID);
       return null;
     }
 
@@ -34,17 +34,30 @@ export const sendEmbed = async (props: Embed): Promise<Message | null> => {
       console.error("Channel not found", props.channelId);
       return null;
     }
+
     // Create a new EmbedBuilder instance
-    const embed = new EmbedBuilder()
-      .setTitle(props.embed.title)
-      .setDescription(props.embed.description || ``)
-      .setColor(props.embed.themeColour)
-      .setFooter({ text: props.embed.footer })
-      .addFields(props.embed.fields);
+    let embed = new EmbedBuilder();
+
+    if (props.embed.title) {
+      embed.setTitle(props.embed.title);
+    }
+    if (props.embed.description) {
+      embed.setDescription(props.embed.description);
+    }
+    if (props.embed.themeColour) {
+      embed.setColor(props.embed.themeColour);
+    }
+    if (props.embed.footer) {
+      embed.setFooter({ text: props.embed.footer });
+    }
+    if (props.embed.fields && props.embed.fields.length > 0) {
+      embed.addFields(props.embed.fields);
+    }
 
     const buttons = new ActionRowBuilder<ButtonBuilder>().addComponents(
       ...(props?.buttons?.components || [])
     );
+
     const messageDelivered = await channel.send({
       embeds: [embed],
       components: [buttons],
