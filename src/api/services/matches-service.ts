@@ -9,22 +9,20 @@ import {
   markMatchComplete,
   updateMatchProcessed,
 } from "../../db/commands";
+import {
+  createLiveScoreCard,
+  createMatchAnalysisEmbed,
+  deleteMatchCards,
+  runEloUpdate,
+  sendMatchFinishNotification,
+  updateVoiceChannelStatus,
+} from "./discord-service";
 import { FaceitService } from "./faceit-service";
 import {
   aggregateEnemyFactionData,
   formatMapData,
   getScoreStatusText,
 } from "../../utils/faceitHelper";
-import { updateChannelStatus } from "./discord/channel-service";
-import {
-  createLiveScoreCard,
-  deleteMatchCards,
-} from "./discord/live-game-service";
-import {
-  sendMatchEndSummary,
-  sendMatchroomAnalysisEmbed,
-} from "./discord/embed-service";
-import { runEloUpdate } from "./discord/member-service";
 
 let workers: Record<string, Worker> = {};
 
@@ -48,10 +46,7 @@ export const startMatch = async (matchId: string) => {
   // If the players are in a voice channel. Create a JS Worker to update the live score in the status of the channel.
   if (match?.voiceChannelId) {
     const scoreStatus = await getScoreStatusText(match.mapName);
-    await updateChannelStatus({
-      id: match.voiceChannelId,
-      status: scoreStatus,
-    });
+    await updateVoiceChannelStatus(match.voiceChannelId, scoreStatus);
   }
 
   await createLiveScoreCard(match);
@@ -92,11 +87,11 @@ export const endMatch = async (matchId: string) => {
 
   // deletes record from DB.
   await markMatchComplete(matchId);
-  await sendMatchEndSummary(match);
+  await sendMatchFinishNotification(match);
   await runEloUpdate(match.trackedTeam.trackedPlayers);
 
   if (match?.voiceChannelId) {
-    await updateChannelStatus({ id: match.voiceChannelId, status: "" });
+    await updateVoiceChannelStatus(match.voiceChannelId, "");
   }
 
   await deleteMatchCards(matchId);
@@ -123,7 +118,7 @@ export const cancelMatch = async (matchId: string) => {
   }
 
   if (match?.voiceChannelId) {
-    await updateChannelStatus({ id: match.voiceChannelId, status: "" });
+    await updateVoiceChannelStatus(match.voiceChannelId, "");
   }
 
   await deleteMatchCards(matchId);
@@ -171,5 +166,5 @@ export const getMatchAnalysis = async (matchId: string): Promise<any> => {
     matchroomPlayers.enemyFaction.length
   );
 
-  sendMatchroomAnalysisEmbed(matchId, matchroomPlayers, formattedMapData);
+  createMatchAnalysisEmbed(matchId, matchroomPlayers, formattedMapData);
 };
