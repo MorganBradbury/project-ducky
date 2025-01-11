@@ -14,8 +14,6 @@ const monitoredChannelId = "1327303978223931462"; // Replace with the ID of the 
 
 // Listen for messages in the server
 client.on("messageCreate", async (message) => {
-  console.log("message received", message.channel.id);
-
   // Ignore messages not from the monitored channel
   if (message.channel.id !== monitoredChannelId) return;
 
