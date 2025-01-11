@@ -2,22 +2,19 @@ import { GuildMember, TextChannel } from "discord.js";
 import client from "../client";
 import { deleteUser } from "../../db/commands";
 
+const GENERAL_CHANNEL_ID = "1309222763994808370";
+
 client.on("guildMemberRemove", async (member) => {
   try {
-    setTimeout(async () => {
-      await deleteUser(member.user.username);
-    }, 4000);
+    // Delay the deletion of the user from the database
+    await deleteUser(member.user.username);
 
-    // Fetch the general channel to send the public message (adjust channel name or ID as needed)
-    const generalChannel = member.guild.channels.cache.find(
-      (channel) => channel.name === "counter-strike" && channel.isTextBased()
+    // Fetch the general channel directly by ID
+    const generalChannel = member.guild.channels.cache.get(
+      GENERAL_CHANNEL_ID
     ) as TextChannel;
 
-    if (!generalChannel) {
-      console.error("General channel not found in the guild.");
-      return;
-    }
-
+    // Send a farewell message to the channel
     await generalChannel.send(
       `👋 Goodbye, <@${member.user.id}>. You will be missed.`
     );
