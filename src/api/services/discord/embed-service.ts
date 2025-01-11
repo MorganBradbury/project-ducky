@@ -54,13 +54,23 @@ export const sendEmbed = async (props: Embed): Promise<Message | null> => {
       embed.addFields(props.embed.fields);
     }
 
-    const buttons = new ActionRowBuilder<ButtonBuilder>().addComponents(
-      ...(props?.buttons?.components || [])
-    );
+    // Check for valid buttons
+    const components: ActionRowBuilder<ButtonBuilder>[] = [];
+    if (
+      props.buttons?.components &&
+      props.buttons.components.length > 0 &&
+      props.buttons.components.length <= 5
+    ) {
+      const buttons = new ActionRowBuilder<ButtonBuilder>().addComponents(
+        ...props.buttons.components
+      );
+      components.push(buttons);
+    }
 
+    // Send the embed
     const messageDelivered = await channel.send({
       embeds: [embed],
-      components: [buttons],
+      components: components.length > 0 ? components : [],
     });
 
     console.log("Embed sent successfully to channel:", {
