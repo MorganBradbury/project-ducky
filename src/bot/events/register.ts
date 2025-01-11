@@ -1,5 +1,6 @@
 import { TextChannel } from "discord.js";
 import {
+  sendNewUserNotification,
   updateLinkedRole,
   updateServerRoles,
 } from "../../api/services/discord-service";
@@ -122,13 +123,12 @@ client.on("messageCreate", async (message) => {
     // Send a welcome message
     const welcomeChannelId = "1309222763994808370";
     const welcomeChannel = await client.channels.fetch(welcomeChannelId);
-    if (welcomeChannel?.isTextBased()) {
-      const totalUsers = message.guild?.memberCount;
-      await (welcomeChannel as TextChannel).send(
-        `👋  Hi <@${message.author.id}>. Welcome to Duckclub. You are duck #${totalUsers}.`
-      );
-      console.log(`Sent welcome message to channel ${welcomeChannelId}`);
-    }
+    const totalUsers = message.guild?.memberCount;
+    await (welcomeChannel as TextChannel).send(
+      `👋  Hi <@${message.author.id}>. Welcome to Duckclub. You are duck #${totalUsers}.`
+    );
+    console.log(`Sent welcome message to channel ${welcomeChannelId}`);
+    await sendNewUserNotification(userTag, player.id);
   } catch (error) {
     console.error("Error processing message:", error);
     await message.reply({ content: `An error occurred: ${error}` });

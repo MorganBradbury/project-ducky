@@ -871,3 +871,27 @@ export const deleteMatchCards = async (matchId: string) => {
     }
   }
 };
+
+export async function sendNewUserNotification(
+  userName: string,
+  faceitId: string
+): Promise<void> {
+  // The ID of the Discord channel to send the message to
+  const channelId = "1327588452719530027";
+  const embed = new EmbedBuilder()
+    .setTitle("New user notification")
+    .setDescription("Add user to Webhook:")
+    .addFields(
+      { name: "User", value: userName },
+      { name: "FACEIT ID", value: faceitId },
+      {
+        name: "🔗 Link to Webhook",
+        value:
+          "[Click here](https://developers.faceit.com/apps/2205acb7-7fb4-4ce4-8a23-871375ee03fa/webhooks/af22807c-f17a-4947-8829-5757ef6a2e34/edit)",
+      }
+    )
+    .setColor("#86AE00");
+
+  // Send the embed message
+  sendEmbedMessage(embed, [], channelId);
+}
