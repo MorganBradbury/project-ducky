@@ -1,7 +1,7 @@
 import client from "../client";
 import { VoiceState, CategoryChannel, VoiceChannel } from "discord.js";
 
-const CREATE_ROOM_CHANNEL_ID = "1328675387877756939"; // "Create a Room" channel ID
+const CREATE_ROOM_CHANNEL_ID = "1328693484533710878"; // "Create a Room" channel ID
 const ROOM_CATEGORY_ID = "1309222763994808372"; // Replace with the ID of the category to create rooms under
 
 client.on(
@@ -70,6 +70,7 @@ client.on(
       if (
         leftChannel &&
         leftChannel.parentId === ROOM_CATEGORY_ID &&
+        leftChannel.id !== CREATE_ROOM_CHANNEL_ID && // Ensure we do not delete "Create a Room"
         leftChannel.members.size === 0
       ) {
         await leftChannel.delete();
