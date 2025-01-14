@@ -2,7 +2,7 @@ import client from "../client";
 import { VoiceState, CategoryChannel, VoiceChannel } from "discord.js";
 
 const CREATE_ROOM_CHANNEL_ID = "1328675387877756939"; // "Create a Room" channel ID
-const ROOM_CATEGORY_ID = "YOUR_CATEGORY_ID"; // Replace with the ID of the category to create rooms under
+const ROOM_CATEGORY_ID = "1309222763994808372"; // Replace with the ID of the category to create rooms under
 
 client.on(
   "voiceStateUpdate",
