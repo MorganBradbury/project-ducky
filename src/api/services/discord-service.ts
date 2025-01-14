@@ -891,68 +891,7 @@ export async function sendNewUserNotification(
     )
     .setColor("#ff5733");
 
-  const markCompleteButton = new ButtonBuilder()
-    .setCustomId("mark_complete")
-    .setLabel("Mark as completed")
-    .setStyle(ButtonStyle.Primary);
+  await sendEmbedMessage(embed, [], "1327588452719530027");
 
-  const row = new ActionRowBuilder<ButtonBuilder>().addComponents(
-    markCompleteButton
-  );
-
-  const handleButton = async (interaction: Interaction) => {
-    if (!interaction.isButton() || interaction.customId !== "mark_complete") {
-      return;
-    }
-
-    // Only allow the server owner to click the button
-    if (interaction.guild?.ownerId !== interaction.user.id) {
-      await interaction.reply({
-        content: "Only the server owner can mark this as completed!",
-        ephemeral: true,
-      });
-      return;
-    }
-
-    // Update the embed to reflect completion
-    const completedEmbed = new EmbedBuilder()
-      .setTitle("New user added to Webhook")
-      .setDescription(`🚥  **${userName}** (${faceitId})`)
-      .setColor("#58b436");
-
-    await interaction.update({
-      embeds: [completedEmbed],
-      components: [], // Remove the button
-    });
-  };
-
-  const message = (await sendEmbedMessage(
-    embed,
-    [row],
-    "1327588452719530027"
-  )) as Message;
-
-  const collector = message.createMessageComponentCollector({
-    filter: (interaction) => interaction.customId === "mark_complete",
-    time: 900000, // 15 minutes
-  });
-
-  collector.on("collect", handleButton);
-
-  collector.on("end", async () => {
-    try {
-      // Re-enable the button if it expires without being clicked
-      await message.edit({ embeds: [embed], components: [row] });
-      const newCollector = message.createMessageComponentCollector({
-        filter: (interaction) => interaction.customId === "mark_complete",
-        time: 900000, // 15 minutes
-      });
-      newCollector.on("collect", handleButton);
-      newCollector.on("end", async () => {
-        await message.edit({ embeds: [embed], components: [row] });
-      });
-    } catch (error) {
-      console.error("Error updating message after collector ends:", error);
-    }
-  });
+  return;
 }

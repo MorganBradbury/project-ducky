@@ -1,88 +1,79 @@
 import client from "../client";
 import { VoiceState, CategoryChannel, VoiceChannel } from "discord.js";
-import { ChannelIcons } from "../../constants";
-import {
-  createNewVoiceChannel,
-  deleteVoiceChannel,
-} from "../../api/services/discord-service";
 
-// Event listener for voice state updates
+const CREATE_ROOM_CHANNEL_ID = "1328675387877756939"; // "Create a Room" channel ID
+const ROOM_CATEGORY_ID = "1309222763994808372"; // Replace with the ID of the category to create rooms under
+
 client.on(
   "voiceStateUpdate",
   async (oldState: VoiceState, newState: VoiceState) => {
     try {
       const joinedChannel = newState.channel;
       const leftChannel = oldState.channel;
+      const guild = newState.guild;
 
-      // Handle a user joining a channel
-      if (joinedChannel && joinedChannel.type === 2) {
-        const newName = `${ChannelIcons.Active} ${joinedChannel.name
-          .replace(/^\p{Emoji_Presentation}/u, "")
-          .trimStart()}`;
-        if (joinedChannel.name !== newName) {
-          await joinedChannel.setName(newName);
-        }
-      }
+      // Handle user joining the "Create a Room" channel
+      if (joinedChannel && joinedChannel.id === CREATE_ROOM_CHANNEL_ID) {
+        // Fetch the category where rooms are created
+        const category = guild.channels.cache.get(
+          ROOM_CATEGORY_ID
+        ) as CategoryChannel;
 
-      // Handle a channel becoming empty
-      if (
-        leftChannel &&
-        leftChannel.type === 2 &&
-        leftChannel.members.size === 0
-      ) {
-        const guild = leftChannel.guild;
-        const parent = leftChannel.parentId
-          ? guild.channels.cache.get(leftChannel.parentId)
-          : null;
-
-        if (!parent || !(parent instanceof CategoryChannel)) {
+        if (!category || category.type !== 4) {
           console.error(
-            "Parent category not found or is not a category channel."
+            "Category not found or is not a valid category channel."
           );
           return;
         }
 
-        // Get the current position of the channel in the category
-        const channelIndex = Array.from(parent.children.cache.values())
-          .filter((child) => child.type === 2) // Filter for voice channels
-          .sort((a, b) => a.rawPosition - b.rawPosition) // Sort by position
-          .findIndex((child) => child.id === leftChannel.id);
+        // Find the highest ROOM- number in the category
+        const roomChannels = Array.from(
+          category.children.cache.values()
+        ).filter(
+          (channel): channel is VoiceChannel =>
+            channel.type === 2 && /^🟢 ROOM-\d+$/.test(channel.name)
+        );
+        const highestNumber = roomChannels
+          .map((channel) =>
+            parseInt(channel.name.match(/ROOM-(\d+)/)?.[1] || "0", 10)
+          )
+          .reduce((max, num) => Math.max(max, num), 0);
 
-        // Delete the empty channel
-        const deleted = await deleteVoiceChannel(leftChannel.id);
-        if (!deleted) {
-          console.error(`Failed to delete channel: ${leftChannel.name}`);
-          return;
-        }
-
-        // Create a new channel with the inactive icon
-        const newName = `${ChannelIcons.Inactive} ${leftChannel.name
-          .replace(/^\p{Emoji_Presentation}/u, "")
-          .trimStart()}`;
-        const newChannelId = await createNewVoiceChannel(newName, parent.id);
-
-        if (!newChannelId) {
-          console.error("Failed to create a new voice channel.");
-          return;
-        }
-
-        // Immediately set the position of the newly created channel
-        await guild.channels.fetch(newChannelId).then(async (newChannel) => {
-          if (newChannel && newChannel.type === 2 && channelIndex !== -1) {
-            await newChannel.setPosition(channelIndex);
-            console.log(
-              `Recreated channel "${newName}" at the correct position.`
-            );
-          } else {
-            console.error("Failed to fetch or reposition the new channel.");
-          }
+        // Create the new room
+        const roomName = `🟢 ROOM-${highestNumber + 1}`;
+        const createdChannel = await guild.channels.create({
+          name: roomName,
+          type: 2, // Voice channel
+          parent: ROOM_CATEGORY_ID,
+          permissionOverwrites: joinedChannel.permissionOverwrites.cache.map(
+            (overwrite) => overwrite
+          ), // Copy permissions
         });
+
+        console.log(`Created new channel: ${roomName}`);
+
+        // Move the user into the new channel
+        if (createdChannel instanceof VoiceChannel) {
+          await newState.setChannel(createdChannel);
+        } else {
+          console.error("Created channel is not a VoiceChannel.");
+        }
+      }
+
+      // Handle when a room becomes empty
+      if (
+        leftChannel &&
+        leftChannel.parentId === ROOM_CATEGORY_ID &&
+        leftChannel.members.size === 0
+      ) {
+        await leftChannel.delete();
+        console.log(`Deleted empty channel: ${leftChannel.name}`);
       }
     } catch (error) {
       if (error instanceof Error) {
         console.error(`Error in voiceStateUpdate handler: ${error.message}`);
       } else {
-        console.error("Unknown error occurred in voiceStateUpdate handler.");
+        console.error("An unknown error occurred in voiceStateUpdate handler.");
       }
     }
   }
