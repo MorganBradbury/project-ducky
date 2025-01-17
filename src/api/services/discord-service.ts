@@ -879,7 +879,6 @@ export async function sendNewUserNotification(
 ): Promise<void> {
   const embed = new EmbedBuilder()
     .setTitle("New user notification")
-    .setDescription("Add user to Webhook:")
     .addFields(
       { name: "User", value: userName },
       { name: "FACEIT ID", value: faceitId },
@@ -889,7 +888,7 @@ export async function sendNewUserNotification(
           "[Click here](https://developers.faceit.com/apps/2205acb7-7fb4-4ce4-8a23-871375ee03fa/webhooks/af22807c-f17a-4947-8829-5757ef6a2e34/edit)",
       }
     )
-    .setColor("#ff5733");
+    .setColor("#c2a042");
 
   await sendEmbedMessage(embed, [], "1327588452719530027");
 
