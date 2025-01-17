@@ -12,6 +12,23 @@ client.on("messageCreate", async (message: Message) => {
     message.author.id === patchBotId &&
     message.embeds.length > 0
   ) {
+    // Check if any embed contains "This update is brought to you by"
+    const isSponsored = message.embeds.some(
+      (embed) =>
+        embed.title?.includes("This update is brought to you by") ||
+        embed.description?.includes("This update is brought to you by")
+    );
+
+    if (isSponsored) {
+      try {
+        await message.delete();
+        console.log("Deleted a sponsored update message.");
+      } catch (error) {
+        console.error("Error deleting sponsored message:", error);
+      }
+      return; // Stop further processing for sponsored messages
+    }
+
     // Check if any embed contains "Counter-Strike 2 Update"
     const containsCs2Update = message.embeds.some(
       (embed) =>
