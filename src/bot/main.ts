@@ -6,6 +6,7 @@ import "./events/welcome";
 import "./events/manage-voice-states";
 import "./events/leaver";
 import "./events/register";
+import "./events/updates";
 
 // Refresh commands and log ready status
 client.once("ready", async () => {
