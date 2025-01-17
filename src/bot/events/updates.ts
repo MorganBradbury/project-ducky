@@ -9,27 +9,32 @@ const linkedRoleId = "1327302146814775369"; // Linked role ID
 client.on("messageCreate", async (message: Message) => {
   if (
     message.channel.id === updatesChannelId &&
-    message.author.id === patchBotId
+    message.author.id === patchBotId &&
+    message.embeds.length > 0
   ) {
-    try {
-      const generalChannel = await client.channels.fetch(generalChannelId);
-      if (generalChannel && generalChannel.isTextBased()) {
-        const content = message.content;
-        const attachments = message.attachments.map((att) => att.url);
+    // Check if any embed contains "Counter-Strike 2 Update"
+    const containsCs2Update = message.embeds.some(
+      (embed) =>
+        embed.title?.includes("Counter-Strike 2 Update") ||
+        embed.description?.includes("Counter-Strike 2 Update")
+    );
 
-        // Forward the message content and attachments
-        let forwardMessage = `🚨 New CS update has been released. See <#${updatesChannelId}> for more information. <@&${linkedRoleId}>`;
-        if (content) forwardMessage += `\n\n${content}`;
-        if (attachments.length)
-          forwardMessage += `\n\nAttachments:\n${attachments.join("\n")}`;
+    if (containsCs2Update) {
+      try {
+        const generalChannel = await client.channels.fetch(generalChannelId);
+        if (generalChannel && generalChannel.isTextBased()) {
+          // Forward the message content and attachments
+          const forwardMessage = `🚨 New CS update has been released. See <#${updatesChannelId}> for more information. [ <@&${linkedRoleId}> ]`;
 
-        await (generalChannel as TextChannel).send(forwardMessage);
-        console.log("Message forwarded successfully.");
-      } else {
-        console.error("General channel not found or not a text-based channel.");
+          await (generalChannel as TextChannel).send(forwardMessage);
+        } else {
+          console.error(
+            "General channel not found or not a text-based channel."
+          );
+        }
+      } catch (error) {
+        console.error("Error forwarding message:", error);
       }
-    } catch (error) {
-      console.error("Error forwarding message:", error);
     }
   }
 });
