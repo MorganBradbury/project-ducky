@@ -5,14 +5,12 @@ import {
   getMatchAnalysis,
   startMatch,
 } from "../services/matches-service"; // Centralized match flow logic
-import {
-  updateLiveScoreCard,
-  updateVoiceChannelStatus,
-} from "../services/discord-service";
 import { FaceitService } from "../services/faceit-service";
 import { getMatchDataFromDb } from "../../db/commands";
 import { AcceptedEventTypes } from "../../constants";
 import { getScoreStatusText } from "../../utils/faceitHelper";
+import { updateVoiceChannelStatus } from "../services/discord/channel-service";
+import { updateLiveScoreCard } from "../services/discord/embed-service";
 
 // Main controller function to handle the webhook for match events
 export const handleMatchesHook = async (

@@ -9,20 +9,20 @@ import {
   markMatchComplete,
   updateMatchProcessed,
 } from "../../db/commands";
-import {
-  createLiveScoreCard,
-  createMatchAnalysisEmbed,
-  deleteMatchCards,
-  runEloUpdate,
-  sendMatchFinishNotification,
-  updateVoiceChannelStatus,
-} from "./discord-service";
 import { FaceitService } from "./faceit-service";
 import {
   aggregateEnemyFactionData,
   formatMapData,
   getScoreStatusText,
 } from "../../utils/faceitHelper";
+import { updateVoiceChannelStatus } from "./discord/channel-service";
+import {
+  createLiveScoreCard,
+  createMatchAnalysisEmbed,
+  deleteMatchCards,
+  sendMatchFinishNotification,
+} from "./discord/embed-service";
+import { runEloUpdate } from "./discord/user-service";
 
 let workers: Record<string, Worker> = {};
 

@@ -1,14 +1,14 @@
 import { TextChannel } from "discord.js";
-import {
-  sendNewUserNotification,
-  updateLinkedRole,
-  updateServerRoles,
-} from "../../api/services/discord-service";
 import { FaceitService } from "../../api/services/faceit-service";
 import { addUser } from "../../db/commands";
 import { Player } from "../../types/Faceit/player";
 import { updateNickname } from "../../utils/nicknameUtils";
 import client from "../client";
+import {
+  updateLinkedRole,
+  updateServerRoles,
+} from "../../api/services/discord/roles-service";
+import { sendNewUserNotification } from "../../api/services/discord/embed-service";
 
 const monitoredChannelId = "1327303978223931462"; // Replace with the ID of the channel to monitor
 
