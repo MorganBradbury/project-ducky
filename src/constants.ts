@@ -69,3 +69,10 @@ export const getSkillLevelEmoji = (faceitLevel: number): string => {
 
   return skillLevelEmojis[faceitLevel] || `:${faceitLevel}:`; // Default to text-based emoji if not found
 };
+
+export const API_VERSION = "v10";
+export const BASE_URL = `https://discord.com/api/${API_VERSION}`;
+export const ENDPOINTS = {
+  voiceStatus: (channelId: string) =>
+    `${BASE_URL}/channels/${channelId}/voice-status`,
+} as const;
