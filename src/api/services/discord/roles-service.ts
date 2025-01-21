@@ -38,13 +38,10 @@ export const updateServerRoles = async (
       )
     );
 
-    // Assign the correct role based on skill level
-    if (!member.roles.cache.has(targetRole.id)) {
-      await member.roles.add(targetRole);
-      console.log(
-        `Assigned role ${skillLevelRoleName} to member ${member.user.tag}.`
-      );
-    }
+    await member.roles.add(targetRole);
+    console.log(
+      `Assigned role ${skillLevelRoleName} to member ${member.user.tag}.`
+    );
   } catch (error) {
     console.error("Error updating server roles:", error);
   }
