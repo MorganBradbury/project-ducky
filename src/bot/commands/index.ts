@@ -12,4 +12,5 @@ export const commands = [
   listUserIdsCommand,
 ];
 
+// export
 export const commandsMap = new Map(commands.map((cmd) => [cmd.name, cmd]));
