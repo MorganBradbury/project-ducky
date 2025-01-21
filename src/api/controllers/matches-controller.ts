@@ -11,6 +11,7 @@ import { AcceptedEventTypes } from "../../constants";
 import { getScoreStatusText } from "../../utils/faceitHelper";
 import { updateVoiceChannelStatus } from "../services/discord/channel-service";
 import { updateLiveScoreCard } from "../services/discord/embed-service";
+import { processEmbedsToThreads } from "../services/discord/thread-service";
 
 // Main controller function to handle the webhook for match events
 export const handleMatchesHook = async (
@@ -94,4 +95,13 @@ export const updateLiveScores = async (
   await updateLiveScoreCard(match);
 
   res.status(200).json({ message: "Live scores updated successfully" });
+};
+
+export const archiveMatches = async (
+  req: Request,
+  res: Response
+): Promise<void> => {
+  await processEmbedsToThreads();
+
+  res.status(200).json({ message: "Threads archived" });
 };
