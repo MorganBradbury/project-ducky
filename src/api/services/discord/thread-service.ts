@@ -38,7 +38,10 @@ export async function processEmbedsToThreads() {
 
   // Process each date group
   for (const [date, embedMessages] of embedsByDate.entries()) {
-    const threadName = `${date.replace(/-/g, "/")} (${embedMessages.length})`;
+    // Convert the date to DD/MM/YY format
+    const [year, month, day] = date.split("-");
+    const formattedDate = `${day}/${month}/${year.slice(-2)}`;
+    const threadName = `${formattedDate} (${embedMessages.length})`;
 
     // Check if a thread with this name already exists
     const existingThreads = await channel.threads.fetchActive();
@@ -55,7 +58,6 @@ export async function processEmbedsToThreads() {
     // Add messages to the thread
     for (const embedMessage of embedMessages) {
       await thread.send({
-        content: `**Original Message by ${embedMessage.author.tag}:**`,
         embeds: embedMessage.embeds,
       });
 
