@@ -62,7 +62,7 @@ export async function processEmbedsToThreads() {
       });
 
       // Delete the original message
-      //await embedMessage.delete();
+      await embedMessage.delete();
     }
   }
 

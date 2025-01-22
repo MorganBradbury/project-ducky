@@ -285,15 +285,8 @@ class FaceitApiClient {
         }
 
         const trackedTeamFaction = await getTeamFaction(teams);
-        console.log("trackedteamfaction", trackedTeamFaction);
         const enemyFactionName =
           trackedTeamFaction.faction === "faction1" ? "faction2" : "faction1";
-
-        console.log(
-          "mapteamdata for1...",
-          teams[trackedTeamFaction.faction]?.roster
-        );
-        console.log("mapteamdata for2...", teams[enemyFactionName]?.roster);
 
         const mapTeamData = (teamFaction: string) =>
           teams[teamFaction]?.roster.map((player: any) => ({
@@ -303,17 +296,12 @@ class FaceitApiClient {
             nickname: player.nickname,
           }));
 
-        console.log("ggggg", mapTeamData(trackedTeamFaction.faction));
-
         return {
           homeFaction: mapTeamData(trackedTeamFaction.faction),
           enemyFaction: mapTeamData(enemyFactionName),
         };
       } catch (error) {
-        console.error(
-          `Attempt ${attempt}: Error fetching match details:`,
-          error
-        );
+        console.error(`Attempt ${attempt}: Error fetching match details:`);
 
         if (attempt === maxRetries) {
           console.error("Max retries reached");
