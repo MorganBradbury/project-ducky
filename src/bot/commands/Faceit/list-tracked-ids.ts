@@ -1,4 +1,8 @@
-import { ChatInputCommandInteraction, EmbedBuilder } from "discord.js";
+import {
+  ChatInputCommandInteraction,
+  EmbedBuilder,
+  MessageFlags,
+} from "discord.js";
 import { getAllUsers } from "../../../db/commands";
 
 export const listUserIdsCommand = {
@@ -20,7 +24,10 @@ export const listUserIdsCommand = {
         .setColor("#00FF00")
         .setDescription(userList);
 
-      await interaction.reply({ embeds: [embed], ephemeral: true });
+      await interaction.reply({
+        embeds: [embed],
+        flags: MessageFlags.Ephemeral,
+      });
     } catch (error) {
       console.error("Error fetching users:", error);
       await interaction.reply(`Failed to list users: ${error}`);

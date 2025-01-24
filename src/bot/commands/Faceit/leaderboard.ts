@@ -1,4 +1,8 @@
-import { ChatInputCommandInteraction, EmbedBuilder } from "discord.js";
+import {
+  ChatInputCommandInteraction,
+  EmbedBuilder,
+  MessageFlags,
+} from "discord.js";
 import { getAllUsers } from "../../../db/commands";
 
 export const leaderboardCommand = {
@@ -64,7 +68,10 @@ export const leaderboardCommand = {
           }
         );
 
-      await interaction.reply({ embeds: [embed], ephemeral: true });
+      await interaction.reply({
+        embeds: [embed],
+        flags: MessageFlags.Ephemeral,
+      });
     } catch (error) {
       console.error("Error generating leaderboard:", error);
       await interaction.reply("Failed to display the leaderboard.");

@@ -4,6 +4,7 @@ import {
   Message,
   DiscordAPIError,
   TextChannel,
+  MessageFlags,
 } from "discord.js";
 
 export const clearMessagesCommand = {
@@ -24,7 +25,7 @@ export const clearMessagesCommand = {
     if (!isServerOwner) {
       await interaction.reply({
         content: "You must be the server owner to run this command.",
-        ephemeral: true,
+        flags: MessageFlags.Ephemeral,
       });
       return;
     }
@@ -34,7 +35,7 @@ export const clearMessagesCommand = {
     if (!amount || amount < 1 || amount > 100) {
       await interaction.reply({
         content: "Please provide a valid number of messages to delete (1-100).",
-        ephemeral: true,
+        flags: MessageFlags.Ephemeral,
       });
       return;
     }
@@ -49,7 +50,7 @@ export const clearMessagesCommand = {
       if (!channel || !(channel instanceof TextChannel)) {
         await interaction.followUp({
           content: "This command can only be used in text channels.",
-          ephemeral: true,
+          flags: MessageFlags.Ephemeral,
         });
         return;
       }
@@ -102,12 +103,12 @@ export const clearMessagesCommand = {
       if (error instanceof DiscordAPIError && error.code === 50034) {
         await interaction.followUp({
           content: "Messages older than 14 days cannot be bulk deleted.",
-          ephemeral: true,
+          flags: MessageFlags.Ephemeral,
         });
       } else {
         await interaction.followUp({
           content: "An error occurred while trying to clear messages.",
-          ephemeral: true,
+          flags: MessageFlags.Ephemeral,
         });
       }
     }

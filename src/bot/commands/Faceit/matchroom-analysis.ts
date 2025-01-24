@@ -1,4 +1,8 @@
-import { ChatInputCommandInteraction, EmbedBuilder } from "discord.js";
+import {
+  ChatInputCommandInteraction,
+  EmbedBuilder,
+  MessageFlags,
+} from "discord.js";
 import { getAllUsers } from "../../../db/commands";
 import { getMatchAnalysis } from "../../../api/services/matches-service";
 
@@ -37,7 +41,7 @@ export const matchAnalysisCommand = {
 
       await interaction.reply({
         content: `Match analysis for match ID: ${matchId} has been triggered.`,
-        ephemeral: true,
+        flags: MessageFlags.Ephemeral,
       });
     } catch (error) {
       console.error("Error fetching match analysis:", error);

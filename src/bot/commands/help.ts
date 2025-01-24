@@ -1,4 +1,8 @@
-import { ChatInputCommandInteraction, EmbedBuilder } from "discord.js";
+import {
+  ChatInputCommandInteraction,
+  EmbedBuilder,
+  MessageFlags,
+} from "discord.js";
 import { commandsMap } from ".";
 
 export const helpCommand = {
@@ -24,7 +28,10 @@ export const helpCommand = {
           "Here are all the commands you can use:\n\n" + commandFields
         );
 
-      await interaction.reply({ embeds: [embed], ephemeral: true });
+      await interaction.reply({
+        embeds: [embed],
+        flags: MessageFlags.Ephemeral,
+      });
     } catch (error) {
       console.error("Error generating help command:", error);
       await interaction.reply("Failed to show the help menu.");

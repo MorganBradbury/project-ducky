@@ -2,6 +2,7 @@ import {
   ChatInputCommandInteraction,
   GuildMember,
   EmbedBuilder,
+  MessageFlags,
 } from "discord.js";
 import { removeUnicodeChars } from "../../../utils/nicknameUtils";
 
@@ -22,7 +23,7 @@ export const updateNicknameCommand = {
       if (!interaction.guild) {
         await interaction.reply({
           content: "This command can only be used in a server.",
-          ephemeral: true,
+          flags: MessageFlags.Ephemeral,
         });
         return;
       }
@@ -68,7 +69,7 @@ export const updateNicknameCommand = {
       await interaction.reply({
         content:
           "An error occurred while updating your nickname. Please try again.",
-        ephemeral: true,
+        flags: MessageFlags.Ephemeral,
       });
     }
   },

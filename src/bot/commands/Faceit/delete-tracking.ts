@@ -1,4 +1,4 @@
-import { ChatInputCommandInteraction } from "discord.js";
+import { ChatInputCommandInteraction, MessageFlags } from "discord.js";
 import { deleteUser } from "../../../db/commands";
 import { config } from "../../../config";
 
@@ -24,7 +24,7 @@ export const deleteUserCommand = {
     if (interaction.user.id !== config.SERVER_OWNER_ID) {
       await interaction.reply({
         content: "❌ You do not have permission to use this command.",
-        ephemeral: true, // This ensures the message is only visible to the user
+        flags: MessageFlags.Ephemeral, // This ensures the message is only visible to the user
       });
       return;
     }
@@ -33,7 +33,7 @@ export const deleteUserCommand = {
       await deleteUser(discordUsername);
       await interaction.reply({
         content: `✅ User \`${discordUsername}\` has been deleted.`,
-        ephemeral: true,
+        flags: MessageFlags.Ephemeral,
       });
     } catch (error) {
       console.error("Error deleting user:", error);
