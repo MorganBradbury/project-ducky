@@ -326,7 +326,7 @@ export const createLiveScoreCard = async (match: Match) => {
 
   // Create the embed
   const embed = new EmbedBuilder()
-    .setTitle(`${ChannelIcons.Active} Live match ${ChannelIcons.Active}`)
+    .setTitle(`${ChannelIcons.Active} Live match`)
     .addFields(
       {
         name: `Players in game`,
