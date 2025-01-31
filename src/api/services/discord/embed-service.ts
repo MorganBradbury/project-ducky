@@ -330,6 +330,7 @@ export const createLiveScoreCard = async (match: Match) => {
       {
         name: "Live score",
         value: `${ChannelIcons.Active} ${matchScore.join(":")}`,
+        inline: true,
       },
       {
         name: "Link to match",
