@@ -349,7 +349,7 @@ export const createLiveScoreCard = async (match: Match) => {
     .addFields(
       {
         name: "Live score",
-        value: `[${ChannelIcons.Active} ${matchScore.join(":")}]`,
+        value: `${ChannelIcons.Active} [${matchScore.join(" : ")}]`,
         inline: true,
       },
       {
