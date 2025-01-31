@@ -24,7 +24,6 @@ export const activeMapPool = [
   "de_inferno",
   "de_mirage",
   "de_ancient",
-  "de_vertigo",
   "de_nuke",
   "de_train",
   "de_anubis",
