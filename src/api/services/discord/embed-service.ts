@@ -349,7 +349,7 @@ export const createLiveScoreCard = async (match: Match) => {
     .addFields(
       {
         name: "Live score",
-        value: `${matchScore.join(" / ")}`,
+        value: `${matchScore.join(":")}`,
         inline: true,
       },
       {
@@ -400,7 +400,7 @@ export const updateLiveScoreCard = async (match: Match) => {
     match.trackedTeam.faction,
     false
   );
-  const newScore = `${matchScore.join(" / ")}`;
+  const newScore = `${matchScore.join(":")}`;
 
   // Extract the embed and find the current score
   const embed = targetMessage.embeds[0];
