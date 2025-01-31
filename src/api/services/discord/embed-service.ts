@@ -147,7 +147,7 @@ export const sendMatchFinishNotification = async (match: Match) => {
     const mapEmoji = getMapEmoji(match.mapName);
 
     const embed = new EmbedBuilder()
-      .setTitle(`New match finished`)
+      .setTitle(``)
       .setColor(didTeamWin ? "#00FF00" : "#FF0000")
       .addFields(
         {
@@ -161,21 +161,20 @@ export const sendMatchFinishNotification = async (match: Match) => {
           inline: true,
         },
         {
-          name: "Match Result",
+          name: "Scoreline",
           value: `${finalScore.join(" / ") || "N/A"}`,
           inline: true,
         },
 
         {
           name: "Match page",
-          value: `[Click here](https://www.faceit.com/en/cs2/room/${match?.matchId})`,
+          value: `[Link 🔗](https://www.faceit.com/en/cs2/room/${match?.matchId})`,
         },
         {
           name: "Players and Stats (K/D/A)",
           value: `${playerStatsTable.join("\n")}`,
         }
       )
-      .setFooter({ text: "Match result" })
       .setTimestamp();
 
     await sendEmbedMessage(embed, [], config.BOT_UPDATES_CHANNEL_ID);
