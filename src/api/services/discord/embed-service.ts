@@ -147,7 +147,6 @@ export const sendMatchFinishNotification = async (match: Match) => {
     const mapEmoji = getMapEmoji(match.mapName);
 
     const embed = new EmbedBuilder()
-      .setTitle(``)
       .setColor(didTeamWin ? "#00FF00" : "#FF0000")
       .addFields(
         {
@@ -327,7 +326,6 @@ export const createLiveScoreCard = async (match: Match) => {
 
   // Create the embed
   const embed = new EmbedBuilder()
-    .setTitle("Live match")
     .addFields(
       {
         name: `Players in game`,
