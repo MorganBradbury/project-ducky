@@ -334,6 +334,7 @@ export const createLiveScoreCard = async (match: Match) => {
       {
         name: "Link to match",
         value: `[Click here](https://www.faceit.com/en/cs2/room/${match?.matchId})`,
+        inline: true,
       }
     )
     .setFooter({ text: `${match.matchId}` })
