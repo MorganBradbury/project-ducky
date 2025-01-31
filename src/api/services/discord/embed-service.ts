@@ -167,7 +167,7 @@ export const sendMatchFinishNotification = async (match: Match) => {
 
         {
           name: "Match page",
-          value: `[Link 🔗](https://www.faceit.com/en/cs2/room/${match?.matchId})`,
+          value: `[🔗 Link](https://www.faceit.com/en/cs2/room/${match?.matchId})`,
         },
         {
           name: "Players and Stats (K/D/A)",
@@ -359,7 +359,7 @@ export const createLiveScoreCard = async (match: Match) => {
       },
       {
         name: "Match page",
-        value: `[🔗 Click](https://www.faceit.com/en/cs2/room/${match?.matchId})`,
+        value: `[🔗 Link](https://www.faceit.com/en/cs2/room/${match?.matchId})`,
         inline: true,
       }
     )
