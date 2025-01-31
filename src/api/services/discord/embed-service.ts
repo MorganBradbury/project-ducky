@@ -359,7 +359,7 @@ export const createLiveScoreCard = async (match: Match) => {
       },
       {
         name: "Match page",
-        value: `[🔗 Link](https://www.faceit.com/en/cs2/room/${match?.matchId})`,
+        value: `[🔗 Click](https://www.faceit.com/en/cs2/room/${match?.matchId})`,
         inline: true,
       }
     )
