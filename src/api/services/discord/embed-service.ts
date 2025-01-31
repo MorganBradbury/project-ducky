@@ -340,6 +340,11 @@ export const createLiveScoreCard = async (match: Match) => {
         inline: true,
       },
       {
+        name: "\u200B",  // Empty field to force a new line
+        value: "\u200B",
+        inline: true,
+      },
+      {
         name: "Link to match",
         value: `[Click here](https://www.faceit.com/en/cs2/room/${match?.matchId})`,
         inline: true,
