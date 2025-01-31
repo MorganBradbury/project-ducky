@@ -274,6 +274,11 @@ export const createMatchAnalysisEmbed = (
         inline: true,
       },
       {
+        name: "\u200B",  // Empty field to force a new line
+        value: "\u200B",
+        inline: true,
+      },
+      {
         name: `Team ${enemyFactionCaptain.nickname}`,
         value: enemyPlayers,
         inline: true,
@@ -286,6 +291,11 @@ export const createMatchAnalysisEmbed = (
           mapDataTable,
       },
       { name: "They likely pick", value: mostLikelyPicks, inline: true },
+      {
+        name: "\u200B",  // Empty field to force a new line
+        value: "\u200B",
+        inline: true,
+      },
       { name: "They likely ban", value: mostLikelyBans, inline: true }
     )
     .setFooter({ text: `${matchId}` })
