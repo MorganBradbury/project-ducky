@@ -156,13 +156,18 @@ export const sendMatchFinishNotification = async (match: Match) => {
           inline: true,
         },
         {
+          name: "\u200B",  // Empty field to force a new line
+          value: "\u200B",
+          inline: true,
+        },
+        {
           name: "Match Result",
           value: `${finalScore.join(" / ") || "N/A"}`,
           inline: true,
         },
 
         {
-          name: "Link to match",
+          name: "Match page",
           value: `[Click here](https://www.faceit.com/en/cs2/room/${match?.matchId})`,
         },
         {
