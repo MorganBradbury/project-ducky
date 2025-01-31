@@ -326,13 +326,18 @@ export const createLiveScoreCard = async (match: Match) => {
           match.mapName
         )}`,
         inline: true,
-      }
+      },
+      {
+        name: "\u200B",  // Empty field to force a new line
+        value: "\u200B",
+        inline: true,
+      },
     )
     .addFields(
       {
         name: "Live score",
         value: `${ChannelIcons.Active} ${matchScore.join(":")}`,
-        inline: false,
+        inline: true,
       },
       {
         name: "Link to match",
