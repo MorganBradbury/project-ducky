@@ -321,15 +321,15 @@ export const createLiveScoreCard = async (match: Match) => {
         inline: true,
       },
       {
+        name: "\u200B",  // Empty field to force a new line
+        value: "\u200B",
+        inline: true,
+      },
+      {
         name: `Map`,
         value: `${getMapEmoji(match.mapName)} ${formattedMapName(
           match.mapName
         )}`,
-        inline: true,
-      },
-      {
-        name: "\u200B",  // Empty field to force a new line
-        value: "\u200B",
         inline: true,
       },
     )
