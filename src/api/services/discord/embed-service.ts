@@ -326,6 +326,7 @@ export const createLiveScoreCard = async (match: Match) => {
 
   // Create the embed
   const embed = new EmbedBuilder()
+    .setTitle("Live match")
     .addFields(
       {
         name: `Players in game`,
@@ -357,8 +358,8 @@ export const createLiveScoreCard = async (match: Match) => {
         inline: true,
       },
       {
-        name: "Link to match",
-        value: `[Click here](https://www.faceit.com/en/cs2/room/${match?.matchId})`,
+        name: "Match page",
+        value: `[Link 🔗](https://www.faceit.com/en/cs2/room/${match?.matchId})`,
         inline: true,
       }
     )
