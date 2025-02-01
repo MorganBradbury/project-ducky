@@ -332,7 +332,7 @@ export const createLiveScoreCard = async (match: Match) => {
 
   // Create the embed
   const embed = new EmbedBuilder()
-    .setTitle(`${mapEmoji}  ${mapName}: (${score})`) // Updated title format
+    .setTitle(`${mapEmoji}  ${mapName}  (${score})`) // Updated title format
     .addFields(
       {
         name: `Players in game`,
@@ -399,9 +399,13 @@ export const updateLiveScoreCard = async (match: Match) => {
     return;
   }
 
+  // Format map name and get its emoji
+  const mapEmoji = getMapEmoji(match.mapName);
+  const mapName = formattedMapName(match.mapName);
+
   // Update the embed with the new score in the title
   const updatedEmbed = EmbedBuilder.from(embed).setTitle(
-    `${ChannelIcons.Active}  Live match (${newScore})`
+    `${mapEmoji}  ${mapName}  (${newScore})`
   );
 
   // Edit the message with the updated embed
