@@ -149,7 +149,7 @@ export const sendMatchFinishNotification = async (match: Match) => {
     const embed = new EmbedBuilder()
       .setColor(didTeamWin ? "#00FF00" : "#FF0000")
       .setTitle(
-        `${mapEmoji}  ${formattedMapName}  ${finalScore.join(":") || "N/A"}`
+        `${mapEmoji}  ${formattedMapName}  (${finalScore.join(":") || "N/A"})`
       )
       .addFields(
         {
