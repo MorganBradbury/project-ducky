@@ -318,17 +318,21 @@ export const createLiveScoreCard = async (match: Match) => {
     .map((player: any) => `${player.faceitUsername}`)
     .join("\n");
 
+  // Get the match score
   const matchScore = await FaceitService.getMatchScore(
     match.matchId,
     match.trackedTeam.faction,
     false
   );
-
   const score = matchScore.join(":");
+
+  // Format map name and get its emoji
+  const mapEmoji = getMapEmoji(match.mapName);
+  const mapName = formattedMapName(match.mapName);
 
   // Create the embed
   const embed = new EmbedBuilder()
-    .setTitle(`${ChannelIcons.Active}  Live match (${score})`)
+    .setTitle(`${mapEmoji} ${mapName}: (${score})`) // Updated title format
     .addFields(
       {
         name: `Players in game`,
@@ -341,18 +345,11 @@ export const createLiveScoreCard = async (match: Match) => {
         inline: true,
       },
       {
-        name: `Map`,
-        value: `${getMapEmoji(match.mapName)} ${formattedMapName(
-          match.mapName
-        )}`,
+        name: "Match page",
+        value: `[🔗 Link](https://www.faceit.com/en/cs2/room/${match?.matchId})`,
         inline: true,
       }
     )
-    .addFields({
-      name: "Match page",
-      value: `[🔗 Link](https://www.faceit.com/en/cs2/room/${match?.matchId})`,
-      inline: false,
-    })
     .setFooter({ text: `${match.matchId}` })
     .setColor("#464dd4");
 
