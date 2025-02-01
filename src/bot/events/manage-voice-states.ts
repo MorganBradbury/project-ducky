@@ -31,16 +31,17 @@ client.on(
           category.children.cache.values()
         ).filter(
           (channel): channel is VoiceChannel =>
-            channel.type === 2 && /^🔊┃Room \d+$/.test(channel.name)
+            channel.type === 2 && /^🔊┃Room #\d+$/.test(channel.name)
         );
+
         const highestNumber = roomChannels
           .map((channel) =>
-            parseInt(channel.name.match(/Room (\d+)/)?.[1] || "0", 10)
+            parseInt(channel.name.match(/Room #(\d+)/)?.[1] || "0", 10)
           )
           .reduce((max, num) => Math.max(max, num), 0);
 
-        // Create the new room
-        const roomName = `🔊┃Room ${highestNumber + 1}`;
+        // Create the new room with '#' before the number
+        const roomName = `🔊┃Room #${highestNumber + 1}`;
         const createdChannel = await guild.channels.create({
           name: roomName,
           type: 2, // Voice channel
@@ -85,3 +86,4 @@ client.on(
     }
   }
 );
+
