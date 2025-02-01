@@ -251,37 +251,37 @@ export const createMatchAnalysisEmbed = (
 
   // Create the embed
   const embed = new EmbedBuilder()
-    .setTitle("Matchroom Analysis")
+    .setTitle(`Map stats (Team ${homeFactionCaptain.nickname})`)
     .addFields(
+      // {
+      //   name: `Team ${homeFactionCaptain.nickname}`,
+      //   value: homePlayers,
+      //   inline: true,
+      // },
+      // {
+      //   name: "\u200B", // Empty field to force a new line
+      //   value: "\u200B",
+      //   inline: true,
+      // },
+      // {
+      //   name: `Team ${enemyFactionCaptain.nickname}`,
+      //   value: enemyPlayers,
+      //   inline: true,
+      // },
       {
-        name: `Team ${homeFactionCaptain.nickname}`,
-        value: homePlayers,
-        inline: true,
-      },
-      {
-        name: "\u200B", // Empty field to force a new line
-        value: "\u200B",
-        inline: true,
-      },
-      {
-        name: `Team ${enemyFactionCaptain.nickname}`,
-        value: enemyPlayers,
-        inline: true,
-      },
-      {
-        name: `Map stats for Team ${enemyFactionCaptain.nickname} (Last 30 games)`,
+        name: `Map stats for other team (Last 50 games)`,
         value:
           "`Map name     | Played | Win % `\n" +
           "`-------------|--------|-------`\n" +
           mapDataTable,
-      },
-      { name: "They likely pick", value: mostLikelyPicks, inline: true },
-      {
-        name: "\u200B", // Empty field to force a new line
-        value: "\u200B",
-        inline: true,
-      },
-      { name: "They likely ban", value: mostLikelyBans, inline: true }
+      }
+      // { name: "They likely pick", value: mostLikelyPicks, inline: true },
+      // {
+      //   name: "\u200B", // Empty field to force a new line
+      //   value: "\u200B",
+      //   inline: true,
+      // },
+      // { name: "They likely ban", value: mostLikelyBans, inline: true }
     )
     .setFooter({ text: `${matchId}` })
     .setColor("#ff5733");
