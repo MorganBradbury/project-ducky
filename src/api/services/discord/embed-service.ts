@@ -330,6 +330,13 @@ export const createLiveScoreCard = async (match: Match) => {
   const mapEmoji = getMapEmoji(match.mapName);
   const mapName = formattedMapName(match.mapName);
 
+  // Ensure matchId footer is at least 20 characters long
+  const minMatchIdLength = 42;
+  const matchIdWithPadding = String(match.matchId).padEnd(
+    minMatchIdLength,
+    " "
+  );
+
   // Create the embed
   const embed = new EmbedBuilder()
     .setTitle(`${mapEmoji}  ${mapName}  (${score})`) // Updated title format
@@ -350,7 +357,7 @@ export const createLiveScoreCard = async (match: Match) => {
         inline: true,
       }
     )
-    .setFooter({ text: `${match.matchId}` })
+    .setFooter({ text: matchIdWithPadding }) // Footer with padded matchId
     .setColor("#464dd4");
 
   // Pass the embed and the button to sendEmbedMessage
