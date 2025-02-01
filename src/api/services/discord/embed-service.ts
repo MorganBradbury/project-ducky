@@ -148,30 +148,17 @@ export const sendMatchFinishNotification = async (match: Match) => {
 
     const embed = new EmbedBuilder()
       .setColor(didTeamWin ? "#00FF00" : "#FF0000")
+      .setTitle(
+        `${mapEmoji}  ${formattedMapName}  ${finalScore.join(":") || "N/A"}`
+      )
       .addFields(
-        {
-          name: "Map",
-          value: `${mapEmoji}  ${formattedMapName}`,
-          inline: true,
-        },
-        {
-          name: "\u200B", // Empty field to force a new line
-          value: "\u200B",
-          inline: true,
-        },
-        {
-          name: "Scoreline",
-          value: `${finalScore.join(" / ") || "N/A"}`,
-          inline: true,
-        },
-
-        {
-          name: "Match page",
-          value: `[🔗 Link](https://www.faceit.com/en/cs2/room/${match?.matchId})`,
-        },
         {
           name: "Players and Stats (K/D/A)",
           value: `${playerStatsTable.join("\n")}`,
+        },
+        {
+          name: "Match page",
+          value: `[🔗 Link](https://www.faceit.com/en/cs2/room/${match?.matchId})`,
         }
       )
       .setTimestamp();
@@ -330,13 +317,6 @@ export const createLiveScoreCard = async (match: Match) => {
   const mapEmoji = getMapEmoji(match.mapName);
   const mapName = formattedMapName(match.mapName);
 
-  // Ensure matchId footer is at least 20 characters long
-  const minMatchIdLength = 42;
-  const matchIdWithPadding = String(match.matchId).padEnd(
-    minMatchIdLength,
-    " "
-  );
-
   // Create the embed
   const embed = new EmbedBuilder()
     .setTitle(`${mapEmoji}  ${mapName}  (${score})`) // Updated title format
@@ -357,7 +337,7 @@ export const createLiveScoreCard = async (match: Match) => {
         inline: true,
       }
     )
-    .setFooter({ text: matchIdWithPadding + "     " }) // Footer with padded matchId
+    .setFooter({ text: `${match.matchId}` })
     .setColor("#464dd4");
 
   // Pass the embed and the button to sendEmbedMessage
@@ -465,14 +445,13 @@ export async function sendNewUserNotification(
   faceitId: string
 ): Promise<void> {
   const embed = new EmbedBuilder()
-    .setTitle("New user notification")
+    .setTitle(`New user: ${userName}`)
     .addFields(
-      { name: "User", value: userName },
       { name: "FACEIT ID", value: faceitId },
       {
-        name: "🔗 Link to Webhook",
+        name: "🔗 Webhook",
         value:
-          "[Click here](https://developers.faceit.com/apps/2205acb7-7fb4-4ce4-8a23-871375ee03fa/webhooks/af22807c-f17a-4947-8829-5757ef6a2e34/edit)",
+          "[Link](https://developers.faceit.com/apps/2205acb7-7fb4-4ce4-8a23-871375ee03fa/webhooks/af22807c-f17a-4947-8829-5757ef6a2e34/edit)",
       }
     )
     .setColor("#c2a042");
