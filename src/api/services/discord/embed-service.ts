@@ -274,6 +274,10 @@ export const createMatchAnalysisEmbed = (
           "`Map name     | Played | Win % `\n" +
           "`-------------|--------|-------`\n" +
           mapDataTable,
+      },
+      {
+        name: "Match page",
+        value: `[🔗 Link](https://www.faceit.com/en/cs2/room/${matchId})`,
       }
       // { name: "They likely pick", value: mostLikelyPicks, inline: true },
       // {
@@ -284,18 +288,11 @@ export const createMatchAnalysisEmbed = (
       // { name: "They likely ban", value: mostLikelyBans, inline: true }
     )
     .setFooter({ text: `${matchId}` })
-    .setColor("#ff5733");
-
-  // Create the "View Match" button
-  const row = new ActionRowBuilder<ButtonBuilder>().addComponents(
-    new ButtonBuilder()
-      .setURL(`https://www.faceit.com/en/cs2/room/${matchId}`)
-      .setLabel("View match")
-      .setStyle(ButtonStyle.Link)
-  );
+    .setColor("#ff5733")
+    .setTimestamp();
 
   // Pass the embed and the button to sendEmbedMessage
-  sendEmbedMessage(embed, [row], config.MATCHROOM_ANALYSIS_CHANNEL_ID);
+  sendEmbedMessage(embed, [], config.MATCHROOM_ANALYSIS_CHANNEL_ID);
   return;
 };
 
