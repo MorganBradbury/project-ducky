@@ -329,10 +329,10 @@ export const updateLiveScoreCard = async (match: Match) => {
   console.log(`Live score updated for matchId: ${match.matchId}`);
 };
 
-export const deleteMatchCards = async () => {
+export const deleteMatchCards = async (matchId?: string) => {
   const channelIDs = [
-    config.MATCHROOM_ANALYSIS_CHANNEL_ID,
-    config.BOT_LIVE_SCORE_CARDS_CHANNEL,
+    config.MATCHROOM_ANALYSIS_CHANNEL_ID, // New functionality
+    config.BOT_LIVE_SCORE_CARDS_CHANNEL, // Old functionality
   ];
 
   for (const channelId of channelIDs) {
@@ -345,29 +345,43 @@ export const deleteMatchCards = async () => {
       }
 
       // Fetch the last 100 messages from the channel (increase limit to check more)
-      const messages = await channel.messages.fetch({ limit: 5 });
+      const messages = await channel.messages.fetch({ limit: 100 });
 
-      // Iterate through all the messages
-      for (const message of messages.values()) {
-        // Check if the message has embeds
-        for (const embed of message.embeds) {
-          const matchId = embed.footer?.text;
+      if (channelId === config.BOT_LIVE_SCORE_CARDS_CHANNEL) {
+        // Old functionality: delete single messages based on matchId in footer
+        const targetMessage = messages.find((message) =>
+          message.embeds.some((embed) => embed.footer?.text === matchId)
+        );
 
-          if (!matchId) continue; // Skip if there's no matchId in the footer
+        if (targetMessage) {
+          await targetMessage.delete();
+          console.log(
+            `Live score card deleted for matchId: ${matchId} in channel ${channelId}`
+          );
+        }
+      } else if (channelId === config.MATCHROOM_ANALYSIS_CHANNEL_ID) {
+        // New functionality: delete embeds older than 10 minutes or with matchId not in DB
+        for (const message of messages.values()) {
+          // Check if the message has embeds
+          for (const embed of message.embeds) {
+            const matchIdFromFooter = embed.footer?.text;
 
-          // Check if the match exists in the database
-          const doesExist = await checkMatchExists(matchId);
+            if (!matchIdFromFooter) continue; // Skip if there's no matchId in the footer
 
-          // Check if the embed is older than 10 minutes
-          const isOlderThan10Minutes =
-            Date.now() - message.createdAt.getTime() > 10 * 60 * 1000;
+            // Check if the match exists in the database
+            const doesExist = await checkMatchExists(matchIdFromFooter);
 
-          // If the match doesn't exist or the embed is too old, delete it
-          if (!doesExist || isOlderThan10Minutes) {
-            await message.delete();
-            console.log(
-              `Deleted embed for matchId: ${matchId} in channel ${channelId}`
-            );
+            // Check if the embed is older than 10 minutes
+            const isOlderThan10Minutes =
+              Date.now() - message.createdAt.getTime() > 10 * 60 * 1000;
+
+            // If the match doesn't exist or the embed is too old, delete it
+            if (!doesExist || isOlderThan10Minutes) {
+              await message.delete();
+              console.log(
+                `Deleted embed for matchId: ${matchIdFromFooter} in channel ${matchIdFromFooter}`
+              );
+            }
           }
         }
       }
