@@ -357,7 +357,7 @@ export const createLiveScoreCard = async (match: Match) => {
         inline: true,
       }
     )
-    .setFooter({ text: matchIdWithPadding }) // Footer with padded matchId
+    .setFooter({ text: matchIdWithPadding + "     " }) // Footer with padded matchId
     .setColor("#464dd4");
 
   // Pass the embed and the button to sendEmbedMessage
