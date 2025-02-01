@@ -1,5 +1,3 @@
-import path from "path";
-import { Worker } from "worker_threads";
 import {
   checkMatchExists,
   getAllUsers,
@@ -23,8 +21,7 @@ import {
   sendMatchFinishNotification,
 } from "./discord/embed-service";
 import { runEloUpdate } from "./discord/user-service";
-
-let workers: Record<string, Worker> = {};
+import axios from "axios";
 
 export const startMatch = async (matchId: string) => {
   console.log("Processing startMatch()", matchId);
@@ -57,9 +54,12 @@ export const startMatch = async (matchId: string) => {
     matchId,
     vcid: match?.voiceChannelId || "Not in VC",
   });
-  const worker = new Worker(path.resolve(__dirname, "../worker.js"));
-  worker.postMessage({ type: "start", matchId: matchId });
-  workers[matchId] = worker;
+
+  await axios.post(
+    "https://live-game-service-production.up.railway.app/api/start",
+    { matchId }
+  );
+  console.log("sent request to worker service to start", matchId);
 };
 
 export const endMatch = async (matchId: string) => {
@@ -78,12 +78,11 @@ export const endMatch = async (matchId: string) => {
 
   await updateMatchProcessed(matchId);
   // Stop the worker associated with this matchId
-  if (workers[matchId]) {
-    workers[matchId].postMessage({ type: "stop" });
-    workers[matchId].terminate(); // Clean up worker resources
-    delete workers[matchId]; // Remove worker from storage
-    console.log("Worker stopped for matchId:", matchId);
-  }
+  await axios.post(
+    "https://live-game-service-production.up.railway.app/api/end",
+    { matchId }
+  );
+  console.log("sent request to worker service to end", matchId);
 
   // deletes record from DB.
   await markMatchComplete(matchId);
@@ -110,12 +109,11 @@ export const cancelMatch = async (matchId: string) => {
   await markMatchComplete(matchId);
 
   // Stop the worker associated with this matchId
-  if (workers[matchId]) {
-    workers[matchId].postMessage({ type: "stop" });
-    workers[matchId].terminate(); // Clean up worker resources
-    delete workers[matchId]; // Remove worker from storage
-    console.log("Worker stopped for matchId:", matchId);
-  }
+  await axios.post(
+    "https://live-game-service-production.up.railway.app/api/end",
+    { matchId }
+  );
+  console.log("sent request to worker service to cancel", matchId);
 
   if (match?.voiceChannelId) {
     await updateVoiceChannelStatus(match.voiceChannelId, "");
