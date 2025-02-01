@@ -153,7 +153,7 @@ export const sendMatchFinishNotification = async (match: Match) => {
       )
       .addFields(
         {
-          name: "Players and Stats (K/D/A)",
+          name: "Scoreboard (K/D/A)",
           value: `${playerStatsTable.join("\n")}`,
         },
         {
