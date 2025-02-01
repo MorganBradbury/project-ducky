@@ -20,6 +20,7 @@ import {
   formattedMapName,
 } from "../../../utils/faceitHelper";
 import { Match } from "../../../types/Faceit/match";
+import { checkMatchExists } from "../../../db/commands";
 
 const sendEmbedMessage = async (
   embed: EmbedBuilder,
@@ -174,7 +175,7 @@ export const createMatchAnalysisEmbed = (
   playersData: any,
   gameData: any
 ) => {
-  // Sorting the game data: first by most played times, then by average win percentage if needed
+  // Sorting the game data by most played times, then by average win percentage
   const sortedMapData = gameData.sort((a: any, b: any) => {
     const aWinPercentage = parseFloat(a.averageWinPercentage);
     const bWinPercentage = parseFloat(b.averageWinPercentage);
@@ -184,53 +185,6 @@ export const createMatchAnalysisEmbed = (
     }
     return b.totalPlayedTimes - a.totalPlayedTimes;
   });
-
-  // Extracting teams and their players
-  const homeFaction = playersData.homeFaction;
-  const enemyFaction = playersData.enemyFaction;
-
-  const homeFactionCaptain = homeFaction.find((player: any) => player.captain);
-  const enemyFactionCaptain = enemyFaction.find(
-    (player: any) => player.captain
-  );
-
-  // Adding skill level icons next to each player name
-  const homePlayers = homeFaction
-    .map(
-      (player: any) =>
-        `${getSkillLevelEmoji(player.faceitLevel)} ${player.nickname}${
-          player.captain ? "*" : ""
-        }`
-    )
-    .join("\n");
-  const enemyPlayers = enemyFaction
-    .map(
-      (player: any) =>
-        `${getSkillLevelEmoji(player.faceitLevel)} ${player.nickname}${
-          player.captain ? "*" : ""
-        }`
-    )
-    .join("\n");
-
-  // Getting most likely picks and bans with map emojis
-  const mostLikelyPicks = sortedMapData
-    .slice(0, 4)
-    .map(
-      (map: any) =>
-        `${getMapEmoji(map.mapName)} ${formattedMapName(map.mapName)}`
-    )
-    .join("\n");
-
-  // Sort maps in ascending order of played times for most likely bans
-  const mostLikelyBans = sortedMapData
-    .slice()
-    .sort((a: any, b: any) => a.totalPlayedTimes - b.totalPlayedTimes) // Sort by least played first
-    .slice(0, 3) // Take the least played 3 maps
-    .map(
-      (map: any) =>
-        `${getMapEmoji(map.mapName)} ${formattedMapName(map.mapName)}`
-    )
-    .join("\n");
 
   // Creating the map stats table content (without map icons)
   const mapDataTable = sortedMapData
@@ -251,23 +205,8 @@ export const createMatchAnalysisEmbed = (
 
   // Create the embed
   const embed = new EmbedBuilder()
-    .setTitle(`Map stats (Team ${homeFactionCaptain.nickname})`)
+    .setTitle(`Map stats (Team ${playersData.homeFaction[0]?.nickname})`)
     .addFields(
-      // {
-      //   name: `Team ${homeFactionCaptain.nickname}`,
-      //   value: homePlayers,
-      //   inline: true,
-      // },
-      // {
-      //   name: "\u200B", // Empty field to force a new line
-      //   value: "\u200B",
-      //   inline: true,
-      // },
-      // {
-      //   name: `Team ${enemyFactionCaptain.nickname}`,
-      //   value: enemyPlayers,
-      //   inline: true,
-      // },
       {
         name: `Map stats for other team (Last 50 games)`,
         value:
@@ -279,19 +218,12 @@ export const createMatchAnalysisEmbed = (
         name: "Match page",
         value: `[🔗 Link](https://www.faceit.com/en/cs2/room/${matchId})`,
       }
-      // { name: "They likely pick", value: mostLikelyPicks, inline: true },
-      // {
-      //   name: "\u200B", // Empty field to force a new line
-      //   value: "\u200B",
-      //   inline: true,
-      // },
-      // { name: "They likely ban", value: mostLikelyBans, inline: true }
     )
     .setFooter({ text: `${matchId}` })
     .setColor("#ff5733")
     .setTimestamp();
 
-  // Pass the embed and the button to sendEmbedMessage
+  // Send the embed to the designated channel
   sendEmbedMessage(embed, [], config.MATCHROOM_ANALYSIS_CHANNEL_ID);
   return;
 };
@@ -397,11 +329,12 @@ export const updateLiveScoreCard = async (match: Match) => {
   console.log(`Live score updated for matchId: ${match.matchId}`);
 };
 
-export const deleteMatchCards = async (matchId: string) => {
+export const deleteMatchCards = async () => {
   const channelIDs = [
     config.MATCHROOM_ANALYSIS_CHANNEL_ID,
     config.BOT_LIVE_SCORE_CARDS_CHANNEL,
   ];
+
   for (const channelId of channelIDs) {
     try {
       // Fetch the Discord channel
@@ -411,26 +344,36 @@ export const deleteMatchCards = async (matchId: string) => {
         continue; // Skip to the next channel.
       }
 
-      // Fetch the last 10 messages from the channel
-      const messages = await channel.messages.fetch({ limit: 10 });
+      // Fetch the last 100 messages from the channel (increase limit to check more)
+      const messages = await channel.messages.fetch({ limit: 5 });
 
-      // Find the message with the embed containing the matchId in its footer
-      const targetMessage = messages.find((message) =>
-        message.embeds.some((embed) => embed.footer?.text === matchId)
-      );
+      // Iterate through all the messages
+      for (const message of messages.values()) {
+        // Check if the message has embeds
+        for (const embed of message.embeds) {
+          const matchId = embed.footer?.text;
 
-      if (!targetMessage) {
-        continue; // Skip to the next channel
+          if (!matchId) continue; // Skip if there's no matchId in the footer
+
+          // Check if the match exists in the database
+          const doesExist = await checkMatchExists(matchId);
+
+          // Check if the embed is older than 10 minutes
+          const isOlderThan10Minutes =
+            Date.now() - message.createdAt.getTime() > 10 * 60 * 1000;
+
+          // If the match doesn't exist or the embed is too old, delete it
+          if (!doesExist || isOlderThan10Minutes) {
+            await message.delete();
+            console.log(
+              `Deleted embed for matchId: ${matchId} in channel ${channelId}`
+            );
+          }
+        }
       }
-
-      // Delete the message
-      await targetMessage.delete();
-      console.log(
-        `Live score card deleted for matchId: ${matchId} in channel ${channelId}`
-      );
     } catch (error) {
       console.error(
-        `Failed to delete match card in channel ${channelId}:`,
+        `Failed to process messages in channel ${channelId}:`,
         error
       );
     }
