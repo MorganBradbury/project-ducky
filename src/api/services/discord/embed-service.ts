@@ -324,9 +324,11 @@ export const createLiveScoreCard = async (match: Match) => {
     false
   );
 
+  const score = matchScore.join(":");
+
   // Create the embed
   const embed = new EmbedBuilder()
-    .setTitle(`${ChannelIcons.Active}  Live match`)
+    .setTitle(`${ChannelIcons.Active}  Live match (${score})`)
     .addFields(
       {
         name: `Players in game`,
@@ -346,23 +348,11 @@ export const createLiveScoreCard = async (match: Match) => {
         inline: true,
       }
     )
-    .addFields(
-      {
-        name: "Live score",
-        value: `${matchScore.join(":")}`,
-        inline: true,
-      },
-      {
-        name: "\u200B", // Empty field to force a new line
-        value: "\u200B",
-        inline: true,
-      },
-      {
-        name: "Match page",
-        value: `[🔗 Link](https://www.faceit.com/en/cs2/room/${match?.matchId})`,
-        inline: true,
-      }
-    )
+    .addFields({
+      name: "Match page",
+      value: `[🔗 Link](https://www.faceit.com/en/cs2/room/${match?.matchId})`,
+      inline: false,
+    })
     .setFooter({ text: `${match.matchId}` })
     .setColor("#464dd4");
 
@@ -400,24 +390,21 @@ export const updateLiveScoreCard = async (match: Match) => {
     match.trackedTeam.faction,
     false
   );
-  const newScore = `${matchScore.join(":")}`;
+  const newScore = matchScore.join(":");
 
-  // Extract the embed and find the current score
+  // Extract the embed and check if the score needs updating
   const embed = targetMessage.embeds[0];
-  const currentScoreField = embed.fields.find(
-    (field) => field.name === "Live score"
-  );
+  const currentTitle = embed.title;
+  const currentScore = currentTitle?.split(" (")[1]?.split(")")[0]; // Extract current score from title
 
   // If the score hasn't changed, skip the update
-  if (currentScoreField?.value === newScore) {
+  if (currentScore === newScore) {
     return;
   }
 
-  // Update the embed with the new score
-  const updatedEmbed = EmbedBuilder.from(embed).setFields(
-    embed.fields.map((field) =>
-      field.name === "Live score" ? { ...field, value: newScore } : field
-    )
+  // Update the embed with the new score in the title
+  const updatedEmbed = EmbedBuilder.from(embed).setTitle(
+    `${ChannelIcons.Active}  Live match (${newScore})`
   );
 
   // Edit the message with the updated embed
