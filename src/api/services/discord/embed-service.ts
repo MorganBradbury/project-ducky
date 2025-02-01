@@ -332,7 +332,7 @@ export const createLiveScoreCard = async (match: Match) => {
 
   // Create the embed
   const embed = new EmbedBuilder()
-    .setTitle(`${mapEmoji} ${mapName}: (${score})`) // Updated title format
+    .setTitle(`${mapEmoji}  ${mapName}: (${score})`) // Updated title format
     .addFields(
       {
         name: `Players in game`,
