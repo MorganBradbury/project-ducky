@@ -155,7 +155,7 @@ export const sendMatchFinishNotification = async (match: Match) => {
           inline: true,
         },
         {
-          name: "\u200B",  // Empty field to force a new line
+          name: "\u200B", // Empty field to force a new line
           value: "\u200B",
           inline: true,
         },
@@ -272,7 +272,7 @@ export const createMatchAnalysisEmbed = (
         inline: true,
       },
       {
-        name: "\u200B",  // Empty field to force a new line
+        name: "\u200B", // Empty field to force a new line
         value: "\u200B",
         inline: true,
       },
@@ -290,7 +290,7 @@ export const createMatchAnalysisEmbed = (
       },
       { name: "They likely pick", value: mostLikelyPicks, inline: true },
       {
-        name: "\u200B",  // Empty field to force a new line
+        name: "\u200B", // Empty field to force a new line
         value: "\u200B",
         inline: true,
       },
@@ -334,7 +334,7 @@ export const createLiveScoreCard = async (match: Match) => {
         inline: true,
       },
       {
-        name: "\u200B",  // Empty field to force a new line
+        name: "\u200B", // Empty field to force a new line
         value: "\u200B",
         inline: true,
       },
@@ -344,7 +344,7 @@ export const createLiveScoreCard = async (match: Match) => {
           match.mapName
         )}`,
         inline: true,
-      },
+      }
     )
     .addFields(
       {
@@ -353,7 +353,7 @@ export const createLiveScoreCard = async (match: Match) => {
         inline: true,
       },
       {
-        name: "\u200B",  // Empty field to force a new line
+        name: "\u200B", // Empty field to force a new line
         value: "\u200B",
         inline: true,
       },
@@ -436,7 +436,7 @@ export const deleteMatchCards = async (matchId: string) => {
       const channel = await client.channels.fetch(channelId);
       if (!channel || !channel.isTextBased()) {
         console.error(`Channel ${channelId} is invalid or not text-based.`);
-        continue; // Skip to the next channel
+        continue; // Skip to the next channel.
       }
 
       // Fetch the last 10 messages from the channel
