@@ -254,7 +254,7 @@ export async function createLeaderboardEmbed() {
   // Column widths based on the provided string:
   const columnWidths = {
     player: 14, // Player column width
-    elo: 6, // Elo column width
+    elo: 4, // Elo column width
     change: 10, // This week column width
   };
 
@@ -262,6 +262,18 @@ export async function createLeaderboardEmbed() {
   const divider = `${"-".repeat(columnWidths.player)}|${"-".repeat(
     columnWidths.elo
   )}|${"-".repeat(columnWidths.change)}`;
+
+  // Function to format player name to 14 characters
+  function formatPlayerName(index: number, playerName: string): string {
+    let formattedName = `(${index + 1}) ${playerName}`.padEnd(
+      columnWidths.player
+    ); // Add index and pad
+    if (formattedName.length > columnWidths.player) {
+      formattedName =
+        formattedName.substring(0, columnWidths.player - 2) + ".."; // Trim and add ".."
+    }
+    return formattedName;
+  }
 
   // Add the first field with column headings
   embed.addFields({
@@ -280,8 +292,9 @@ export async function createLeaderboardEmbed() {
             .padEnd(columnWidths.elo)}`;
           const changeThisWeek = "No change"; // Use fixed "No change" for consistency
 
-          return `\`(${index + 1}) ${user.faceitUsername.padEnd(
-            columnWidths.player
+          return `\`${formatPlayerName(
+            index,
+            user.faceitUsername
           )} | ${formattedElo} | ${changeThisWeek.padEnd(
             columnWidths.change
           )}\``;
