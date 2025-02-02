@@ -232,7 +232,7 @@ export async function sendNewUserNotification(
   await sendEmbedMessage(embed, config.NEW_USER_CHANNEL);
 }
 
-export async function createLeaderboardEmbed() {
+export async function updateLeaderboardEmbed() {
   const channel = await client.channels.fetch(config.LEADERBOARD_CHANNEL);
   if (!channel || !channel.isTextBased()) return;
   try {
@@ -312,7 +312,7 @@ function formatLeaderboardTable(
       const formattedElo = `${user.previousElo
         .toString()
         .padEnd(columnWidths.elo)}`;
-      const changeThisWeek = "📈 +310"; // Example change
+      const changeThisWeek = "➡ +0"; // Example change
 
       return `\`${formatPlayerName(
         startIndex + index,

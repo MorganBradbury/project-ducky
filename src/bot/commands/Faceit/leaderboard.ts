@@ -1,10 +1,4 @@
-import {
-  ChatInputCommandInteraction,
-  EmbedBuilder,
-  MessageFlags,
-} from "discord.js";
-import { getAllUsers } from "../../../db/commands";
-import { createLeaderboardEmbed } from "../../../api/services/discord/embed-service";
+import { ChatInputCommandInteraction, MessageFlags } from "discord.js";
 
 export const leaderboardCommand = {
   name: "leaderboard",
@@ -12,9 +6,9 @@ export const leaderboardCommand = {
   options: [],
   execute: async (interaction: ChatInputCommandInteraction) => {
     console.log("go and send embed");
-    await createLeaderboardEmbed();
     await interaction.reply({
-      content: "This command has now moved to the Leaderboard channel",
+      content:
+        "This command has been deleted. Leaderboard now exists in the Leaderboard channel and works in real-time.",
       flags: MessageFlags.Ephemeral,
     });
 

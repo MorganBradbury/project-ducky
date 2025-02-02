@@ -19,6 +19,7 @@ import {
   createMatchAnalysisEmbed,
   deleteMatchCards,
   matchEndNotification,
+  updateLeaderboardEmbed,
 } from "./discord/embed-service";
 import { runEloUpdate } from "./discord/user-service";
 import axios from "axios";
@@ -94,6 +95,7 @@ export const endMatch = async (matchId: string) => {
   }
 
   await deleteMatchCards(matchId);
+  await updateLeaderboardEmbed();
 };
 
 export const cancelMatch = async (matchId: string) => {
