@@ -263,7 +263,7 @@ export async function createLeaderboardEmbed() {
     columnWidths.elo + 2
   )}|${"-".repeat(columnWidths.change)}`;
 
-  // Function to format player name to 14 characters
+  // Function to format player name to fit in the specified column width
   function formatPlayerName(index: number, playerName: string): string {
     let formattedName = `(${index + 1}) ${playerName}`.padEnd(
       columnWidths.player
@@ -285,42 +285,59 @@ export async function createLeaderboardEmbed() {
       divider +
       "`" +
       "\n" +
-      userChunks[0]
-        .map((user, index) => {
-          const formattedElo = `${user.previousElo
-            .toString()
-            .padEnd(columnWidths.elo)}`;
-          const changeThisWeek = "📈 +31"; // Use fixed "No change" for consistency
+      userChunks
+        .slice(0, 6) // Get the first 6 chunks (first row)
+        .map((userChunk, chunkIndex) => {
+          return userChunk
+            .map((user, index) => {
+              const formattedElo = `${user.previousElo
+                .toString()
+                .padEnd(columnWidths.elo)}`;
+              const changeThisWeek = "📈 +31"; // Use fixed "No change" for consistency
 
-          return `\`${formatPlayerName(
-            index,
-            user.faceitUsername
-          )} | ${formattedElo} | ${changeThisWeek.padEnd(
-            columnWidths.change
-          )}\``;
+              return `\`${formatPlayerName(
+                chunkIndex * chunkSize + index,
+                user.faceitUsername
+              )} | ${formattedElo} | ${changeThisWeek.padEnd(
+                columnWidths.change
+              )}\``;
+            })
+            .join("\n");
         })
-        .join("\n"),
+        .join("\n\n"), // Join chunks in the same row with an empty line in between them
   });
 
-  // Add remaining fields for each chunk (ensure it's userChunks[i] here)
-  for (let i = 1; i < userChunks.length; i++) {
+  // Add remaining fields for the second page (next rows)
+  for (let i = 6; i < userChunks.length; i += 6) {
     embed.addFields({
       name: `\u200B`,
-      value: userChunks[i] // Fix: use userChunks[i], not userChunks[0]
-        .map((user, index) => {
-          const formattedElo = `${user.previousElo
-            .toString()
-            .padEnd(columnWidths.elo)}`;
-          const changeThisWeek = "📈 +31"; // Use fixed "No change" for consistency
+      value:
+        "`Player          | Elo  | Change `" +
+        "\n" +
+        "`" +
+        divider +
+        "`" +
+        "\n" +
+        userChunks
+          .slice(i, i + 6) // Get the next set of 6 chunks
+          .map((userChunk, chunkIndex) => {
+            return userChunk
+              .map((user, index) => {
+                const formattedElo = `${user.previousElo
+                  .toString()
+                  .padEnd(columnWidths.elo)}`;
+                const changeThisWeek = "📈 +31"; // Use fixed "No change" for consistency
 
-          return `\`${formatPlayerName(
-            i * chunkSize + index,
-            user.faceitUsername
-          )} | ${formattedElo} | ${changeThisWeek.padEnd(
-            columnWidths.change
-          )}\``;
-        })
-        .join("\n"),
+                return `\`${formatPlayerName(
+                  chunkIndex * chunkSize + index,
+                  user.faceitUsername
+                )} | ${formattedElo} | ${changeThisWeek.padEnd(
+                  columnWidths.change
+                )}\``;
+              })
+              .join("\n");
+          })
+          .join("\n\n"), // Join chunks in the same row with an empty line in between them
     });
   }
 
