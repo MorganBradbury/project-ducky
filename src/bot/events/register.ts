@@ -8,7 +8,7 @@ import {
   updateLinkedRole,
   updateServerRoles,
 } from "../../api/services/discord/roles-service";
-import { sendNewUserNotification } from "../../api/services/discord/embed-service";
+import { sendNewUserNotification, updateLeaderboardEmbed } from "../../api/services/discord/embed-service";
 
 const monitoredChannelId = "1327303978223931462"; // Replace with the ID of the channel to monitor
 
@@ -127,6 +127,7 @@ client.on("messageCreate", async (message) => {
     );
     console.log(`Sent welcome message to channel ${welcomeChannelId}`);
     await sendNewUserNotification(userTag, player.id);
+    updateLeaderboardEmbed();
   } catch (error) {
     console.error("Error processing message:", error);
     await message.reply({ content: `An error occurred: ${error}` });
