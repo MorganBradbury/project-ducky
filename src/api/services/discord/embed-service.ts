@@ -16,6 +16,7 @@ import {
   prepareScoreUpdate,
 } from "../../../utils/faceitHelper";
 import client from "../../../bot/client";
+import { getAllUsers } from "../../../db/commands";
 
 export async function sendEmbedMessage(
   embed: EmbedBuilder,
@@ -228,4 +229,38 @@ export async function sendNewUserNotification(
     .setColor("#c2a042");
 
   await sendEmbedMessage(embed, config.NEW_USER_CHANNEL);
+}
+
+export async function createLeaderboardEmbed() {
+  const users = await getAllUsers();
+
+  // Sort users by ELO in descending order
+  const sortedUsers = users.sort((a, b) => b.previousElo - a.previousElo);
+
+  // Create the leaderboard table
+  const leaderboardTable = sortedUsers
+    .map((user, index) => {
+      const formattedElo = `${user.previousElo.toString().padEnd(6)}`;
+      const changeThisWeek = "No change this week";
+
+      return `\`(${index + 1}) ${user.discordUsername.padEnd(
+        12
+      )} | ${formattedElo} | ${changeThisWeek.padEnd(6)}\``;
+    })
+    .join("\n");
+
+  const embed = new EmbedBuilder()
+    .setTitle(`Leaderboard (LIVE)`)
+    .addFields({
+      name: `Leaderboard`,
+      value:
+        "`Player       | Elo    |       `\n" +
+        "`-------------|--------|-------`\n" +
+        leaderboardTable,
+    })
+    .setFooter({ text: `Last updated` })
+    .setColor(`#${EMBED_COLOURS.ANALYSIS}`)
+    .setTimestamp();
+
+  await sendEmbedMessage(embed, config.LEADERBOARD_CHANNEL);
 }
