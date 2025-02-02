@@ -251,22 +251,33 @@ export async function createLeaderboardEmbed() {
     .setColor(`#${EMBED_COLOURS.ANALYSIS}`)
     .setTimestamp();
 
+  // Column widths based on the provided string:
+  const columnWidths = {
+    player: 20, // Player column width
+    elo: 6, // Elo column width
+    change: 5, // This week column width
+  };
+
   // Add the first field with column headings
   embed.addFields({
     name: `Leaderboard`,
     value:
-      "`Player                 | Elo  | Change`" +
+      "`Player                 | Elo  | This week`" +
       "\n" +
-      "`-----------------------|------|-------`" +
+      "`--------------------|-----|----------`" +
       "\n" +
       userChunks[0]
         .map((user, index) => {
-          const formattedElo = `${user.previousElo.toString().padEnd(4)}`;
-          const changeThisWeek = "No change";
+          const formattedElo = `${user.previousElo
+            .toString()
+            .padEnd(columnWidths.elo)}`;
+          const changeThisWeek = "No change"; // Use fixed "No change" for consistency
 
           return `\`(${index + 1}) ${user.faceitUsername.padEnd(
-            22
-          )} | ${formattedElo} | ${changeThisWeek.padEnd(5)}\``;
+            columnWidths.player
+          )} | ${formattedElo} | ${changeThisWeek.padEnd(
+            columnWidths.change
+          )}\``;
         })
         .join("\n"),
   });
@@ -277,14 +288,18 @@ export async function createLeaderboardEmbed() {
       name: `\u200B`,
       value: userChunks[i]
         .map((user, index) => {
-          const formattedElo = `${user.previousElo.toString().padEnd(4)}`;
-          const changeThisWeek = "No change";
+          const formattedElo = `${user.previousElo
+            .toString()
+            .padEnd(columnWidths.elo)}`;
+          const changeThisWeek = "No change"; // Ensure this is the same value for consistency
 
           return `\`(${
             i * chunkSize + index + 1
           }) ${user.discordUsername.padEnd(
-            22
-          )} | ${formattedElo} | ${changeThisWeek.padEnd(5)}\``;
+            columnWidths.player
+          )} | ${formattedElo} | ${changeThisWeek.padEnd(
+            columnWidths.change
+          )}\``;
         })
         .join("\n"),
     });
