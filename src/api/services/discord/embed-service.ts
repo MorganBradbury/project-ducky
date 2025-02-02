@@ -259,7 +259,7 @@ export async function createLeaderboardEmbed() {
   };
 
   // Create the divider line by repeating '-' based on columnWidths
-  const divider = `${"-".repeat(columnWidths.player)}|${"-".repeat(
+  const divider = `${"-".repeat(columnWidths.player + 1)}|${"-".repeat(
     columnWidths.elo
   )}|${"-".repeat(columnWidths.change)}`;
 
