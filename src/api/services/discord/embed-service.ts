@@ -306,22 +306,28 @@ export async function createLeaderboardEmbed() {
   for (let i = 1; i < userChunks.length; i++) {
     embed.addFields({
       name: `\u200B`,
-      value: userChunks[i]
-        .map((user, index) => {
-          const formattedElo = `${user.previousElo
-            .toString()
-            .padEnd(columnWidths.elo)}`;
-          const changeThisWeek = "No change"; // Ensure this is the same value for consistency
+      value:
+        "`Player        | Elo  | This week`" +
+        "\n" +
+        "`" +
+        divider +
+        "`" +
+        "\n" +
+        userChunks[0]
+          .map((user, index) => {
+            const formattedElo = `${user.previousElo
+              .toString()
+              .padEnd(columnWidths.elo)}`;
+            const changeThisWeek = "No change"; // Use fixed "No change" for consistency
 
-          return `\`(${
-            i * chunkSize + index + 1
-          }) ${user.discordUsername.padEnd(
-            columnWidths.player
-          )} | ${formattedElo} | ${changeThisWeek.padEnd(
-            columnWidths.change
-          )}\``;
-        })
-        .join("\n"),
+            return `\`${formatPlayerName(
+              index,
+              user.faceitUsername
+            )} | ${formattedElo} | ${changeThisWeek.padEnd(
+              columnWidths.change
+            )}\``;
+          })
+          .join("\n"),
     });
   }
 
