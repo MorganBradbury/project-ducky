@@ -75,3 +75,22 @@ export const ENDPOINTS = {
   voiceStatus: (channelId: string) =>
     `${BASE_URL}/channels/${channelId}/voice-status`,
 } as const;
+
+export const LINKS = {
+  WEBHOOK:
+    "https://developers.faceit.com/apps/2205acb7-7fb4-4ce4-8a23-871375ee03fa/webhooks/af22807c-f17a-4947-8829-5757ef6a2e34/edit",
+  MATCHROOM: "https://www.faceit.com/en/cs2/room",
+};
+
+export const EMBED_COLOURS = {
+  MAP_WIN: "00FF00",
+  MAP_LOSS: "FF0000",
+  LIVE_SCORE: "464DD4",
+  ANALYSIS: "FF5733",
+};
+
+export const EMPTY_FIELD = {
+  name: "\u200B", // Empty field to force a new line
+  value: "\u200B",
+  inline: true,
+};

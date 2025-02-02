@@ -1,7 +1,12 @@
 import { EmbedBuilder, Message, TextChannel } from "discord.js";
 import { config } from "../../../config";
 import client from "../../../bot/client";
-import { getMapEmoji } from "../../../constants";
+import {
+  EMBED_COLOURS,
+  EMPTY_FIELD,
+  getMapEmoji,
+  LINKS,
+} from "../../../constants";
 import { FaceitService } from "../faceit-service";
 import {
   calculateEloDifference,
@@ -89,7 +94,7 @@ export const sendMatchFinishNotification = async (match: Match) => {
       match.trackedTeam.faction,
       true
     );
-    const didTeamWin = await FaceitService.getMatchResult(
+    const mapWin = await FaceitService.getMatchResult(
       match.matchId,
       match.trackedTeam.faction
     );
@@ -102,7 +107,7 @@ export const sendMatchFinishNotification = async (match: Match) => {
     const mapEmoji = getMapEmoji(match.mapName);
 
     const embed = new EmbedBuilder()
-      .setColor(didTeamWin ? "#00FF00" : "#FF0000")
+      .setColor(`#${mapWin ? EMBED_COLOURS.MAP_WIN : EMBED_COLOURS.MAP_LOSS}`)
       .setTitle(
         `${mapEmoji}  ${formattedMapName}  (${finalScore.join(":") || "N/A"})`
       )
@@ -113,7 +118,7 @@ export const sendMatchFinishNotification = async (match: Match) => {
         },
         {
           name: "Match page",
-          value: `[🔗 Link](https://www.faceit.com/en/cs2/room/${match?.matchId})`,
+          value: `[🔗 Link](${LINKS.MATCHROOM}/${match?.matchId})`,
         }
       )
       .setTimestamp();
@@ -170,11 +175,11 @@ export const createMatchAnalysisEmbed = (
       },
       {
         name: "Match page",
-        value: `[🔗 Link](https://www.faceit.com/en/cs2/room/${matchId})`,
+        value: `[🔗 Link](${LINKS.MATCHROOM}/${matchId})`,
       }
     )
     .setFooter({ text: `${matchId}` })
-    .setColor("#ff5733")
+    .setColor(`#${EMBED_COLOURS.ANALYSIS}`)
     .setTimestamp();
 
   // Send the embed to the designated channel
@@ -209,19 +214,15 @@ export const createLiveScoreCard = async (match: Match) => {
         value: homePlayers,
         inline: true,
       },
-      {
-        name: "\u200B", // Empty field to force a new line
-        value: "\u200B",
-        inline: true,
-      },
+      EMPTY_FIELD,
       {
         name: "Match page",
-        value: `[🔗 Link](https://www.faceit.com/en/cs2/room/${match?.matchId})`,
+        value: `[🔗 Link](${LINKS.MATCHROOM}/${match?.matchId})`,
         inline: true,
       }
     )
     .setFooter({ text: `${match.matchId}` })
-    .setColor("#464dd4");
+    .setColor(`#${EMBED_COLOURS.LIVE_SCORE}`);
 
   // Pass the embed and the button to sendEmbedMessage
   sendEmbedMessage(embed, config.BOT_LIVE_SCORE_CARDS_CHANNEL, match.matchId);
@@ -361,8 +362,7 @@ export async function sendNewUserNotification(
       { name: "FACEIT ID", value: faceitId },
       {
         name: "🔗 Webhook",
-        value:
-          "[Link](https://developers.faceit.com/apps/2205acb7-7fb4-4ce4-8a23-871375ee03fa/webhooks/af22807c-f17a-4947-8829-5757ef6a2e34/edit)",
+        value: `[Link](${LINKS.WEBHOOK})`,
       }
     )
     .setColor("#c2a042");
