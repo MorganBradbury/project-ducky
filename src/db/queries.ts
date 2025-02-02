@@ -9,7 +9,7 @@ export const SQL_QUERIES = {
   WHERE userId = ?
   `,
   SELECT_ALL_USERS: `
-  SELECT userId, discordUsername, faceitUsername, previousElo, gamePlayerId, faceitId
+  SELECT userId, discordUsername, faceitUsername, previousElo, gamePlayerId, faceitId, startOfMonthElo, startOfMonthPosition
   FROM users
   `,
   DELETE_USER: `

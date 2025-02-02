@@ -6,4 +6,6 @@ export type SystemUser = {
   previousElo: number;
   gamePlayerId: string;
   faceitId: string;
+  startOfMonthElo: string;
+  startOfMonthPosition: number;
 };

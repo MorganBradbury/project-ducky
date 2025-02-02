@@ -17,6 +17,7 @@ import {
 } from "../../../utils/faceitHelper";
 import client from "../../../bot/client";
 import { getAllUsers } from "../../../db/commands";
+import { SystemUser } from "../../../types/system-user";
 
 export async function sendEmbedMessage(
   embed: EmbedBuilder,
@@ -273,7 +274,7 @@ export async function updateLeaderboardEmbed() {
 
 // Function to format leaderboard data
 function formatLeaderboardTable(
-  users: any[],
+  users: SystemUser[],
   startIndex: number,
   showHeaders: boolean
 ): string {
@@ -286,7 +287,7 @@ function formatLeaderboardTable(
   // Create the divider line
   const divider = `${"-".repeat(columnWidths.player + 1)}|${"-".repeat(
     columnWidths.elo + 2
-  )}|${"-".repeat(columnWidths.change + 1)}`;
+  )}|${"-".repeat(columnWidths.change)}`;
 
   // Function to format player names
   function formatPlayerName(index: number, playerName: string): string {
@@ -304,7 +305,7 @@ function formatLeaderboardTable(
 
   if (showHeaders) {
     output +=
-      "`Player         | Elo  | Change  `" + "\n" + "`" + divider + "`" + "\n";
+      "`Player         | Elo  | Change `" + "\n" + "`" + divider + "`" + "\n";
   }
 
   output += users
@@ -312,12 +313,17 @@ function formatLeaderboardTable(
       const formattedElo = `${user.previousElo
         .toString()
         .padEnd(columnWidths.elo)}`;
-      const changeThisWeek = " -"; // Example change
+      const changeThisMonth =
+        Number(user.startOfMonthElo) === user.previousElo
+          ? `-`
+          : Number(user.startOfMonthElo) > user.previousElo
+          ? `📉 -${Number(user.startOfMonthElo) - user.previousElo}`
+          : `📈 + ${user.previousElo - Number(user.startOfMonthElo)}`; // Example change
 
       return `\`${formatPlayerName(
         startIndex + index,
         user.faceitUsername
-      )} | ${formattedElo} | ${changeThisWeek.padEnd(columnWidths.change)}\``;
+      )} | ${formattedElo} | ${changeThisMonth.padEnd(columnWidths.change)}\``;
     })
     .join("\n");
 
