@@ -11,7 +11,8 @@ export const leaderboardCommand = {
   description: "Displays the leaderboard of tracked users by ELO.",
   options: [],
   execute: async (interaction: ChatInputCommandInteraction) => {
-    createLeaderboardEmbed();
+    console.log("go and send embed");
+    await createLeaderboardEmbed();
     await interaction.reply(
       "This command has now moved to the Leaderboard channel"
     );

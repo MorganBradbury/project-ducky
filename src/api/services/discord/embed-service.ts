@@ -26,6 +26,7 @@ export async function sendEmbedMessage(
   try {
     const channel = (await client.channels.fetch(channelId)) as TextChannel;
     if (await checkIfAlreadySent(matchId || null, channel)) {
+      console.log(`Embed already sent for matchId: ${matchId}`);
       return;
     }
 
@@ -232,6 +233,7 @@ export async function sendNewUserNotification(
 }
 
 export async function createLeaderboardEmbed() {
+  console.log("received in createLeaderboardEmbed");
   const users = await getAllUsers();
 
   // Sort users by ELO in descending order
