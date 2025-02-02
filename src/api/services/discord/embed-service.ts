@@ -253,9 +253,9 @@ export async function createLeaderboardEmbed() {
 
   // Column widths based on the provided string:
   const columnWidths = {
-    player: 15, // Player column width
+    player: 14, // Player column width
     elo: 4, // Elo column width
-    change: 8, // This week column width
+    change: 9, // This week column width
   };
 
   // Create the divider line by repeating '-' based on columnWidths
@@ -265,7 +265,7 @@ export async function createLeaderboardEmbed() {
 
   // Function to format player name to 14 characters
   function formatPlayerName(index: number, playerName: string): string {
-    let formattedName = `(${index + 1}) ${playerName}`.padEnd(
+    let formattedName = `${index + 1}. ${playerName}`.padEnd(
       columnWidths.player
     ); // Add index and pad
     if (formattedName.length > columnWidths.player) {
