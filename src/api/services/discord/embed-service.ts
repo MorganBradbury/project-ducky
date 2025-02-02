@@ -262,7 +262,7 @@ export async function updateLeaderboardEmbed() {
 
   // Create embed
   const embed = new EmbedBuilder()
-    .setTitle(`Leaderboard (LIVE)`)
+    .setTitle(`🟢 Weekly Leaderboard`)
     .setColor(`#${EMBED_COLOURS.ANALYSIS}`)
     .setTimestamp()
     .setDescription(leaderboardText);
