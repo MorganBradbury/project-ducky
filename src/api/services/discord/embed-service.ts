@@ -261,9 +261,12 @@ export async function updateLeaderboardEmbed() {
     leaderboardText = leaderboardText.substring(0, 4093) + "..."; // Truncate if necessary
   }
 
+  const currentDate = new Date();
+  const monthFormatter = new Intl.DateTimeFormat("en-US", { month: "long" });
+  const currentMonthName = monthFormatter.format(currentDate);
   // Create embed
   const embed = new EmbedBuilder()
-    .setTitle(`🟢 Weekly Leaderboard`)
+    .setTitle(`🟢 Monthly Leaderboard (${currentMonthName})`)
     .setColor(`#${EMBED_COLOURS.ANALYSIS}`)
     .setTimestamp()
     .setDescription(leaderboardText);
