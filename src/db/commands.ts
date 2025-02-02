@@ -191,3 +191,21 @@ export const isMatchProcessed = async (matchId: string): Promise<boolean> => {
     return rows.length > 0 && rows[0]?.processed === 1; // Returns true if processed
   });
 };
+
+// Update the 'processed' column for a match
+export const updatePlayerEloAndPosition = async (
+  userId: number,
+  startOfMonthElo: string,
+  startOfMonthPosition: number
+): Promise<boolean> => {
+  return useConnection(async (connection) => {
+    const [result] = await connection.query(
+      SQL_QUERIES.UPDATE_PLAYER_ELO_AND_POSITION,
+      [startOfMonthElo, startOfMonthPosition, userId]
+    );
+    if ((result as any).affectedRows === 0) {
+      throw new Error(`User ${userId} not found or already processed.`);
+    }
+    return true;
+  });
+};

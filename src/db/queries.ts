@@ -53,4 +53,10 @@ export const SQL_QUERIES = {
   WHERE matchId = ?
   LIMIT 1
 `,
+  UPDATE_PLAYER_ELO_AND_POSITION: `
+  UPDATE users
+  SET startOfMonthElo = ?,
+  startOfMonthPosition = ?
+  WHERE userId = ?
+`,
 };

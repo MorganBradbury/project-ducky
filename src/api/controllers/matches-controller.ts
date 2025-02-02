@@ -6,7 +6,11 @@ import {
   startMatch,
 } from "../services/matches-service"; // Centralized match flow logic
 import { FaceitService } from "../services/faceit-service";
-import { getAllUsers, getMatchDataFromDb } from "../../db/commands";
+import {
+  getAllUsers,
+  getMatchDataFromDb,
+  updatePlayerEloAndPosition,
+} from "../../db/commands";
 import { AcceptedEventTypes } from "../../constants";
 import { getScoreStatusText } from "../../utils/faceitHelper";
 import { updateVoiceChannelStatus } from "../services/discord/channel-service";
@@ -111,9 +115,38 @@ export const updateLeaderboard = async (
   res: Response
 ): Promise<void> => {
   const users = await getAllUsers();
-  // users.forEach(async (user) => {
 
-  // })
+  // Get player data for all users and map them to an array with Elo and userId
+  const playerDataPromises = users.map(async (user) => {
+    const playerData = await FaceitService.getPlayer(user.gamePlayerId);
+    if (playerData === null) {
+      return null; // Skip if no player data
+    }
+    return {
+      userId: user.userId,
+      faceitElo: playerData.faceitElo,
+    };
+  });
 
-  res.status(200).json({ message: users });
+  // Wait for all the player data promises to resolve
+  const playerDataArray = await Promise.all(playerDataPromises);
+
+  // Filter out null results (users with no player data)
+  const validPlayerData = playerDataArray.filter((data) => data !== null);
+
+  // Sort players by Elo in descending order (highest Elo first)
+  validPlayerData.sort((a, b) => b.faceitElo - a.faceitElo);
+
+  // Update Elo and position based on sorted data
+  for (let i = 0; i < validPlayerData.length; i++) {
+    const { userId, faceitElo } = validPlayerData[i];
+    const startOfMonthPosition = i + 1; // Position based on sorted order
+    await updatePlayerEloAndPosition(
+      userId,
+      String(faceitElo),
+      startOfMonthPosition
+    );
+  }
+
+  res.send("Leaderboard updated");
 };
