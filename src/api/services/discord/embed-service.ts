@@ -241,7 +241,7 @@ export async function createLeaderboardEmbed() {
 
   // Format the full leaderboard into one string
   let leaderboardText = formatLeaderboardTable(sortedUsers, 0, true);
-
+  console.log(leaderboardText.length);
   // Ensure description does not exceed 4096 characters
   if (leaderboardText.length > 4096) {
     leaderboardText = leaderboardText.substring(0, 4093) + "..."; // Truncate if necessary
