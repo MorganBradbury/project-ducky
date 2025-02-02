@@ -31,10 +31,11 @@ export const leaderboardCommand = {
         return emojiMap[rank] || `${rank}.`;
       };
 
-      // Split the leaderboard into two columns
-      const halfwayIndex = Math.ceil(sortedUsers.length / 2);
-      const leftColumn = sortedUsers.slice(0, halfwayIndex);
-      const rightColumn = sortedUsers.slice(halfwayIndex);
+      // Calculate column sizes
+      const columnSize = Math.ceil(sortedUsers.length / 3);
+      const firstColumn = sortedUsers.slice(0, columnSize);
+      const secondColumn = sortedUsers.slice(columnSize, columnSize * 2);
+      const thirdColumn = sortedUsers.slice(columnSize * 2);
 
       // Helper function to format a column
       const formatColumn = (column: typeof sortedUsers, offset: number) =>
@@ -47,23 +48,29 @@ export const leaderboardCommand = {
           })
           .join("\n");
 
-      // Format both columns
-      const leftColumnText = formatColumn(leftColumn, 0);
-      const rightColumnText = formatColumn(rightColumn, halfwayIndex);
+      // Format all three columns
+      const firstColumnText = formatColumn(firstColumn, 0);
+      const secondColumnText = formatColumn(secondColumn, columnSize);
+      const thirdColumnText = formatColumn(thirdColumn, columnSize * 2);
 
-      // Create embed with two fields for columns
+      // Create embed with three fields for columns
       const embed = new EmbedBuilder()
         .setTitle("Leaderboard standings")
         .setColor("#FFD700")
         .addFields(
           {
             name: "Leaderboard",
-            value: leftColumnText || "No players",
+            value: firstColumnText || "No players",
             inline: true,
           },
           {
-            name: "...",
-            value: rightColumnText,
+            name: "\u200B",
+            value: secondColumnText || "\u200B",
+            inline: true,
+          },
+          {
+            name: "\u200B",
+            value: thirdColumnText || "\u200B",
             inline: true,
           }
         );
