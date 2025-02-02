@@ -261,7 +261,7 @@ export async function createLeaderboardEmbed() {
   // Create the divider line by repeating '-' based on columnWidths
   const divider = `${"-".repeat(columnWidths.player + 1)}|${"-".repeat(
     columnWidths.elo + 2
-  )}|${"-".repeat(columnWidths.change + 1)}`;
+  )}|${"-".repeat(columnWidths.change)}`;
 
   // Function to format player name to 14 characters
   function formatPlayerName(index: number, playerName: string): string {
