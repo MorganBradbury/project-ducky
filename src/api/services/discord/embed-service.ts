@@ -255,16 +255,18 @@ export async function createLeaderboardEmbed() {
   embed.addFields({
     name: `Leaderboard`,
     value:
-      "`Player       | Elo    |       `\n" +
-      "`-------------|--------|-------`\n" +
+      "`Player                 | Elo  | Change`" +
+      "\n" +
+      "`-----------------------|------|-------`" +
+      "\n" +
       userChunks[0]
         .map((user, index) => {
-          const formattedElo = `${user.previousElo.toString().padEnd(6)}`;
-          const changeThisWeek = "No change this week";
+          const formattedElo = `${user.previousElo.toString().padEnd(4)}`;
+          const changeThisWeek = "No change";
 
           return `\`(${index + 1}) ${user.discordUsername.padEnd(
-            12
-          )} | ${formattedElo} | ${changeThisWeek.padEnd(6)}\``;
+            22
+          )} | ${formattedElo} | ${changeThisWeek.padEnd(5)}\``;
         })
         .join("\n"),
   });
@@ -272,17 +274,17 @@ export async function createLeaderboardEmbed() {
   // Add remaining fields for each chunk
   for (let i = 1; i < userChunks.length; i++) {
     embed.addFields({
-      name: `Leaderboard`,
+      name: `\u200B`,
       value: userChunks[i]
         .map((user, index) => {
-          const formattedElo = `${user.previousElo.toString().padEnd(6)}`;
-          const changeThisWeek = "No change this week";
+          const formattedElo = `${user.previousElo.toString().padEnd(4)}`;
+          const changeThisWeek = "No change";
 
           return `\`(${
             i * chunkSize + index + 1
           }) ${user.discordUsername.padEnd(
-            12
-          )} | ${formattedElo} | ${changeThisWeek.padEnd(6)}\``;
+            22
+          )} | ${formattedElo} | ${changeThisWeek.padEnd(5)}\``;
         })
         .join("\n"),
     });
