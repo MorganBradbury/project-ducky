@@ -259,7 +259,7 @@ export async function createLeaderboardEmbed() {
   };
 
   // Create the divider line by repeating '-' based on columnWidths
-  const divider = `${"-".repeat(columnWidths.player + 1)}|${"-".repeat(
+  const divider = `${"-".repeat(columnWidths.player + 2)}|${"-".repeat(
     columnWidths.elo + 2
   )}|${"-".repeat(columnWidths.change)}`;
 
@@ -279,7 +279,7 @@ export async function createLeaderboardEmbed() {
   embed.addFields({
     name: `\u200B`,
     value:
-      "`Player          | Elo  | Change `" +
+      "`Player           | Elo  | Change `" +
       "\n" +
       "`" +
       divider +
