@@ -239,33 +239,22 @@ export async function createLeaderboardEmbed() {
   // Sort users by ELO in descending order
   const sortedUsers = users.sort((a, b) => b.previousElo - a.previousElo);
 
-  // Split the sorted users into chunks of 12
-  const chunkSize = 12;
-  const userChunks = [];
-  for (let i = 0; i < sortedUsers.length; i += chunkSize) {
-    userChunks.push(sortedUsers.slice(i, i + chunkSize));
+  // Format the full leaderboard into one string
+  let leaderboardText = formatLeaderboardTable(sortedUsers, 0, true);
+
+  // Ensure description does not exceed 4096 characters
+  if (leaderboardText.length > 4096) {
+    leaderboardText = leaderboardText.substring(0, 4093) + "..."; // Truncate if necessary
   }
 
+  // Create embed
   const embed = new EmbedBuilder()
     .setTitle(`Leaderboard (LIVE)`)
     .setColor(`#${EMBED_COLOURS.ANALYSIS}`)
-    .setTimestamp();
+    .setTimestamp()
+    .setDescription(leaderboardText);
 
-  // Add the first field with headings
-  embed.addFields({
-    name: `\u200B`,
-    value: formatLeaderboardTable(userChunks[0], 0, true), // Show headers for first chunk
-  });
-
-  // Add remaining fields without headings
-  for (let i = 1; i < userChunks.length; i++) {
-    embed.addFields({
-      name: `\u200B`,
-      value: formatLeaderboardTable(userChunks[i], i * chunkSize, false), // Hide headers for other chunks
-    });
-  }
-
-  // Send the embed to the channel
+  // Send the embed
   await sendEmbedMessage(embed, config.LEADERBOARD_CHANNEL);
 }
 
@@ -292,8 +281,7 @@ function formatLeaderboardTable(
       columnWidths.player
     );
     if (formattedName.length > columnWidths.player) {
-      formattedName =
-        formattedName.substring(0, columnWidths.player - 2) + ".."; // Trim and add ".."
+      formattedName = formattedName.substring(0, columnWidths.player - 1) + "."; // Trim and add "."
     }
     return formattedName;
   }
