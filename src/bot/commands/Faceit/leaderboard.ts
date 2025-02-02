@@ -13,8 +13,6 @@ export const leaderboardCommand = {
   execute: async (interaction: ChatInputCommandInteraction) => {
     console.log("go and send embed");
     await createLeaderboardEmbed();
-    await interaction.reply({ flags: MessageFlags.Ephemeral });
-
     await interaction.reply({
       content: "This command has now moved to the Leaderboard channel",
       flags: MessageFlags.Ephemeral,
