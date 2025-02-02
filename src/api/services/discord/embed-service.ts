@@ -372,11 +372,11 @@ export const deleteMatchCards = async (matchId?: string) => {
             const doesExist = await checkMatchExists(matchIdFromFooter);
 
             // Check if the embed is older than 10 minutes
-            const isOlderThan10Minutes =
-              Date.now() - message.createdAt.getTime() > 10 * 60 * 1000;
+            const isOlderThan5Minutes =
+              Date.now() - message.createdAt.getTime() > 5 * 60 * 1000;
 
             // If the match doesn't exist or the embed is too old, delete it
-            if (!doesExist || isOlderThan10Minutes) {
+            if (!doesExist && isOlderThan5Minutes) {
               await message.delete();
               console.log(
                 `Deleted embed for matchId: ${matchIdFromFooter} in channel ${matchIdFromFooter}`
