@@ -279,7 +279,7 @@ export async function createLeaderboardEmbed() {
   embed.addFields({
     name: `\u200B`,
     value:
-      "`Player          | Elo  | Change `" +
+      "`Player         | Elo  | Change  `" +
       "\n" +
       "`" +
       divider +
