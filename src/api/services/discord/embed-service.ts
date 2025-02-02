@@ -246,35 +246,48 @@ export async function createLeaderboardEmbed() {
     userChunks.push(sortedUsers.slice(i, i + chunkSize));
   }
 
-  // Send an embed for each chunk
-  for (let i = 0; i < userChunks.length; i++) {
-    const chunk = userChunks[i];
-    const leaderboardTable = chunk
-      .map((user, index) => {
-        const formattedElo = `${user.previousElo.toString().padEnd(6)}`;
-        const changeThisWeek = "No change this week";
+  const embed = new EmbedBuilder()
+    .setTitle(`Leaderboard (LIVE)`)
+    .setColor(`#${EMBED_COLOURS.ANALYSIS}`)
+    .setTimestamp();
 
-        return `\`(${i * chunkSize + index + 1}) ${user.discordUsername.padEnd(
-          12
-        )} | ${formattedElo} | ${changeThisWeek.padEnd(6)}\``;
-      })
-      .join("\n");
+  // Add the first field with column headings
+  embed.addFields({
+    name: `Leaderboard`,
+    value:
+      "`Player       | Elo    |       `\n" +
+      "`-------------|--------|-------`\n" +
+      userChunks[0]
+        .map((user, index) => {
+          const formattedElo = `${user.previousElo.toString().padEnd(6)}`;
+          const changeThisWeek = "No change this week";
 
-    const embed = new EmbedBuilder()
-      .setTitle(`Leaderboard (LIVE)`)
-      .addFields({
-        name: i === 0 ? `Leaderboard` : `Leaderboard - Page ${i + 1}`, // Only first embed gets column headings
-        value:
-          i === 0
-            ? "`Player       | Elo    |       `\n" +
-              "`-------------|--------|-------`\n" +
-              leaderboardTable // Add headings for the first embed
-            : leaderboardTable, // No headings for subsequent embeds
-      })
-      .setFooter({ text: `Page ${i + 1}` }) // Footer shows page number
-      .setColor(`#${EMBED_COLOURS.ANALYSIS}`)
-      .setTimestamp();
+          return `\`(${index + 1}) ${user.discordUsername.padEnd(
+            12
+          )} | ${formattedElo} | ${changeThisWeek.padEnd(6)}\``;
+        })
+        .join("\n"),
+  });
 
-    await sendEmbedMessage(embed, config.LEADERBOARD_CHANNEL);
+  // Add remaining fields for each chunk
+  for (let i = 1; i < userChunks.length; i++) {
+    embed.addFields({
+      name: `Leaderboard`,
+      value: userChunks[i]
+        .map((user, index) => {
+          const formattedElo = `${user.previousElo.toString().padEnd(6)}`;
+          const changeThisWeek = "No change this week";
+
+          return `\`(${
+            i * chunkSize + index + 1
+          }) ${user.discordUsername.padEnd(
+            12
+          )} | ${formattedElo} | ${changeThisWeek.padEnd(6)}\``;
+        })
+        .join("\n"),
+    });
   }
+
+  // Send the embed to the channel
+  await sendEmbedMessage(embed, config.LEADERBOARD_CHANNEL);
 }
