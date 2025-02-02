@@ -264,7 +264,7 @@ export async function createLeaderboardEmbed() {
           const formattedElo = `${user.previousElo.toString().padEnd(4)}`;
           const changeThisWeek = "No change";
 
-          return `\`(${index + 1}) ${user.discordUsername.padEnd(
+          return `\`(${index + 1}) ${user.faceitUsername.padEnd(
             22
           )} | ${formattedElo} | ${changeThisWeek.padEnd(5)}\``;
         })
