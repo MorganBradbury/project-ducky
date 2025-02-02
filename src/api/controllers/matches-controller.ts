@@ -6,7 +6,7 @@ import {
   startMatch,
 } from "../services/matches-service"; // Centralized match flow logic
 import { FaceitService } from "../services/faceit-service";
-import { getMatchDataFromDb } from "../../db/commands";
+import { getAllUsers, getMatchDataFromDb } from "../../db/commands";
 import { AcceptedEventTypes } from "../../constants";
 import { getScoreStatusText } from "../../utils/faceitHelper";
 import { updateVoiceChannelStatus } from "../services/discord/channel-service";
@@ -104,4 +104,16 @@ export const archiveMatches = async (
   await processEmbedsToThreads();
 
   res.status(200).json({ message: "Threads archived" });
+};
+
+export const updateLeaderboard = async (
+  req: Request,
+  res: Response
+): Promise<void> => {
+  const users = await getAllUsers();
+  // users.forEach(async (user) => {
+
+  // })
+
+  res.status(200).json({ message: users });
 };

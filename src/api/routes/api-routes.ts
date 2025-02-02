@@ -9,5 +9,5 @@ export const apiRoutes = express.Router();
 
 apiRoutes.post("/webhook", handleMatchesHook);
 apiRoutes.post("/updatelivescores", updateLiveScores);
-// archive threads
 apiRoutes.post("/archivethreads", archiveMatches);
+apiRoutes.post("/updateleaderboard", archiveMatches);
