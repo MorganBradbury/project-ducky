@@ -302,7 +302,7 @@ export async function createLeaderboardEmbed() {
         .join("\n"),
   });
 
-  // Add remaining fields for each chunk
+  // Add remaining fields for each chunk (ensure it's userChunks[i] here)
   for (let i = 1; i < userChunks.length; i++) {
     embed.addFields({
       name: `\u200B`,
@@ -313,7 +313,7 @@ export async function createLeaderboardEmbed() {
         divider +
         "`" +
         "\n" +
-        userChunks[0]
+        userChunks[i] // Fix: use userChunks[i], not userChunks[0]
           .map((user, index) => {
             const formattedElo = `${user.previousElo
               .toString()
@@ -321,7 +321,7 @@ export async function createLeaderboardEmbed() {
             const changeThisWeek = "No change"; // Use fixed "No change" for consistency
 
             return `\`${formatPlayerName(
-              index,
+              i * chunkSize + index,
               user.faceitUsername
             )} | ${formattedElo} | ${changeThisWeek.padEnd(
               columnWidths.change
