@@ -290,7 +290,7 @@ export async function createLeaderboardEmbed() {
           const formattedElo = `${user.previousElo
             .toString()
             .padEnd(columnWidths.elo)}`;
-          const changeThisWeek = "📈 +31"; // Use fixed "No change" for consistency
+          const changeThisWeek = "📈 +310"; // Use fixed "No change" for consistency
 
           return `\`${formatPlayerName(
             index,
