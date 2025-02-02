@@ -306,28 +306,21 @@ export async function createLeaderboardEmbed() {
   for (let i = 1; i < userChunks.length; i++) {
     embed.addFields({
       name: `\u200B`,
-      value:
-        "`Player        | Elo  | This week`" +
-        "\n" +
-        "`" +
-        divider +
-        "`" +
-        "\n" +
-        userChunks[i] // Fix: use userChunks[i], not userChunks[0]
-          .map((user, index) => {
-            const formattedElo = `${user.previousElo
-              .toString()
-              .padEnd(columnWidths.elo)}`;
-            const changeThisWeek = "No change"; // Use fixed "No change" for consistency
+      value: userChunks[i] // Fix: use userChunks[i], not userChunks[0]
+        .map((user, index) => {
+          const formattedElo = `${user.previousElo
+            .toString()
+            .padEnd(columnWidths.elo)}`;
+          const changeThisWeek = "No change"; // Use fixed "No change" for consistency
 
-            return `\`${formatPlayerName(
-              i * chunkSize + index,
-              user.faceitUsername
-            )} | ${formattedElo} | ${changeThisWeek.padEnd(
-              columnWidths.change
-            )}\``;
-          })
-          .join("\n"),
+          return `\`${formatPlayerName(
+            i * chunkSize + index,
+            user.faceitUsername
+          )} | ${formattedElo} | ${changeThisWeek.padEnd(
+            columnWidths.change
+          )}\``;
+        })
+        .join("\n"),
     });
   }
 
