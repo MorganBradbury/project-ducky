@@ -251,17 +251,17 @@ export async function createLeaderboardEmbed() {
     .setColor(`#${EMBED_COLOURS.ANALYSIS}`)
     .setTimestamp();
 
-  // Add the first field with column headings
+  // Add the first field with headings
   embed.addFields({
     name: `\u200B`,
-    value: formatLeaderboardTable(userChunks[0], 0),
+    value: formatLeaderboardTable(userChunks[0], 0, true), // Show headers for first chunk
   });
 
-  // Add remaining fields for each chunk
+  // Add remaining fields without headings
   for (let i = 1; i < userChunks.length; i++) {
     embed.addFields({
       name: `\u200B`,
-      value: formatLeaderboardTable(userChunks[i], i * chunkSize),
+      value: formatLeaderboardTable(userChunks[i], i * chunkSize, false), // Hide headers for other chunks
     });
   }
 
@@ -270,7 +270,11 @@ export async function createLeaderboardEmbed() {
 }
 
 // Function to format leaderboard data
-function formatLeaderboardTable(users: any[], startIndex: number): string {
+function formatLeaderboardTable(
+  users: any[],
+  startIndex: number,
+  showHeaders: boolean
+): string {
   const columnWidths = {
     player: 14, // Player column width
     elo: 4, // Elo column width
@@ -295,25 +299,26 @@ function formatLeaderboardTable(users: any[], startIndex: number): string {
   }
 
   // Format the leaderboard table
-  return (
-    "`Player         | Elo  | Change `" +
-    "\n" +
-    "`" +
-    divider +
-    "`" +
-    "\n" +
-    users
-      .map((user, index) => {
-        const formattedElo = `${user.previousElo
-          .toString()
-          .padEnd(columnWidths.elo)}`;
-        const changeThisWeek = "📈 +310"; // Example change
+  let output = "";
 
-        return `\`${formatPlayerName(
-          startIndex + index,
-          user.faceitUsername
-        )} | ${formattedElo} | ${changeThisWeek.padEnd(columnWidths.change)}\``;
-      })
-      .join("\n")
-  );
+  if (showHeaders) {
+    output +=
+      "`Player         | Elo  | Change `" + "\n" + "`" + divider + "`" + "\n";
+  }
+
+  output += users
+    .map((user, index) => {
+      const formattedElo = `${user.previousElo
+        .toString()
+        .padEnd(columnWidths.elo)}`;
+      const changeThisWeek = "📈 +310"; // Example change
+
+      return `\`${formatPlayerName(
+        startIndex + index,
+        user.faceitUsername
+      )} | ${formattedElo} | ${changeThisWeek.padEnd(columnWidths.change)}\``;
+    })
+    .join("\n");
+
+  return output;
 }
