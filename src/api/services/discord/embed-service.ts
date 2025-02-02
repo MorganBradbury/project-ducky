@@ -255,7 +255,7 @@ export async function createLeaderboardEmbed() {
   const columnWidths = {
     player: 15, // Player column width
     elo: 4, // Elo column width
-    change: 8, // This week column width
+    change: 9, // This week column width
   };
 
   // Create the divider line by repeating '-' based on columnWidths
