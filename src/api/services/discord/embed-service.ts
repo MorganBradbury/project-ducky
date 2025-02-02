@@ -239,30 +239,42 @@ export async function createLeaderboardEmbed() {
   // Sort users by ELO in descending order
   const sortedUsers = users.sort((a, b) => b.previousElo - a.previousElo);
 
-  // Create the leaderboard table
-  const leaderboardTable = sortedUsers
-    .map((user, index) => {
-      const formattedElo = `${user.previousElo.toString().padEnd(6)}`;
-      const changeThisWeek = "No change this week";
+  // Split the sorted users into chunks of 12
+  const chunkSize = 12;
+  const userChunks = [];
+  for (let i = 0; i < sortedUsers.length; i += chunkSize) {
+    userChunks.push(sortedUsers.slice(i, i + chunkSize));
+  }
 
-      return `\`(${index + 1}) ${user.discordUsername.padEnd(
-        12
-      )} | ${formattedElo} | ${changeThisWeek.padEnd(6)}\``;
-    })
-    .join("\n");
+  // Send an embed for each chunk
+  for (let i = 0; i < userChunks.length; i++) {
+    const chunk = userChunks[i];
+    const leaderboardTable = chunk
+      .map((user, index) => {
+        const formattedElo = `${user.previousElo.toString().padEnd(6)}`;
+        const changeThisWeek = "No change this week";
 
-  const embed = new EmbedBuilder()
-    .setTitle(`Leaderboard (LIVE)`)
-    .addFields({
-      name: `Leaderboard`,
-      value:
-        "`Player       | Elo    |       `\n" +
-        "`-------------|--------|-------`\n" +
-        leaderboardTable,
-    })
-    .setFooter({ text: `Last updated` })
-    .setColor(`#${EMBED_COLOURS.ANALYSIS}`)
-    .setTimestamp();
+        return `\`(${i * chunkSize + index + 1}) ${user.discordUsername.padEnd(
+          12
+        )} | ${formattedElo} | ${changeThisWeek.padEnd(6)}\``;
+      })
+      .join("\n");
 
-  await sendEmbedMessage(embed, config.LEADERBOARD_CHANNEL);
+    const embed = new EmbedBuilder()
+      .setTitle(`Leaderboard (LIVE)`)
+      .addFields({
+        name: i === 0 ? `Leaderboard` : `Leaderboard - Page ${i + 1}`, // Only first embed gets column headings
+        value:
+          i === 0
+            ? "`Player       | Elo    |       `\n" +
+              "`-------------|--------|-------`\n" +
+              leaderboardTable // Add headings for the first embed
+            : leaderboardTable, // No headings for subsequent embeds
+      })
+      .setFooter({ text: `Page ${i + 1}` }) // Footer shows page number
+      .setColor(`#${EMBED_COLOURS.ANALYSIS}`)
+      .setTimestamp();
+
+    await sendEmbedMessage(embed, config.LEADERBOARD_CHANNEL);
+  }
 }
