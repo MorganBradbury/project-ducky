@@ -282,7 +282,7 @@ function formatLeaderboardTable(
   showHeaders: boolean
 ): string {
   const columnWidths = {
-    player: 14, // Player column width
+    player: 12, // Player column width
     elo: 4, // Elo column width
     change: 8, // This week column width
   };
@@ -294,7 +294,7 @@ function formatLeaderboardTable(
 
   // Function to format player names
   function formatPlayerName(index: number, playerName: string): string {
-    let formattedName = `${index + 1}. ${playerName}`.padEnd(
+    let formattedName = `${index + 1}.${playerName}`.padEnd(
       columnWidths.player
     );
     if (formattedName.length > columnWidths.player) {
@@ -308,7 +308,7 @@ function formatLeaderboardTable(
 
   if (showHeaders) {
     output +=
-      "`Player         | Elo  | +/-    `" + "\n" + "`" + divider + "`" + "\n";
+      "`Player       | Elo  | +/-    `" + "\n" + "`" + divider + "`" + "\n";
   }
 
   output += users
