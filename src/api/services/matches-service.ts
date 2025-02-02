@@ -119,7 +119,7 @@ export const cancelMatch = async (matchId: string) => {
     await updateVoiceChannelStatus(match.voiceChannelId, "");
   }
 
-  await deleteMatchCards(matchId);
+  await deleteMatchCards(matchId, true);
 };
 
 export const getMatchAnalysis = async (matchId: string): Promise<any> => {

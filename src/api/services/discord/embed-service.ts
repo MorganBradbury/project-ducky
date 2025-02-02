@@ -283,7 +283,10 @@ export const updateLiveScoreCard = async (match: Match) => {
   console.log(`Live score updated for matchId: ${match.matchId}`);
 };
 
-export const deleteMatchCards = async (matchId?: string) => {
+export const deleteMatchCards = async (
+  matchId?: string,
+  forceDelete?: boolean
+) => {
   const channelIDs = [
     config.MATCHROOM_ANALYSIS_CHANNEL_ID, // New functionality
     config.BOT_LIVE_SCORE_CARDS_CHANNEL, // Old functionality
@@ -330,7 +333,7 @@ export const deleteMatchCards = async (matchId?: string) => {
               Date.now() - message.createdAt.getTime() > 5 * 60 * 1000;
 
             // If the match doesn't exist or the embed is too old, delete it
-            if (!doesExist && isOlderThan5Minutes) {
+            if ((!doesExist && isOlderThan5Minutes) || forceDelete) {
               await message.delete();
               console.log(
                 `Deleted embed for matchId: ${matchIdFromFooter} in channel ${matchIdFromFooter}`
