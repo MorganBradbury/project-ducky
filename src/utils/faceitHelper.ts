@@ -1,6 +1,11 @@
 import { SystemUser } from "../types/system-user";
-import { getAllUsers } from "../db/commands";
+import { checkMatchExists, getAllUsers } from "../db/commands";
 import { FaceitService } from "../api/services/faceit-service";
+import { EmbedBuilder, Message, TextChannel } from "discord.js";
+import client from "../bot/client";
+import { Match } from "../types/Faceit/match";
+import { getMapEmoji } from "../constants";
+import { config } from "../config";
 
 export const getTrackedPlayers = async (teams: any): Promise<SystemUser[]> => {
   const allTrackedUsers = await getAllUsers();
@@ -135,3 +140,162 @@ export const formatMapData = (
     averageWinPercentage: (stats.totalWinPercentage / playerCount).toFixed(2),
   }));
 };
+
+export async function checkIfAlreadySent(
+  matchId: string | null,
+  channel: TextChannel
+): Promise<boolean> {
+  if (!matchId) {
+    return false;
+  }
+  const messages = await channel.messages.fetch({ limit: 5 });
+
+  return messages.some((message: Message) =>
+    message.embeds.some((embedMsg: any) =>
+      embedMsg.footer?.text?.includes(matchId)
+    )
+  );
+}
+
+export async function generatePlayerStatsTable(
+  playerStatsData: any[],
+  match: Match
+) {
+  return Promise.all(
+    playerStatsData
+      .sort((a: any, b: any) => b.kills - a.kills)
+      .map(async (stat) => {
+        const player = match.trackedTeam.trackedPlayers.find(
+          (player) => player.faceitId === stat.playerId
+        );
+        const eloChange = await calculateEloDifference(
+          player?.previousElo || 0,
+          player?.gamePlayerId || ""
+        );
+
+        const playerName = player?.faceitUsername || "Unknown";
+        const name =
+          playerName.length > 11
+            ? `${playerName.substring(0, 9)}..`
+            : playerName.padEnd(11, " ");
+
+        const kda = `${stat.kills}/${stat.deaths}/${stat.assists}`;
+        const paddedKDA = kda.padEnd(8, " ");
+
+        const elo =
+          `${eloChange?.operator}${eloChange?.difference} (${eloChange?.newElo})`.padEnd(
+            3,
+            " "
+          );
+
+        return `\`${name} ${paddedKDA}  ${elo}\``;
+      })
+  );
+}
+
+function sortMapData(gameData: any[]) {
+  return gameData.sort((a: any, b: any) => {
+    const aWinPercentage = parseFloat(a.averageWinPercentage);
+    const bWinPercentage = parseFloat(b.averageWinPercentage);
+
+    if (b.totalPlayedTimes === a.totalPlayedTimes) {
+      return bWinPercentage - aWinPercentage;
+    }
+    return b.totalPlayedTimes - a.totalPlayedTimes;
+  });
+}
+
+export function generateMapDataTable(gameData: any[]) {
+  const sortedMapData = sortMapData(gameData);
+
+  return sortedMapData
+    .map((map: any) => {
+      const formattedWinPercentage =
+        map.totalPlayedTimes === 0 ||
+        isNaN(parseFloat(map.averageWinPercentage))
+          ? "N/A"
+          : Math.ceil(parseFloat(map.averageWinPercentage)).toString() + "%";
+
+      return `\`${formattedMapName(map.mapName).padEnd(
+        12
+      )} | ${map.totalPlayedTimes
+        .toString()
+        .padEnd(6)} | ${formattedWinPercentage.padEnd(6)}\``;
+    })
+    .join("\n");
+}
+
+export function formatMapInfo(mapName: string) {
+  const mapEmoji = getMapEmoji(mapName);
+  const formattedMapName = mapName
+    .replace(/^de_/, "")
+    .replace(/\b\w/g, (char) => char.toUpperCase());
+
+  return { mapEmoji, formattedMapName };
+}
+
+export async function findMatchMessage(matchId: string, channelId: string) {
+  const channel = await client.channels.fetch(channelId);
+  if (!channel || !channel.isTextBased()) {
+    console.error("Invalid channel or not a text-based channel.");
+    return null;
+  }
+
+  const messages = await channel.messages.fetch({ limit: 10 });
+  return messages.find((message) =>
+    message.embeds.some((embed) => embed.footer?.text === matchId)
+  );
+}
+
+export function prepareScoreUpdate(
+  targetMessage: Message,
+  match: Match,
+  newScore: string
+) {
+  const embed = targetMessage.embeds[0];
+  const currentTitle = embed.title;
+  const currentScore = currentTitle?.split(" (")[1]?.split(")")[0];
+
+  if (currentScore === newScore) {
+    return { shouldUpdate: false, updatedEmbed: null };
+  }
+
+  const { mapEmoji, formattedMapName } = formatMapInfo(match.mapName);
+  const updatedEmbed = EmbedBuilder.from(embed).setTitle(
+    `${mapEmoji}  ${formattedMapName}  (${newScore})`
+  );
+
+  return { shouldUpdate: true, updatedEmbed };
+}
+
+export async function deleteLiveScoreCard(messages: any, matchId?: string) {
+  const targetMessage = messages.find((message: Message) =>
+    message.embeds.some((embed) => embed.footer?.text === matchId)
+  );
+
+  if (targetMessage) {
+    await targetMessage.delete();
+    console.log(`Live score card deleted for matchId: ${matchId}`);
+  }
+}
+
+export async function deleteAnalysisEmbeds(
+  messages: any,
+  forceDelete?: boolean
+) {
+  for (const message of messages.values()) {
+    for (const embed of message.embeds) {
+      const matchIdFromFooter = embed.footer?.text;
+      if (!matchIdFromFooter) continue;
+
+      const doesExist = await checkMatchExists(matchIdFromFooter);
+      const isOlderThan5Minutes =
+        Date.now() - message.createdAt.getTime() > 5 * 60 * 1000;
+
+      if ((!doesExist && isOlderThan5Minutes) || forceDelete) {
+        await message.delete();
+        console.log(`Deleted embed for matchId: ${matchIdFromFooter}`);
+      }
+    }
+  }
+}

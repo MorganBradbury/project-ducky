@@ -1,41 +1,27 @@
-import { EmbedBuilder, Message, TextChannel } from "discord.js";
+// embedService.ts
+
+import { EmbedBuilder, TextChannel } from "discord.js";
 import { config } from "../../../config";
-import client from "../../../bot/client";
-import {
-  EMBED_COLOURS,
-  EMPTY_FIELD,
-  getMapEmoji,
-  LINKS,
-} from "../../../constants";
+import { EMBED_COLOURS, EMPTY_FIELD, LINKS } from "../../../constants";
+import { Match } from "../../../types/Faceit/match";
 import { FaceitService } from "../faceit-service";
 import {
-  calculateEloDifference,
-  formattedMapName,
+  checkIfAlreadySent,
+  deleteAnalysisEmbeds,
+  deleteLiveScoreCard,
+  findMatchMessage,
+  formatMapInfo,
+  generateMapDataTable,
+  generatePlayerStatsTable,
+  prepareScoreUpdate,
 } from "../../../utils/faceitHelper";
-import { Match } from "../../../types/Faceit/match";
-import { checkMatchExists } from "../../../db/commands";
+import client from "../../../bot/client";
 
-const checkIfAlreadySent = async (
-  matchId: string | null,
-  channel: TextChannel
-): Promise<boolean> => {
-  if (!matchId) {
-    return false;
-  }
-  const messages = await channel.messages.fetch({ limit: 5 });
-
-  return messages.some((message: Message) =>
-    message.embeds.some((embedMsg: any) =>
-      embedMsg.footer?.text?.includes(matchId)
-    )
-  );
-};
-
-const sendEmbedMessage = async (
+export async function sendEmbedMessage(
   embed: EmbedBuilder,
   channelId: string,
   matchId?: string
-) => {
+) {
   try {
     const channel = (await client.channels.fetch(channelId)) as TextChannel;
     if (await checkIfAlreadySent(matchId || null, channel)) {
@@ -48,47 +34,19 @@ const sendEmbedMessage = async (
   } catch (error) {
     console.error("Error sending embedMessage", error);
   }
-};
+}
 
-export const sendMatchFinishNotification = async (match: Match) => {
+export async function matchEndNotification(match: Match) {
   try {
-    const getPlayerStatsData = await FaceitService.getPlayerStats(
+    const playerStatsData = await FaceitService.getPlayerStats(
       match.matchId,
       match.trackedTeam.trackedPlayers.map((player) => player.faceitId)
     );
 
-    // Sort players by kills in descending order
-    getPlayerStatsData.sort((a: any, b: any) => b.kills - a.kills);
-
-    const playerStatsTable = await Promise.all(
-      getPlayerStatsData.map(async (stat) => {
-        const player = match.trackedTeam.trackedPlayers.find(
-          (player) => player.faceitId === stat.playerId
-        );
-        const eloChange = await calculateEloDifference(
-          player?.previousElo || 0,
-          player?.gamePlayerId || ""
-        );
-
-        const playerName = player?.faceitUsername || "Unknown";
-        const name =
-          playerName.length > 11
-            ? `${playerName.substring(0, 9)}..`
-            : playerName.padEnd(11, " ");
-
-        const kda = `${stat.kills}/${stat.deaths}/${stat.assists}`;
-        const paddedKDA = kda.padEnd(8, " ");
-
-        const elo =
-          `${eloChange?.operator}${eloChange?.difference} (${eloChange?.newElo})`.padEnd(
-            3,
-            " "
-          );
-
-        return `\`${name} ${paddedKDA}  ${elo}\``;
-      })
+    const playerStatsTable = await generatePlayerStatsTable(
+      playerStatsData,
+      match
     );
-
     const finalScore = await FaceitService.getMatchScore(
       match.matchId,
       match.trackedTeam.faction,
@@ -99,12 +57,7 @@ export const sendMatchFinishNotification = async (match: Match) => {
       match.trackedTeam.faction
     );
 
-    // Strip 'de_' and capitalize the first letter of the map name
-    const formattedMapName = match.mapName
-      .replace(/^de_/, "")
-      .replace(/\b\w/g, (char) => char.toUpperCase());
-
-    const mapEmoji = getMapEmoji(match.mapName);
+    const { formattedMapName, mapEmoji } = formatMapInfo(match.mapName);
 
     const embed = new EmbedBuilder()
       .setColor(`#${mapWin ? EMBED_COLOURS.MAP_WIN : EMBED_COLOURS.MAP_LOSS}`)
@@ -127,42 +80,15 @@ export const sendMatchFinishNotification = async (match: Match) => {
   } catch (error) {
     console.error("Error sending match finish notification:", error);
   }
-};
+}
 
-export const createMatchAnalysisEmbed = (
+export async function createMatchAnalysisEmbed(
   matchId: string,
   playersData: any,
   gameData: any
-) => {
-  // Sorting the game data by most played times, then by average win percentage
-  const sortedMapData = gameData.sort((a: any, b: any) => {
-    const aWinPercentage = parseFloat(a.averageWinPercentage);
-    const bWinPercentage = parseFloat(b.averageWinPercentage);
+) {
+  const mapDataTable = generateMapDataTable(gameData);
 
-    if (b.totalPlayedTimes === a.totalPlayedTimes) {
-      return bWinPercentage - aWinPercentage;
-    }
-    return b.totalPlayedTimes - a.totalPlayedTimes;
-  });
-
-  // Creating the map stats table content (without map icons)
-  const mapDataTable = sortedMapData
-    .map((map: any) => {
-      // Ensure averageWinPercentage is a valid number by parsing the string to a float
-      const formattedWinPercentage =
-        map.totalPlayedTimes === 0 ||
-        isNaN(parseFloat(map.averageWinPercentage))
-          ? "N/A"
-          : Math.ceil(parseFloat(map.averageWinPercentage)).toString() + "%"; // Round up the win percentage to nearest whole number
-      return `\`${formattedMapName(map.mapName).padEnd(
-        12
-      )} | ${map.totalPlayedTimes
-        .toString()
-        .padEnd(6)} | ${formattedWinPercentage.padEnd(6)}\``;
-    })
-    .join("\n");
-
-  // Create the embed
   const embed = new EmbedBuilder()
     .setTitle(`Map stats (Team ${playersData.homeFaction[0]?.nickname})`)
     .addFields(
@@ -182,32 +108,24 @@ export const createMatchAnalysisEmbed = (
     .setColor(`#${EMBED_COLOURS.ANALYSIS}`)
     .setTimestamp();
 
-  // Send the embed to the designated channel
-  sendEmbedMessage(embed, config.MATCHROOM_ANALYSIS_CHANNEL_ID, matchId);
-  return;
-};
+  await sendEmbedMessage(embed, config.MATCHROOM_ANALYSIS_CHANNEL_ID, matchId);
+}
 
-export const createLiveScoreCard = async (match: Match) => {
-  // Adding skill level icons next to each player name
+export async function createLiveScoreCard(match: Match) {
   const homePlayers = match.trackedTeam.trackedPlayers
     .map((player: any) => `${player.faceitUsername}`)
     .join("\n");
 
-  // Get the match score
   const matchScore = await FaceitService.getMatchScore(
     match.matchId,
     match.trackedTeam.faction,
     false
   );
-  const score = matchScore.join(":");
 
-  // Format map name and get its emoji
-  const mapEmoji = getMapEmoji(match.mapName);
-  const mapName = formattedMapName(match.mapName);
+  const { formattedMapName, mapEmoji } = formatMapInfo(match.mapName);
 
-  // Create the embed
   const embed = new EmbedBuilder()
-    .setTitle(`${mapEmoji}  ${mapName}  (${score})`) // Updated title format
+    .setTitle(`${mapEmoji}  ${formattedMapName}  (${matchScore.join(":")})`)
     .addFields(
       {
         name: `Players in game`,
@@ -224,27 +142,17 @@ export const createLiveScoreCard = async (match: Match) => {
     .setFooter({ text: `${match.matchId}` })
     .setColor(`#${EMBED_COLOURS.LIVE_SCORE}`);
 
-  // Pass the embed and the button to sendEmbedMessage
-  sendEmbedMessage(embed, config.BOT_LIVE_SCORE_CARDS_CHANNEL, match.matchId);
-  return;
-};
-
-export const updateLiveScoreCard = async (match: Match) => {
-  // Get the Discord client and fetch the channel
-  const channel = await client.channels.fetch(
-    config.BOT_LIVE_SCORE_CARDS_CHANNEL
+  await sendEmbedMessage(
+    embed,
+    config.BOT_LIVE_SCORE_CARDS_CHANNEL,
+    match.matchId
   );
-  if (!channel || !channel.isTextBased()) {
-    console.error("Invalid channel or not a text-based channel.");
-    return;
-  }
+}
 
-  // Fetch the last 10 messages from the channel
-  const messages = await channel.messages.fetch({ limit: 10 });
-
-  // Find the message with the embed containing the matchId in its footer
-  const targetMessage = messages.find((message) =>
-    message.embeds.some((embed) => embed.footer?.text === match.matchId)
+export async function updateLiveScoreCard(match: Match) {
+  const targetMessage = await findMatchMessage(
+    match.matchId,
+    config.BOT_LIVE_SCORE_CARDS_CHANNEL
   );
 
   if (!targetMessage) {
@@ -252,96 +160,48 @@ export const updateLiveScoreCard = async (match: Match) => {
     return;
   }
 
-  // Retrieve the latest match score
   const matchScore = await FaceitService.getMatchScore(
     match.matchId,
     match.trackedTeam.faction,
     false
   );
+
   const newScore = matchScore.join(":");
-
-  // Extract the embed and check if the score needs updating
-  const embed = targetMessage.embeds[0];
-  const currentTitle = embed.title;
-  const currentScore = currentTitle?.split(" (")[1]?.split(")")[0]; // Extract current score from title
-
-  // If the score hasn't changed, skip the update
-  if (currentScore === newScore) {
-    return;
-  }
-
-  // Format map name and get its emoji
-  const mapEmoji = getMapEmoji(match.mapName);
-  const mapName = formattedMapName(match.mapName);
-
-  // Update the embed with the new score in the title
-  const updatedEmbed = EmbedBuilder.from(embed).setTitle(
-    `${mapEmoji}  ${mapName}  (${newScore})`
+  const { shouldUpdate, updatedEmbed } = prepareScoreUpdate(
+    targetMessage,
+    match,
+    newScore
   );
 
-  // Edit the message with the updated embed
-  await targetMessage.edit({ embeds: [updatedEmbed] });
-  console.log(`Live score updated for matchId: ${match.matchId}`);
-};
+  if (shouldUpdate && updatedEmbed) {
+    await targetMessage.edit({ embeds: [updatedEmbed] });
+    console.log(`Live score updated for matchId: ${match.matchId}`);
+  }
+}
 
-export const deleteMatchCards = async (
+export async function deleteMatchCards(
   matchId?: string,
   forceDelete?: boolean
-) => {
+) {
   const channelIDs = [
-    config.MATCHROOM_ANALYSIS_CHANNEL_ID, // New functionality
-    config.BOT_LIVE_SCORE_CARDS_CHANNEL, // Old functionality
+    config.MATCHROOM_ANALYSIS_CHANNEL_ID,
+    config.BOT_LIVE_SCORE_CARDS_CHANNEL,
   ];
 
   for (const channelId of channelIDs) {
     try {
-      // Fetch the Discord channel
       const channel = await client.channels.fetch(channelId);
       if (!channel || !channel.isTextBased()) {
         console.error(`Channel ${channelId} is invalid or not text-based.`);
-        continue; // Skip to the next channel.
+        continue;
       }
 
-      // Fetch the last 100 messages from the channel (increase limit to check more)
       const messages = await channel.messages.fetch({ limit: 100 });
 
       if (channelId === config.BOT_LIVE_SCORE_CARDS_CHANNEL) {
-        // Old functionality: delete single messages based on matchId in footer
-        const targetMessage = messages.find((message) =>
-          message.embeds.some((embed) => embed.footer?.text === matchId)
-        );
-
-        if (targetMessage) {
-          await targetMessage.delete();
-          console.log(
-            `Live score card deleted for matchId: ${matchId} in channel ${channelId}`
-          );
-        }
+        await deleteLiveScoreCard(messages, matchId);
       } else if (channelId === config.MATCHROOM_ANALYSIS_CHANNEL_ID) {
-        // New functionality: delete embeds older than 10 minutes or with matchId not in DB
-        for (const message of messages.values()) {
-          // Check if the message has embeds
-          for (const embed of message.embeds) {
-            const matchIdFromFooter = embed.footer?.text;
-
-            if (!matchIdFromFooter) continue; // Skip if there's no matchId in the footer
-
-            // Check if the match exists in the database
-            const doesExist = await checkMatchExists(matchIdFromFooter);
-
-            // Check if the embed is older than 10 minutes
-            const isOlderThan5Minutes =
-              Date.now() - message.createdAt.getTime() > 5 * 60 * 1000;
-
-            // If the match doesn't exist or the embed is too old, delete it
-            if ((!doesExist && isOlderThan5Minutes) || forceDelete) {
-              await message.delete();
-              console.log(
-                `Deleted embed for matchId: ${matchIdFromFooter} in channel ${matchIdFromFooter}`
-              );
-            }
-          }
-        }
+        await deleteAnalysisEmbeds(messages, forceDelete);
       }
     } catch (error) {
       console.error(
@@ -350,12 +210,12 @@ export const deleteMatchCards = async (
       );
     }
   }
-};
+}
 
 export async function sendNewUserNotification(
   userName: string,
   faceitId: string
-): Promise<void> {
+) {
   const embed = new EmbedBuilder()
     .setTitle(`New user: ${userName}`)
     .addFields(
@@ -367,7 +227,5 @@ export async function sendNewUserNotification(
     )
     .setColor("#c2a042");
 
-  await sendEmbedMessage(embed, "1327588452719530027");
-
-  return;
+  await sendEmbedMessage(embed, config.NEW_USER_CHANNEL);
 }

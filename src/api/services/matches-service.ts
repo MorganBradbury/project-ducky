@@ -18,7 +18,7 @@ import {
   createLiveScoreCard,
   createMatchAnalysisEmbed,
   deleteMatchCards,
-  sendMatchFinishNotification,
+  matchEndNotification,
 } from "./discord/embed-service";
 import { runEloUpdate } from "./discord/user-service";
 import axios from "axios";
@@ -86,7 +86,7 @@ export const endMatch = async (matchId: string) => {
 
   // deletes record from DB.
   await markMatchComplete(matchId);
-  await sendMatchFinishNotification(match);
+  await matchEndNotification(match);
   await runEloUpdate(match.trackedTeam.trackedPlayers);
 
   if (match?.voiceChannelId) {
