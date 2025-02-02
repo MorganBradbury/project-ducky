@@ -321,7 +321,7 @@ function formatLeaderboardTable(
           ? `-`
           : Number(user.startOfMonthElo) > user.previousElo
           ? `📉 -${Number(user.startOfMonthElo) - user.previousElo}`
-          : `📈 + ${user.previousElo - Number(user.startOfMonthElo)}`; // Example change
+          : `📈 +${user.previousElo - Number(user.startOfMonthElo)}`; // Example change
 
       return `\`${formatPlayerName(
         startIndex + index,
