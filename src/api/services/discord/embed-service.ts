@@ -253,10 +253,15 @@ export async function createLeaderboardEmbed() {
 
   // Column widths based on the provided string:
   const columnWidths = {
-    player: 20, // Player column width
-    elo: 6, // Elo column width
+    player: 22, // Player column width
+    elo: 4, // Elo column width
     change: 5, // This week column width
   };
+
+  // Create the divider line by repeating '-' based on columnWidths
+  const divider = `${"-".repeat(columnWidths.player)}|${"-".repeat(
+    columnWidths.elo
+  )}|${"-".repeat(columnWidths.change)}`;
 
   // Add the first field with column headings
   embed.addFields({
@@ -264,7 +269,9 @@ export async function createLeaderboardEmbed() {
     value:
       "`Player                 | Elo  | This week`" +
       "\n" +
-      "`--------------------|-----|----------`" +
+      "`" +
+      divider +
+      "`" +
       "\n" +
       userChunks[0]
         .map((user, index) => {
