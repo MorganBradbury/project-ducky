@@ -42,9 +42,9 @@ export const leaderboardCommand = {
         column
           .map((user, index) => {
             const rank = index + offset + 1;
-            return `${getRankEmoji(rank)} **${user.faceitUsername}**: ${
+            return `${getRankEmoji(rank)} **${user.discordUsername}** (${
               user.previousElo
-            } ELO`;
+            })`;
           })
           .join("\n");
 
