@@ -251,23 +251,42 @@ export async function createLeaderboardEmbed() {
     .setColor(`#${EMBED_COLOURS.ANALYSIS}`)
     .setTimestamp();
 
-  // Column widths based on the provided string:
+  // Add the first field with column headings
+  embed.addFields({
+    name: `\u200B`,
+    value: formatLeaderboardTable(userChunks[0], 0),
+  });
+
+  // Add remaining fields for each chunk
+  for (let i = 1; i < userChunks.length; i++) {
+    embed.addFields({
+      name: `\u200B`,
+      value: formatLeaderboardTable(userChunks[i], i * chunkSize),
+    });
+  }
+
+  // Send the embed to the channel
+  await sendEmbedMessage(embed, config.LEADERBOARD_CHANNEL);
+}
+
+// Function to format leaderboard data
+function formatLeaderboardTable(users: any[], startIndex: number): string {
   const columnWidths = {
     player: 14, // Player column width
     elo: 4, // Elo column width
     change: 8, // This week column width
   };
 
-  // Create the divider line by repeating '-' based on columnWidths
+  // Create the divider line
   const divider = `${"-".repeat(columnWidths.player + 1)}|${"-".repeat(
     columnWidths.elo + 2
   )}|${"-".repeat(columnWidths.change)}`;
 
-  // Function to format player name to 14 characters
+  // Function to format player names
   function formatPlayerName(index: number, playerName: string): string {
     let formattedName = `${index + 1}. ${playerName}`.padEnd(
       columnWidths.player
-    ); // Add index and pad
+    );
     if (formattedName.length > columnWidths.player) {
       formattedName =
         formattedName.substring(0, columnWidths.player - 2) + ".."; // Trim and add ".."
@@ -275,55 +294,26 @@ export async function createLeaderboardEmbed() {
     return formattedName;
   }
 
-  // Add the first field with column headings
-  embed.addFields({
-    name: `\u200B`,
-    value:
-      "`Player         | Elo  | Change `" +
-      "\n" +
-      "`" +
-      divider +
-      "`" +
-      "\n" +
-      userChunks[0]
-        .map((user, index) => {
-          const formattedElo = `${user.previousElo
-            .toString()
-            .padEnd(columnWidths.elo)}`;
-          const changeThisWeek = "📈 +310"; // Use fixed "No change" for consistency
+  // Format the leaderboard table
+  return (
+    "`Player         | Elo  | Change `" +
+    "\n" +
+    "`" +
+    divider +
+    "`" +
+    "\n" +
+    users
+      .map((user, index) => {
+        const formattedElo = `${user.previousElo
+          .toString()
+          .padEnd(columnWidths.elo)}`;
+        const changeThisWeek = "📈 +310"; // Example change
 
-          return `\`${formatPlayerName(
-            index,
-            user.faceitUsername
-          )} | ${formattedElo} | ${changeThisWeek.padEnd(
-            columnWidths.change
-          )}\``;
-        })
-        .join("\n"),
-  });
-
-  // Add remaining fields for each chunk (ensure it's userChunks[i] here)
-  for (let i = 1; i < userChunks.length; i++) {
-    embed.addFields({
-      name: `\u200B`,
-      value: userChunks[i] // Fix: use userChunks[i], not userChunks[0]
-        .map((user, index) => {
-          const formattedElo = `${user.previousElo
-            .toString()
-            .padEnd(columnWidths.elo)}`;
-          const changeThisWeek = "📈 +31"; // Use fixed "No change" for consistency
-
-          return `\`${formatPlayerName(
-            i * chunkSize + index,
-            user.faceitUsername
-          )} | ${formattedElo} | ${changeThisWeek.padEnd(
-            columnWidths.change
-          )}\``;
-        })
-        .join("\n"),
-    });
-  }
-
-  // Send the embed to the channel
-  await sendEmbedMessage(embed, config.LEADERBOARD_CHANNEL);
+        return `\`${formatPlayerName(
+          startIndex + index,
+          user.faceitUsername
+        )} | ${formattedElo} | ${changeThisWeek.padEnd(columnWidths.change)}\``;
+      })
+      .join("\n")
+  );
 }
