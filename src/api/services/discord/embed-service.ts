@@ -253,7 +253,7 @@ export async function createLeaderboardEmbed() {
 
   // Column widths based on the provided string:
   const columnWidths = {
-    player: 14, // Player column width
+    player: 13, // Player column width
     elo: 6, // Elo column width
     change: 10, // This week column width
   };
