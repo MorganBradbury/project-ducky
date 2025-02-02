@@ -1,19 +1,7 @@
-import {
-  ActionRowBuilder,
-  ButtonBuilder,
-  ButtonStyle,
-  EmbedBuilder,
-  Message,
-  TextChannel,
-  ThreadChannel,
-} from "discord.js";
+import { EmbedBuilder, Message, TextChannel } from "discord.js";
 import { config } from "../../../config";
 import client from "../../../bot/client";
-import {
-  ChannelIcons,
-  getMapEmoji,
-  getSkillLevelEmoji,
-} from "../../../constants";
+import { getMapEmoji } from "../../../constants";
 import { FaceitService } from "../faceit-service";
 import {
   calculateEloDifference,
@@ -22,72 +10,38 @@ import {
 import { Match } from "../../../types/Faceit/match";
 import { checkMatchExists } from "../../../db/commands";
 
+const checkIfAlreadySent = async (
+  matchId: string | null,
+  channel: TextChannel
+): Promise<boolean> => {
+  if (!matchId) {
+    return false;
+  }
+  const messages = await channel.messages.fetch({ limit: 5 });
+
+  return messages.some((message: Message) =>
+    message.embeds.some((embedMsg: any) =>
+      embedMsg.footer?.text?.includes(matchId)
+    )
+  );
+};
+
 const sendEmbedMessage = async (
   embed: EmbedBuilder,
-  components: any[] = [],
-  channelId: string = config.BOT_UPDATES_CHANNEL_ID,
-  threadId?: string // Optional thread ID parameter
+  channelId: string,
+  matchId?: string
 ) => {
   try {
-    if (!client.isReady()) {
-      console.error("Discord client is not ready!");
-      return;
-    }
-
     const channel = (await client.channels.fetch(channelId)) as TextChannel;
-
-    if (!channel) {
-      console.log(`Channel with ID ${channelId} not found.`);
+    if (await checkIfAlreadySent(matchId || null, channel)) {
       return;
     }
 
-    let targetChannelOrThread: TextChannel | ThreadChannel = channel;
-
-    // If a threadId is provided, fetch the thread and use it as the target
-    if (threadId) {
-      const thread = await channel.threads.fetch(threadId);
-      if (!thread || thread.archived) {
-        console.error(`Thread with ID ${threadId} not found or is archived.`);
-        return;
-      }
-      targetChannelOrThread = thread;
-    }
-
-    if (channelId === config.MATCHROOM_ANALYSIS_CHANNEL_ID) {
-      // Fetch the last 10 messages from the target (channel or thread)
-      const messages = await targetChannelOrThread.messages.fetch({
-        limit: 10,
-      });
-
-      // Extract the matchId from the embed footer (using data.footer)
-      const matchId = embed.data.footer?.text;
-
-      if (!matchId) {
-        console.error("No matchId found in embed footer!");
-        return;
-      }
-
-      // Check if any of the last 10 messages contain an embed with the same matchId in the footer
-      const duplicate = messages.some((message: Message) => {
-        return message.embeds.some((embedMsg: any) => {
-          console.log(`Does ${embed?.data?.footer?.text} include ${matchId}?`);
-          return embedMsg.footer?.text?.includes(matchId); // Check for matching matchId in the footer
-        });
-      });
-
-      if (duplicate) {
-        console.log("Duplicate embed found, not sending the embed.");
-        return;
-      }
-    }
-
-    // Send the embed with the optional button in the components array
-    return targetChannelOrThread.send({
+    return channel.send({
       embeds: [embed],
-      components, // If components (buttons) are passed, they will be included
     });
   } catch (error) {
-    console.error("Error sending message to Discord channel or thread:", error);
+    console.error("Error sending embedMessage", error);
   }
 };
 
@@ -164,7 +118,7 @@ export const sendMatchFinishNotification = async (match: Match) => {
       )
       .setTimestamp();
 
-    await sendEmbedMessage(embed, [], config.BOT_UPDATES_CHANNEL_ID);
+    await sendEmbedMessage(embed, config.BOT_UPDATES_CHANNEL_ID, match.matchId);
   } catch (error) {
     console.error("Error sending match finish notification:", error);
   }
@@ -224,7 +178,7 @@ export const createMatchAnalysisEmbed = (
     .setTimestamp();
 
   // Send the embed to the designated channel
-  sendEmbedMessage(embed, [], config.MATCHROOM_ANALYSIS_CHANNEL_ID);
+  sendEmbedMessage(embed, config.MATCHROOM_ANALYSIS_CHANNEL_ID, matchId);
   return;
 };
 
@@ -270,7 +224,7 @@ export const createLiveScoreCard = async (match: Match) => {
     .setColor("#464dd4");
 
   // Pass the embed and the button to sendEmbedMessage
-  sendEmbedMessage(embed, [], config.BOT_LIVE_SCORE_CARDS_CHANNEL);
+  sendEmbedMessage(embed, config.BOT_LIVE_SCORE_CARDS_CHANNEL, match.matchId);
   return;
 };
 
@@ -410,7 +364,7 @@ export async function sendNewUserNotification(
     )
     .setColor("#c2a042");
 
-  await sendEmbedMessage(embed, [], "1327588452719530027");
+  await sendEmbedMessage(embed, "1327588452719530027");
 
   return;
 }
