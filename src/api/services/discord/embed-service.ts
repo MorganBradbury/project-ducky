@@ -312,7 +312,7 @@ function formatLeaderboardTable(
       const formattedElo = `${user.previousElo
         .toString()
         .padEnd(columnWidths.elo)}`;
-      const changeThisWeek = "➡ +0"; // Example change
+      const changeThisWeek = " +0"; // Example change
 
       return `\`${formatPlayerName(
         startIndex + index,
