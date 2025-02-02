@@ -300,7 +300,6 @@ export async function createLeaderboardEmbed() {
           )}\``;
         })
         .join("\n"),
-    inline: true,
   });
 
   // Add remaining fields for each chunk (ensure it's userChunks[i] here)
@@ -322,7 +321,6 @@ export async function createLeaderboardEmbed() {
           )}\``;
         })
         .join("\n"),
-      inline: true,
     });
   }
 
