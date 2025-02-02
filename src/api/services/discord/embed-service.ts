@@ -253,9 +253,9 @@ export async function createLeaderboardEmbed() {
 
   // Column widths based on the provided string:
   const columnWidths = {
-    player: 13, // Player column width
+    player: 15, // Player column width
     elo: 4, // Elo column width
-    change: 10, // This week column width
+    change: 8, // This week column width
   };
 
   // Create the divider line by repeating '-' based on columnWidths
@@ -279,7 +279,7 @@ export async function createLeaderboardEmbed() {
   embed.addFields({
     name: `\u200B`,
     value:
-      "`Player        | Elo  | This week`" +
+      "`Player        | Elo  | Change `" +
       "\n" +
       "`" +
       divider +
@@ -290,7 +290,7 @@ export async function createLeaderboardEmbed() {
           const formattedElo = `${user.previousElo
             .toString()
             .padEnd(columnWidths.elo)}`;
-          const changeThisWeek = "No change"; // Use fixed "No change" for consistency
+          const changeThisWeek = "📈 +31"; // Use fixed "No change" for consistency
 
           return `\`${formatPlayerName(
             index,
@@ -311,7 +311,7 @@ export async function createLeaderboardEmbed() {
           const formattedElo = `${user.previousElo
             .toString()
             .padEnd(columnWidths.elo)}`;
-          const changeThisWeek = "No change"; // Use fixed "No change" for consistency
+          const changeThisWeek = "📈 +31"; // Use fixed "No change" for consistency
 
           return `\`${formatPlayerName(
             i * chunkSize + index,
