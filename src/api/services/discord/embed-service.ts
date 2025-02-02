@@ -267,7 +267,7 @@ export async function createLeaderboardEmbed() {
   embed.addFields({
     name: `\u200B`,
     value:
-      "`Player         | Elo  | This week`" +
+      "`Player        | Elo  | This week`" +
       "\n" +
       "`" +
       divider +
