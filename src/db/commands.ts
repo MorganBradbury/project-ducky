@@ -98,6 +98,7 @@ export const getMatchDataFromDb = async (
   });
 
   if (match) {
+    const trackedPlayers: SystemUser[] = match.trackedPlayers ? JSON.parse(match.trackedPlayers as string) : [];
     return {
       matchId: match.matchId,
       mapName: match.mapName,
@@ -105,7 +106,7 @@ export const getMatchDataFromDb = async (
         teamId: match.teamId,
         faction: match.faction,
         // Parse trackedPlayers correctly here
-        trackedPlayers: JSON.parse(match.trackedPlayers as string), // Ensure it's treated as a string for parsing
+        trackedPlayers // Ensure it's treated as a string for parsing
       },
       voiceChannelId: match.voiceChannelId || '',
     };
