@@ -213,6 +213,7 @@ export async function createLiveScoreCard(match: Match) {
         const playerLevel = await FaceitService.getPlayer(
           player.faceitId || ""
         );
+        console.log(playerLevel);
         return `${getSkillLevelEmoji(playerLevel?.skillLevel || 1)} ${
           player.faceitUsername
         }`;
