@@ -289,11 +289,9 @@ function formatLeaderboardTable(
   };
 
   // Create the divider line
-  const divider = `${"➖".repeat(columnWidths.player + 1)}-${"➖".repeat(
+  const divider = `${"-".repeat(columnWidths.player + 1)}-${"-".repeat(
     columnWidths.elo + 2
-  )}-${"➖".repeat(columnWidths.change)}➖${"➖".repeat(
-    columnWidths.position
-  )}`;
+  )}-${"-".repeat(columnWidths.change)}-${"-".repeat(columnWidths.position)}`;
 
   // Function to format player names
   function formatPlayerName(index: number, playerName: string): string {
