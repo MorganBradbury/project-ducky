@@ -207,14 +207,18 @@ export const createMatchAnalysisEmbed = (
 };
 
 export async function createLiveScoreCard(match: Match) {
-  const homePlayers = match.trackedTeam.trackedPlayers
-    .map(async (player: SystemUser) => {
-      const playerLevel = await FaceitService.getPlayer(player.faceitId || "");
-      return `${getSkillLevelEmoji(playerLevel?.skillLevel || 1)} ${
-        player.faceitUsername
-      }`;
-    })
-    .join("\n");
+  const homePlayers = (
+    await Promise.all(
+      match.trackedTeam.trackedPlayers.map(async (player: SystemUser) => {
+        const playerLevel = await FaceitService.getPlayer(
+          player.faceitId || ""
+        );
+        return `${getSkillLevelEmoji(playerLevel?.skillLevel || 1)} ${
+          player.faceitUsername
+        }`;
+      })
+    )
+  ).join("\n");
 
   const matchScore = await FaceitService.getMatchScore(
     match.matchId,
