@@ -235,35 +235,3 @@ export function prepareScoreUpdate(
 
   return { shouldUpdate: true, updatedEmbed };
 }
-
-export async function deleteLiveScoreCard(messages: any, matchId?: string) {
-  const targetMessage = messages.find((message: Message) =>
-    message.embeds.some((embed) => embed.footer?.text === matchId)
-  );
-
-  if (targetMessage) {
-    await targetMessage.delete();
-    console.log(`Live score card deleted for matchId: ${matchId}`);
-  }
-}
-
-export async function deleteAnalysisEmbeds(
-  messages: any,
-  forceDelete?: boolean
-) {
-  for (const message of messages.values()) {
-    for (const embed of message.embeds) {
-      const matchIdFromFooter = embed.footer?.text;
-      if (!matchIdFromFooter) continue;
-
-      const doesExist = await checkMatchExists(matchIdFromFooter);
-      const isOlderThan5Minutes =
-        Date.now() - message.createdAt.getTime() > 5 * 60 * 1000;
-
-      if ((!doesExist && isOlderThan5Minutes) || forceDelete) {
-        await message.delete();
-        console.log(`Deleted embed for matchId: ${matchIdFromFooter}`);
-      }
-    }
-  }
-}

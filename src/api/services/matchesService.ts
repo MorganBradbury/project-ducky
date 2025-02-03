@@ -100,7 +100,7 @@ export const endMatch = async (matchId: string) => {
 
 export const cancelMatch = async (matchId: string) => {
   console.log("Processing cancelMatch()", matchId);
-  await deleteMatchCards(matchId, true);
+  await deleteMatchCards(matchId);
 
   let match = await getMatchDataFromDb(matchId);
   if (!match) {

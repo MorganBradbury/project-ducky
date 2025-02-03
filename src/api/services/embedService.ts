@@ -1,6 +1,6 @@
 // embedService.ts
 
-import { EmbedBuilder, TextChannel } from "discord.js";
+import { EmbedBuilder, Message, TextChannel } from "discord.js";
 import { config } from "../../config";
 import {
   EMBED_COLOURS,
@@ -13,8 +13,6 @@ import { Match } from "../../types/Faceit/match";
 import { FaceitService } from "./faceitService";
 import {
   checkIfAlreadySent,
-  deleteAnalysisEmbeds,
-  deleteLiveScoreCard,
   findMatchMessage,
   formatMapInfo,
   formattedMapName,
@@ -272,10 +270,7 @@ export async function updateLiveScoreCard(match: Match) {
   }
 }
 
-export async function deleteMatchCards(
-  matchId?: string,
-  forceDelete?: boolean
-) {
+export async function deleteMatchCards(matchId?: string) {
   const channelIDs = [config.CHANNEL_MAP_ANALYSIS, config.CHANNEL_LIVE_MATCHES];
 
   for (const channelId of channelIDs) {
@@ -286,12 +281,15 @@ export async function deleteMatchCards(
         continue;
       }
 
-      const messages = await channel.messages.fetch({ limit: 100 });
+      const messages = await channel.messages.fetch({ limit: 20 });
 
-      if (channelId === config.CHANNEL_LIVE_MATCHES) {
-        await deleteLiveScoreCard(messages, matchId);
-      } else if (channelId === config.CHANNEL_MAP_ANALYSIS) {
-        await deleteAnalysisEmbeds(messages, forceDelete);
+      const targetMessage = messages.find((message: Message) =>
+        message.embeds.some((embed) => embed.footer?.text === matchId)
+      );
+
+      if (targetMessage) {
+        await targetMessage.delete();
+        console.log(`Embed deleted for matchId: ${matchId}}`);
       }
     } catch (error) {
       console.error(
