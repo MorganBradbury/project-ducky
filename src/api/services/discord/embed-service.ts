@@ -303,7 +303,7 @@ function formatLeaderboardTable(
   let output = "";
 
   if (showHeaders) {
-    output += "`Player      | Elo  | ➕/-   | 🔺/🔻`" + "\n";
+    output += "`Player      | Elo  | ➕/-   | 🔼/🔻`" + "\n";
   }
 
   output += users
@@ -323,7 +323,7 @@ function formatLeaderboardTable(
           ? ""
           : user.startOfMonthPosition > currentIndex
           ? `🔼 ${user.startOfMonthPosition - currentIndex}`
-          : `🔽 ${currentIndex - user.startOfMonthPosition}`;
+          : `🔻 ${currentIndex - user.startOfMonthPosition}`;
 
       return `\`${formatPlayerName(
         startIndex + index,
