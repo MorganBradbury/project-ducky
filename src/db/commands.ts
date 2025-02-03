@@ -89,7 +89,6 @@ export const checkMatchExists = async (matchId: string): Promise<boolean> => {
 };
 
 // Get match data from database
-// Get match data from database
 export const getMatchDataFromDb = async (
   matchId: string
 ): Promise<Match | null> => {
