@@ -303,7 +303,7 @@ function formatLeaderboardTable(
   let output = "";
 
   if (showHeaders) {
-    output += "`Player      | Elo  | ➕/-  | /🔻`" + "\n";
+    output += "`Player      | Elo  | ➕/-  | 🔼/🔻`" + "\n";
   }
 
   output += users
@@ -315,15 +315,15 @@ function formatLeaderboardTable(
         Number(user.startOfMonthElo) === user.previousElo
           ? `💤`
           : Number(user.startOfMonthElo) > user.previousElo
-          ? `-${Number(user.startOfMonthElo) - user.previousElo}🔻`
+          ? `-${Number(user.startOfMonthElo) - user.previousElo}👎`
           : `+${user.previousElo - Number(user.startOfMonthElo)}🔥`;
       const currentIndex = index + 1;
       const formattedPositionChange =
         user.startOfMonthPosition === currentIndex
           ? ""
           : user.startOfMonthPosition > currentIndex
-          ? `${user.startOfMonthPosition - currentIndex}🔼`
-          : `${currentIndex - user.startOfMonthPosition}🔻`;
+          ? `🔼${user.startOfMonthPosition - currentIndex}`
+          : `🔻${currentIndex - user.startOfMonthPosition}`;
 
       return `\`${formatPlayerName(
         startIndex + index,
