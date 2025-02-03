@@ -208,7 +208,12 @@ export const createMatchAnalysisEmbed = (
 
 export async function createLiveScoreCard(match: Match) {
   const homePlayers = match.trackedTeam.trackedPlayers
-    .map((player: any) => `${player.faceitUsername}`)
+    .map(async (player: SystemUser) => {
+      const playerLevel = await FaceitService.getPlayer(player.faceitId || "");
+      return `${getSkillLevelEmoji(playerLevel?.skillLevel || 1)} ${
+        player.faceitUsername
+      }`;
+    })
     .join("\n");
 
   const matchScore = await FaceitService.getMatchScore(
