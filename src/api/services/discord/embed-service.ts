@@ -303,7 +303,7 @@ function formatLeaderboardTable(
   let output = "";
 
   if (showHeaders) {
-    output += "`Player      | Elo  | Diff  | 🔼/🔻`" + "\n";
+    output += "`Player      | Elo  | Diff  | Pos`" + "\n";
   }
 
   output += users
