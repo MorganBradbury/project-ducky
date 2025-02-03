@@ -27,7 +27,6 @@ export const handleMatchesHook = async (
   res: Response
 ): Promise<void> => {
   try {
-    updateLeaderboardEmbed();
     // Pre req checks before logic.
     const matchId = req.body?.payload?.id;
     const eventId = req.body?.event;
