@@ -335,7 +335,7 @@ function formatLeaderboardTable(
         startIndex + index,
         user.faceitUsername
       )} | ${formattedElo} | ${changeThisMonth.padEnd(
-        columnWidths.change
+        columnWidths.change - 1
       )} | ${formattedPositionChange.padEnd(columnWidths.position)}\``;
     })
     .join("\n");
