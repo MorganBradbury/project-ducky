@@ -44,7 +44,7 @@ export async function matchEndNotification(match: Match) {
   try {
     const playerStatsData = await FaceitService.getPlayerStats(
       match.matchId,
-      match.trackedTeam.trackedPlayers.map((player) => player.faceitId)
+      match.trackedTeam.trackedPlayers.map((player) => player.faceitId || '')
     );
 
     const playerStatsTable = await generatePlayerStatsTable(
@@ -409,12 +409,13 @@ function formatLeaderboardTable(
           ? `🔻-${Number(user.startOfMonthElo) - user.previousElo}`
           : `🔥+${user.previousElo - Number(user.startOfMonthElo)}`;
       const currentIndex = index + 1;
+      const startingPosition = user.startOfMonthPosition || 1;
       const formattedPositionChange =
         user.startOfMonthPosition === currentIndex
           ? ""
-          : user.startOfMonthPosition > currentIndex
-          ? `🔼${user.startOfMonthPosition - currentIndex}`
-          : `🔻${currentIndex - user.startOfMonthPosition}`;
+          : startingPosition  > currentIndex
+          ? `🔼${startingPosition - currentIndex}`
+          : `🔻${currentIndex - startingPosition}`;
 
       return `\`${formatPlayerName(
         startIndex + index,
