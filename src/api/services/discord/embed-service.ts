@@ -328,8 +328,8 @@ function formatLeaderboardTable(
         user.startOfMonthPosition === index + 1
           ? ""
           : user.startOfMonthPosition > index + 1
-          ? `▲ ${user.startOfMonthPosition - index + 1}`
-          : `▲ ${index + 1 - user.startOfMonthPosition}`;
+          ? `${user.startOfMonthPosition - index + 1}▲`
+          : `${index + 1 - user.startOfMonthPosition}▲`;
 
       return `\`${formatPlayerName(
         startIndex + index,
