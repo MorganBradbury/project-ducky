@@ -282,16 +282,11 @@ function formatLeaderboardTable(
   showHeaders: boolean
 ): string {
   const columnWidths = {
-    player: 12, // Player column width
+    player: 11, // Player column width
     elo: 4, // Elo column width
     change: 7,
     position: 4,
   };
-
-  // Create the divider line
-  const divider = `${"-".repeat(columnWidths.player + 1)}|${"-".repeat(
-    columnWidths.elo + 2
-  )}|${"-".repeat(columnWidths.change)}|${"-".repeat(columnWidths.position)}`;
 
   // Function to format player names
   function formatPlayerName(index: number, playerName: string): string {
@@ -308,7 +303,7 @@ function formatLeaderboardTable(
   let output = "";
 
   if (showHeaders) {
-    output += "`Player       | Elo  | ➕/-   | 🔼/🔽`" + "\n";
+    output += "`Player      | Elo  | ➕/-   | 🔼/🔽`" + "\n";
   }
 
   output += users
