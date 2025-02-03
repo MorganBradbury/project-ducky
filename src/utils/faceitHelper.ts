@@ -4,7 +4,7 @@ import { FaceitService } from "../api/services/faceitService";
 import { EmbedBuilder, Message, TextChannel } from "discord.js";
 import client from "../bot/client";
 import { Match } from "../types/Faceit/match";
-import { getMapEmoji } from "../constants";
+import { getMapEmoji, getSkillLevelEmoji } from "../constants";
 import { config } from "../config";
 
 export const getTrackedPlayers = async (teams: any): Promise<SystemUser[]> => {
@@ -158,7 +158,7 @@ export async function checkIfAlreadySent(
 }
 
 export async function generatePlayerStatsTable(
-  playerStatsData: any[],
+  playerStatsData: PlayerStats[],
   match: Match
 ) {
   return Promise.all(
@@ -168,6 +168,15 @@ export async function generatePlayerStatsTable(
         const player = match.trackedTeam.trackedPlayers.find(
           (player) => player.faceitId === stat.playerId
         );
+
+        const playerLevel = await FaceitService.getPlayer(
+          player?.gamePlayerId || ""
+        );
+
+        const skillLevelForPlayer = getSkillLevelEmoji(
+          playerLevel?.skillLevel || 1
+        );
+
         const eloChange = await calculateEloDifference(
           player?.previousElo || 0,
           player?.gamePlayerId || ""
@@ -188,7 +197,8 @@ export async function generatePlayerStatsTable(
             " "
           );
 
-        return `\`${name} ${paddedKDA}  ${elo}\``;
+        // Return player stats with the level icon
+        return `\`${skillLevelForPlayer} ${name} ${paddedKDA}  ${elo}\``;
       })
   );
 }
