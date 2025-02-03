@@ -72,9 +72,6 @@ export const handleMatchesHook = async (
       await cancelMatch(matchId);
     }
 
-    // Add the match ID to the set after processing
-    processedMatchIds.add(matchId);
-
     res.status(200).json({ message: "Webhook data received and processed." });
     return;
   } catch (error) {
