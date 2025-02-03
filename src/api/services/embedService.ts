@@ -211,7 +211,7 @@ export async function createLiveScoreCard(match: Match) {
     await Promise.all(
       match.trackedTeam.trackedPlayers.map(async (player: SystemUser) => {
         const playerLevel = await FaceitService.getPlayer(
-          player.faceitId || ""
+          player.gamePlayerId || ""
         );
         console.log(playerLevel);
         return `${getSkillLevelEmoji(playerLevel?.skillLevel || 1)} ${
