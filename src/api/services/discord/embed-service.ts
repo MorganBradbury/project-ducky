@@ -2,7 +2,7 @@
 
 import { EmbedBuilder, TextChannel } from "discord.js";
 import { config } from "../../../config";
-import { EMBED_COLOURS, EMPTY_FIELD, LINKS } from "../../../constants";
+import { EMBED_COLOURS, EMPTY_FIELD, getMapEmoji, getSkillLevelEmoji, LINKS } from "../../../constants";
 import { Match } from "../../../types/Faceit/match";
 import { FaceitService } from "../faceit-service";
 import {
@@ -11,6 +11,7 @@ import {
   deleteLiveScoreCard,
   findMatchMessage,
   formatMapInfo,
+  formattedMapName,
   generateMapDataTable,
   generatePlayerStatsTable,
   prepareScoreUpdate,
@@ -85,34 +86,124 @@ export async function matchEndNotification(match: Match) {
   }
 }
 
-export async function createMatchAnalysisEmbed(
+export const createMatchAnalysisEmbed = (
   matchId: string,
   playersData: any,
   gameData: any
-) {
-  const mapDataTable = generateMapDataTable(gameData);
+) => {
+  // Sorting the game data: first by most played times, then by average win percentage if needed
+  const sortedMapData = gameData.sort((a: any, b: any) => {
+    const aWinPercentage = parseFloat(a.averageWinPercentage);
+    const bWinPercentage = parseFloat(b.averageWinPercentage);
 
+    if (b.totalPlayedTimes === a.totalPlayedTimes) {
+      return bWinPercentage - aWinPercentage;
+    }
+    return b.totalPlayedTimes - a.totalPlayedTimes;
+  });
+
+  // Extracting teams and their players
+  const homeFaction = playersData.homeFaction;
+  const enemyFaction = playersData.enemyFaction;
+
+  const homeFactionCaptain = homeFaction.find((player: any) => player.captain);
+  const enemyFactionCaptain = enemyFaction.find(
+    (player: any) => player.captain
+  );
+
+  // Adding skill level icons next to each player name
+  const homePlayers = homeFaction
+    .map(
+      (player: any) =>
+        `${getSkillLevelEmoji(player.faceitLevel)} ${player.nickname}${
+          player.captain ? "*" : ""
+        }`
+    )
+    .join("\n");
+  const enemyPlayers = enemyFaction
+    .map(
+      (player: any) =>
+        `${getSkillLevelEmoji(player.faceitLevel)} ${player.nickname}${
+          player.captain ? "*" : ""
+        }`
+    )
+    .join("\n");
+
+  // Getting most likely picks and bans with map emojis
+  const mostLikelyPicks = sortedMapData
+    .slice(0, 4)
+    .map(
+      (map: any) =>
+        `${getMapEmoji(map.mapName)} ${formattedMapName(map.mapName)}`
+    )
+    .join("\n");
+
+  // Sort maps in ascending order of played times for most likely bans
+  const mostLikelyBans = sortedMapData
+    .slice()
+    .sort((a: any, b: any) => a.totalPlayedTimes - b.totalPlayedTimes) // Sort by least played first
+    .slice(0, 4) // Take the least played 3 maps
+    .map(
+      (map: any) =>
+        `${getMapEmoji(map.mapName)} ${formattedMapName(map.mapName)}`
+    )
+    .join("\n");
+
+  // Creating the map stats table content (without map icons)
+  const mapDataTable = sortedMapData
+    .map((map: any) => {
+      // Ensure averageWinPercentage is a valid number by parsing the string to a float
+      const formattedWinPercentage =
+        map.totalPlayedTimes === 0 ||
+        isNaN(parseFloat(map.averageWinPercentage))
+          ? "N/A"
+          : Math.ceil(parseFloat(map.averageWinPercentage)).toString() + "%"; // Round up the win percentage to nearest whole number
+      return `\`${formattedMapName(map.mapName).padEnd(
+        12
+      )} | ${map.totalPlayedTimes
+        .toString()
+        .padEnd(6)} | ${formattedWinPercentage.padEnd(6)}\``;
+    })
+    .join("\n");
+
+  // Create the embed
   const embed = new EmbedBuilder()
-    .setTitle(`Map stats (Team ${playersData.homeFaction[0]?.nickname})`)
+    .setTitle("Matchroom Analysis")
     .addFields(
       {
-        name: `Map stats for other team (Last 50 games)`,
+        name: `Team ${homeFactionCaptain.nickname}`,
+        value: homePlayers,
+        inline: true,
+      },
+      {
+        name: `Team ${enemyFactionCaptain.nickname}`,
+        value: enemyPlayers,
+        inline: true,
+      },
+      {
+        name: `Map stats for Team ${enemyFactionCaptain.nickname} (Last 30 games)`,
         value:
           "`Map name     | Played | Win % `\n" +
           "`-------------|--------|-------`\n" +
           mapDataTable,
       },
+      { name: "They likely pick", value: mostLikelyPicks, inline: true },
+      { name: "They likely ban", value: mostLikelyBans, inline: true },
       {
         name: "Match page",
-        value: `[🔗 Link](${LINKS.MATCHROOM}/${matchId})`,
+        value: `[🔗 Link](${LINKS.MATCHROOM}/${match?.matchId})`,
+        inline: false,
       }
     )
     .setFooter({ text: `${matchId}` })
-    .setColor(`#${EMBED_COLOURS.ANALYSIS}`)
-    .setTimestamp();
+    .setColor("#ff5733");
 
-  await sendEmbedMessage(embed, config.MATCHROOM_ANALYSIS_CHANNEL_ID, matchId);
-}
+
+
+  // Pass the embed and the button to sendEmbedMessage
+  sendEmbedMessage(embed, config.MATCHROOM_ANALYSIS_CHANNEL_ID);
+  return;
+};
 
 export async function createLiveScoreCard(match: Match) {
   const homePlayers = match.trackedTeam.trackedPlayers
