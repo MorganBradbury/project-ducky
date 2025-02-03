@@ -204,7 +204,7 @@ export const createMatchAnalysisEmbed = (
     .setColor("#ff5733");
 
   // Pass the embed and the button to sendEmbedMessage
-  sendEmbedMessage(embed, config.CHANNEL_MAP_ANALYSIS);
+  sendEmbedMessage(embed, config.CHANNEL_MAP_ANALYSIS, matchId);
   return;
 };
 
