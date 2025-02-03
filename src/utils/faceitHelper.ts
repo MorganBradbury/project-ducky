@@ -184,9 +184,9 @@ export async function generatePlayerStatsTable(
 
         const playerName = player?.faceitUsername || "Unknown";
         const name =
-          playerName.length > 11
-            ? `${playerName.substring(0, 9)}..`
-            : playerName.padEnd(11, " ");
+          playerName.length > 10
+            ? `${playerName.substring(0, 8)}..`
+            : playerName.padEnd(10, " ");
 
         const kda = `${stat.kills}/${stat.deaths}/${stat.assists}`;
         const paddedKDA = kda.padEnd(8, " ");
@@ -198,7 +198,7 @@ export async function generatePlayerStatsTable(
           );
 
         // Return player stats with the level icon
-        return `${skillLevelForPlayer} \`${name} ${paddedKDA}  ${elo}\``;
+        return `${skillLevelForPlayer} \`${name} ${paddedKDA} ${elo}\``;
       })
   );
 }
