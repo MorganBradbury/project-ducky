@@ -326,8 +326,8 @@ function formatLeaderboardTable(
         Number(user.startOfMonthElo) === user.previousElo
           ? `-`
           : Number(user.startOfMonthElo) > user.previousElo
-          ? `📉 -${Number(user.startOfMonthElo) - user.previousElo}`
-          : `📈 +${user.previousElo - Number(user.startOfMonthElo)}`;
+          ? `💩 -${Number(user.startOfMonthElo) - user.previousElo}`
+          : `🔥 +${user.previousElo - Number(user.startOfMonthElo)}`;
 
       const formattedPositionChange =
         user.startOfMonthPosition === index + 1
