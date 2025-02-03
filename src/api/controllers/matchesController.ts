@@ -4,21 +4,21 @@ import {
   endMatch,
   getMatchAnalysis,
   startMatch,
-} from "../services/matches-service"; // Centralized match flow logic
-import { FaceitService } from "../services/faceit-service";
+} from "../services/matchesService"; // Centralized match flow logic
+import { FaceitService } from "../services/faceitService";
 import {
   getAllUsers,
   getMatchDataFromDb,
   updatePlayerEloAndPosition,
-} from "../../db/commands";
+} from "../../db/dbCommands";
 import { AcceptedEventTypes } from "../../constants";
 import { getScoreStatusText } from "../../utils/faceitHelper";
-import { updateVoiceChannelStatus } from "../services/discord/channel-service";
+import { updateVoiceChannelStatus } from "../services/channelService";
 import {
   updateLeaderboardEmbed,
   updateLiveScoreCard,
-} from "../services/discord/embed-service";
-import { processEmbedsToThreads } from "../services/discord/thread-service";
+} from "../services/embedService";
+import { processEmbedsToThreads } from "../services/threadService";
 
 // Main controller function to handle the webhook for match events
 export const handleMatchesHook = async (

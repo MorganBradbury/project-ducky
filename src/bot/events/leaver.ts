@@ -1,6 +1,6 @@
 import { GuildMember, TextChannel } from "discord.js";
 import client from "../client";
-import { deleteUser } from "../../db/commands";
+import { deleteUser } from "../../db/dbCommands";
 
 const GENERAL_CHANNEL_ID = "1309222763994808370";
 

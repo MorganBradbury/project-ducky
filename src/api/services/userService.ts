@@ -1,11 +1,11 @@
-import client from "../../../bot/client";
-import { config } from "../../../config";
-import { updateUserElo } from "../../../db/commands";
-import { Player } from "../../../types/Faceit/player";
-import { SystemUser } from "../../../types/system-user";
-import { updateNickname } from "../../../utils/nicknameUtils";
-import { FaceitService } from "../faceit-service";
-import { updateServerRoles } from "./roles-service";
+import client from "../../bot/client";
+import { config } from "../../config";
+import { updateUserElo } from "../../db/dbCommands";
+import { Player } from "../../types/Faceit/player";
+import { SystemUser } from "../../types/systemUser";
+import { updateNickname } from "../../utils/nicknameUtils";
+import { FaceitService } from "./faceitService";
+import { updateServerRoles } from "./rolesService";
 
 export const runEloUpdate = async (users: SystemUser[]) => {
   try {

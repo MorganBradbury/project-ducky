@@ -1,9 +1,9 @@
 import { VoiceChannel } from "discord.js";
-import client from "../../../bot/client";
-import { config } from "../../../config";
-import { SystemUser } from "../../../types/system-user";
+import client from "../../bot/client";
+import { config } from "../../config";
+import { SystemUser } from "../../types/systemUser";
 import axios, { AxiosError } from "axios";
-import { ENDPOINTS } from "../../../constants";
+import { ENDPOINTS } from "../../constants";
 
 export const getMatchVoiceChannelId = async (
   matchingPlayers: SystemUser[]

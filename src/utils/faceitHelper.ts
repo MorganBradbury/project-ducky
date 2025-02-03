@@ -1,6 +1,6 @@
-import { SystemUser } from "../types/system-user";
-import { checkMatchExists, getAllUsers } from "../db/commands";
-import { FaceitService } from "../api/services/faceit-service";
+import { SystemUser } from "../types/systemUser";
+import { checkMatchExists, getAllUsers } from "../db/dbCommands";
+import { FaceitService } from "../api/services/faceitService";
 import { EmbedBuilder, Message, TextChannel } from "discord.js";
 import client from "../bot/client";
 import { Match } from "../types/Faceit/match";
@@ -203,26 +203,6 @@ function sortMapData(gameData: any[]) {
     }
     return b.totalPlayedTimes - a.totalPlayedTimes;
   });
-}
-
-export function generateMapDataTable(gameData: any[]) {
-  const sortedMapData = sortMapData(gameData);
-
-  return sortedMapData
-    .map((map: any) => {
-      const formattedWinPercentage =
-        map.totalPlayedTimes === 0 ||
-        isNaN(parseFloat(map.averageWinPercentage))
-          ? "N/A"
-          : Math.ceil(parseFloat(map.averageWinPercentage)).toString() + "%";
-
-      return `\`${formattedMapName(map.mapName).padEnd(
-        12
-      )} | ${map.totalPlayedTimes
-        .toString()
-        .padEnd(6)} | ${formattedWinPercentage.padEnd(6)}\``;
-    })
-    .join("\n");
 }
 
 export function formatMapInfo(mapName: string) {

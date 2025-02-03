@@ -1,4 +1,4 @@
-import { SystemUser } from "../types/system-user";
+import { SystemUser } from "../types/systemUser";
 import { Match } from "../types/Faceit/match";
 import { prisma } from "../api/server";
 

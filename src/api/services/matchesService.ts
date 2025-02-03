@@ -6,22 +6,22 @@ import {
   isMatchProcessed,
   markMatchComplete,
   updateMatchProcessed,
-} from "../../db/commands";
-import { FaceitService } from "./faceit-service";
+} from "../../db/dbCommands";
+import { FaceitService } from "./faceitService";
 import {
   aggregateEnemyFactionData,
   formatMapData,
   getScoreStatusText,
 } from "../../utils/faceitHelper";
-import { updateVoiceChannelStatus } from "./discord/channel-service";
+import { updateVoiceChannelStatus } from "./channelService";
 import {
   createLiveScoreCard,
   createMatchAnalysisEmbed,
   deleteMatchCards,
   matchEndNotification,
   updateLeaderboardEmbed,
-} from "./discord/embed-service";
-import { runEloUpdate } from "./discord/user-service";
+} from "./embedService";
+import { runEloUpdate } from "./userService";
 import axios from "axios";
 
 export const startMatch = async (matchId: string) => {

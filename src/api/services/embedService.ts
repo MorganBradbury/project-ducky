@@ -1,10 +1,16 @@
 // embedService.ts
 
 import { EmbedBuilder, TextChannel } from "discord.js";
-import { config } from "../../../config";
-import { EMBED_COLOURS, EMPTY_FIELD, getMapEmoji, getSkillLevelEmoji, LINKS } from "../../../constants";
-import { Match } from "../../../types/Faceit/match";
-import { FaceitService } from "../faceit-service";
+import { config } from "../../config";
+import {
+  EMBED_COLOURS,
+  EMPTY_FIELD,
+  getMapEmoji,
+  getSkillLevelEmoji,
+  LINKS,
+} from "../../constants";
+import { Match } from "../../types/Faceit/match";
+import { FaceitService } from "./faceitService";
 import {
   checkIfAlreadySent,
   deleteAnalysisEmbeds,
@@ -12,13 +18,12 @@ import {
   findMatchMessage,
   formatMapInfo,
   formattedMapName,
-  generateMapDataTable,
   generatePlayerStatsTable,
   prepareScoreUpdate,
-} from "../../../utils/faceitHelper";
-import client from "../../../bot/client";
-import { getAllUsers } from "../../../db/commands";
-import { SystemUser } from "../../../types/system-user";
+} from "../../utils/faceitHelper";
+import client from "../../bot/client";
+import { getAllUsers } from "../../db/dbCommands";
+import { SystemUser } from "../../types/systemUser";
 
 export async function sendEmbedMessage(
   embed: EmbedBuilder,
@@ -44,7 +49,7 @@ export async function matchEndNotification(match: Match) {
   try {
     const playerStatsData = await FaceitService.getPlayerStats(
       match.matchId,
-      match.trackedTeam.trackedPlayers.map((player) => player.faceitId || '')
+      match.trackedTeam.trackedPlayers.map((player) => player.faceitId || "")
     );
 
     const playerStatsTable = await generatePlayerStatsTable(
@@ -197,8 +202,6 @@ export const createMatchAnalysisEmbed = (
     )
     .setFooter({ text: `${matchId}` })
     .setColor("#ff5733");
-
-
 
   // Pass the embed and the button to sendEmbedMessage
   sendEmbedMessage(embed, config.MATCHROOM_ANALYSIS_CHANNEL_ID);
@@ -413,7 +416,7 @@ function formatLeaderboardTable(
       const formattedPositionChange =
         user.startOfMonthPosition === currentIndex
           ? ""
-          : startingPosition  > currentIndex
+          : startingPosition > currentIndex
           ? `🔼${startingPosition - currentIndex}`
           : `🔻${currentIndex - startingPosition}`;
 

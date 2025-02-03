@@ -3,7 +3,7 @@ import {
   EmbedBuilder,
   MessageFlags,
 } from "discord.js";
-import { getAllUsers } from "../../../db/commands";
+import { getAllUsers } from "../../../db/dbCommands";
 
 export const listUserIdsCommand = {
   name: "list_tracked_ids",

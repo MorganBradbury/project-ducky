@@ -1,12 +1,10 @@
 import { helpCommand } from "./help";
-import { leaderboardCommand } from "./Faceit/leaderboard";
-import { clearMessagesCommand } from "./Discord/clear-messages";
-import { updateNicknameCommand } from "./Discord/set-nickname";
-import { listUserIdsCommand } from "./Faceit/list-tracked-ids";
+import { clearMessagesCommand } from "./Discord/clearMessages";
+import { updateNicknameCommand } from "./Discord/setNickname";
+import { listUserIdsCommand } from "./Faceit/listTrackedIds";
 
 export const commands = [
   helpCommand,
-  leaderboardCommand,
   clearMessagesCommand,
   updateNicknameCommand,
   listUserIdsCommand,

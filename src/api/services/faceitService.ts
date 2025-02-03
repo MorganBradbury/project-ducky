@@ -8,7 +8,7 @@ import {
 import { Player } from "../../types/Faceit/player";
 import { Match } from "../../types/Faceit/match";
 import { activeMapPool } from "../../constants";
-import { getMatchVoiceChannelId } from "./discord/channel-service";
+import { getMatchVoiceChannelId } from "./channelService";
 
 class FaceitApiClient {
   private client: AxiosInstance;

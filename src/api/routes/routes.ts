@@ -4,7 +4,7 @@ import {
   handleMatchesHook,
   updateLeaderboard,
   updateLiveScores,
-} from "../controllers/matches-controller";
+} from "../controllers/matchesController";
 
 export const apiRoutes = express.Router();
 

@@ -1,5 +1,5 @@
 import { ChannelType } from "discord.js";
-import client from "../../../bot/client";
+import client from "../../bot/client";
 
 export async function processEmbedsToThreads() {
   const channelId = "1310572627932479529"; // Fixed channel ID

@@ -1,7 +1,7 @@
 import { GuildMember, Role } from "discord.js";
-import client from "../../../bot/client";
-import { config } from "../../../config";
-import { Player } from "../../../types/Faceit/player";
+import client from "../../bot/client";
+import { config } from "../../config";
+import { Player } from "../../types/Faceit/player";
 
 export const updateServerRoles = async (
   member: GuildMember,
