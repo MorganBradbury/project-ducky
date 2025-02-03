@@ -100,6 +100,7 @@ export const endMatch = async (matchId: string) => {
 
 export const cancelMatch = async (matchId: string) => {
   console.log("Processing cancelMatch()", matchId);
+  await deleteMatchCards(matchId, true);
 
   let match = await getMatchDataFromDb(matchId);
   if (!match) {
@@ -120,8 +121,6 @@ export const cancelMatch = async (matchId: string) => {
   if (match?.voiceChannelId) {
     await updateVoiceChannelStatus(match.voiceChannelId, "");
   }
-
-  await deleteMatchCards(matchId, true);
 };
 
 export const getMatchAnalysis = async (matchId: string): Promise<any> => {
