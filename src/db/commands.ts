@@ -1,6 +1,6 @@
 import { SystemUser } from "../types/system-user";
 import { Match } from "../types/Faceit/match";
-import prisma from "../api/services/prisma";
+import { prisma } from "../api/server";
 
 // Add a new user
 export const addUser = async (
@@ -98,7 +98,9 @@ export const getMatchDataFromDb = async (
   });
 
   if (match) {
-    const trackedPlayers: SystemUser[] = match.trackedPlayers ? JSON.parse(match.trackedPlayers as string) : [];
+    const trackedPlayers: SystemUser[] = match.trackedPlayers
+      ? JSON.parse(match.trackedPlayers as string)
+      : [];
     return {
       matchId: match.matchId,
       mapName: match.mapName,
@@ -106,14 +108,13 @@ export const getMatchDataFromDb = async (
         teamId: match.teamId,
         faction: match.faction,
         // Parse trackedPlayers correctly here
-        trackedPlayers // Ensure it's treated as a string for parsing
+        trackedPlayers, // Ensure it's treated as a string for parsing
       },
-      voiceChannelId: match.voiceChannelId || '',
+      voiceChannelId: match.voiceChannelId || "",
     };
   }
   return null;
 };
-
 
 // Update live scores channel for a match
 export const updateLiveScoresChannelIdForMatch = async (
@@ -126,7 +127,9 @@ export const updateLiveScoresChannelIdForMatch = async (
   });
 
   if (result) {
-    console.log(`Successfully updated liveScoresChannelId for match ${matchId}`);
+    console.log(
+      `Successfully updated liveScoresChannelId for match ${matchId}`
+    );
   } else {
     console.log(`No match found with matchId ${matchId}`);
   }
