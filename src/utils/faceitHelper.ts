@@ -193,18 +193,6 @@ export async function generatePlayerStatsTable(
   );
 }
 
-function sortMapData(gameData: any[]) {
-  return gameData.sort((a: any, b: any) => {
-    const aWinPercentage = parseFloat(a.averageWinPercentage);
-    const bWinPercentage = parseFloat(b.averageWinPercentage);
-
-    if (b.totalPlayedTimes === a.totalPlayedTimes) {
-      return bWinPercentage - aWinPercentage;
-    }
-    return b.totalPlayedTimes - a.totalPlayedTimes;
-  });
-}
-
 export function formatMapInfo(mapName: string) {
   const mapEmoji = getMapEmoji(mapName);
   const formattedMapName = mapName
