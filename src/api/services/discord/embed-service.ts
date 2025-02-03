@@ -191,7 +191,7 @@ export const createMatchAnalysisEmbed = (
       { name: "They likely ban", value: mostLikelyBans, inline: true },
       {
         name: "Match page",
-        value: `[🔗 Link](${LINKS.MATCHROOM}/${match?.matchId})`,
+        value: `[🔗 Link](${LINKS.MATCHROOM}/${matchId})`,
         inline: false,
       }
     )
