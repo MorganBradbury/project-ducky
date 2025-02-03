@@ -1,11 +1,10 @@
-// Define the User type
-export type SystemUser = {
+export interface SystemUser {
   userId: number;
   discordUsername: string;
   faceitUsername: string;
   previousElo: number;
   gamePlayerId: string;
-  faceitId: string;
-  startOfMonthElo: string;
-  startOfMonthPosition: number;
-};
+  faceitId: string | null;  // Change here to allow null
+  startOfMonthElo: string | null;
+  startOfMonthPosition: number | null;
+}

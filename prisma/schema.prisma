@@ -1,0 +1,31 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("MYSQL_URL")
+}
+
+model matches {
+  matchId             String   @id @db.VarChar(255)
+  trackedPlayers      Json
+  mapName             String   @db.VarChar(255)
+  teamId              String   @db.VarChar(255)
+  faction             String   @db.VarChar(255)
+  voiceChannelId      String?  @db.VarChar(255)
+  voiceChannelName    String?  @db.VarChar(255)
+  liveScoresChannelId String?  @db.VarChar(255)
+  processed           Boolean? @default(false)
+}
+
+model users {
+  userId               Int     @id @default(autoincrement())
+  discordUsername      String  @unique(map: "discordUsername") @db.VarChar(255)
+  faceitUsername       String  @db.VarChar(255)
+  previousElo          Int
+  gamePlayerId         String  @db.Text
+  faceitId             String? @db.Text
+  startOfMonthElo      String? @db.Text
+  startOfMonthPosition Int?
+}
