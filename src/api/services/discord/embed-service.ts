@@ -326,7 +326,7 @@ function formatLeaderboardTable(
         .padEnd(columnWidths.elo)}`;
       const changeThisMonth =
         Number(user.startOfMonthElo) === user.previousElo
-          ? ``
+          ? `➖`
           : Number(user.startOfMonthElo) > user.previousElo
           ? `👎 -${Number(user.startOfMonthElo) - user.previousElo}`
           : `🔥 +${user.previousElo - Number(user.startOfMonthElo)}`;
