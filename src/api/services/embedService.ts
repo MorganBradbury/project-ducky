@@ -343,7 +343,7 @@ export async function updateLeaderboardEmbed() {
   // Format the full leaderboard into one string
   let leaderboardText = formatLeaderboardTable(sortedUsers, 0, true);
 
-  // Ensure description does not exceed 4096 characters
+  // Ensure description does not exceed 4096 characters.
   if (leaderboardText.length > 4096) {
     leaderboardText = leaderboardText.substring(0, 4093) + "..."; // Truncate if necessary
   }
