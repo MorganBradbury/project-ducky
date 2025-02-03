@@ -1,10 +1,9 @@
-import { Client, GatewayIntentBits, TextChannel, Message } from "discord.js";
+import { TextChannel, Message } from "discord.js";
 import client from "../client";
 
 const updatesChannelId = "1329771058290753598"; // Updates channel
 const generalChannelId = "1309222763994808370"; // General channel
 const patchBotId = "1329771120034975765"; // PatchBot user ID
-const linkedRoleId = "1327302146814775369"; // Linked role ID
 
 client.on("messageCreate", async (message: Message) => {
   if (
@@ -41,7 +40,7 @@ client.on("messageCreate", async (message: Message) => {
         const generalChannel = await client.channels.fetch(generalChannelId);
         if (generalChannel && generalChannel.isTextBased()) {
           // Forward the message content and attachments
-          const forwardMessage = `🚨 New CS update has been released. See <#${updatesChannelId}> for more information. [ <@&${linkedRoleId}> ]`;
+          const forwardMessage = `🚨 New Counter Strike update has been released. See <#${updatesChannelId}> for more information.`;
 
           await (generalChannel as TextChannel).send(forwardMessage);
         } else {

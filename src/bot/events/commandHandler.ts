@@ -1,9 +1,5 @@
 import client from "../client";
-import {
-  ChatInputCommandInteraction,
-  ButtonInteraction,
-  Interaction,
-} from "discord.js";
+import { ChatInputCommandInteraction, Interaction } from "discord.js";
 import { commandsMap } from "../commands/index";
 
 client.on("interactionCreate", async (interaction: Interaction) => {
