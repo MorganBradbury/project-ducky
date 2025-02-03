@@ -1,7 +1,5 @@
 import {
   ChatInputCommandInteraction,
-  Collection,
-  Message,
   DiscordAPIError,
   TextChannel,
   MessageFlags,

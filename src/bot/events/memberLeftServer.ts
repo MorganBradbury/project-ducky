@@ -1,4 +1,4 @@
-import { GuildMember, TextChannel } from "discord.js";
+import { TextChannel } from "discord.js";
 import client from "../client";
 import { deleteUser } from "../../db/dbCommands";
 
