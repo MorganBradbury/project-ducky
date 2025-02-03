@@ -311,7 +311,12 @@ function formatLeaderboardTable(
 
   if (showHeaders) {
     output +=
-      "`Player       | Elo  | ➕/-   | ▼/▲`" + "\n" + "`" + `\n` + "`" + "\n";
+      "`Player       | Elo  | ➕/-   | ▼/▲`" +
+      "\n" +
+      "`" +
+      divider +
+      "`" +
+      "\n";
   }
 
   output += users
@@ -321,7 +326,7 @@ function formatLeaderboardTable(
         .padEnd(columnWidths.elo)}`;
       const changeThisMonth =
         Number(user.startOfMonthElo) === user.previousElo
-          ? `💤`
+          ? ``
           : Number(user.startOfMonthElo) > user.previousElo
           ? `👎 -${Number(user.startOfMonthElo) - user.previousElo}`
           : `🔥 +${user.previousElo - Number(user.startOfMonthElo)}`;
