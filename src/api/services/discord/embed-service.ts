@@ -284,14 +284,14 @@ function formatLeaderboardTable(
   const columnWidths = {
     player: 12, // Player column width
     elo: 4, // Elo column width
-    change: 8,
+    change: 6,
     position: 4,
   };
 
   // Create the divider line
   const divider = `${"-".repeat(columnWidths.player + 1)}|${"-".repeat(
     columnWidths.elo + 2
-  )}|${"-".repeat(columnWidths.change)}`;
+  )}|${"-".repeat(columnWidths.change)}|${"-".repeat(columnWidths.position)}`;
 
   // Function to format player names
   function formatPlayerName(index: number, playerName: string): string {
