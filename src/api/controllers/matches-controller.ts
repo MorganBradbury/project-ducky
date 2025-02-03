@@ -14,7 +14,10 @@ import {
 import { AcceptedEventTypes } from "../../constants";
 import { getScoreStatusText } from "../../utils/faceitHelper";
 import { updateVoiceChannelStatus } from "../services/discord/channel-service";
-import { updateLiveScoreCard } from "../services/discord/embed-service";
+import {
+  updateLeaderboardEmbed,
+  updateLiveScoreCard,
+} from "../services/discord/embed-service";
 import { processEmbedsToThreads } from "../services/discord/thread-service";
 
 // Main controller function to handle the webhook for match events
@@ -146,6 +149,7 @@ export const updateLeaderboard = async (
       String(faceitElo),
       startOfMonthPosition
     );
+    updateLeaderboardEmbed();
   }
 
   res.send("Leaderboard updated");
