@@ -319,7 +319,7 @@ function formatLeaderboardTable(
         .padEnd(columnWidths.elo)}`;
       const changeThisMonth =
         Number(user.startOfMonthElo) === user.previousElo
-          ? `┉`
+          ? `💤`
           : Number(user.startOfMonthElo) > user.previousElo
           ? `👎 -${Number(user.startOfMonthElo) - user.previousElo}`
           : `🔥 +${user.previousElo - Number(user.startOfMonthElo)}`;
@@ -336,7 +336,7 @@ function formatLeaderboardTable(
         user.faceitUsername
       )} | ${formattedElo} | ${changeThisMonth.padEnd(
         columnWidths.change
-      )} | ${formattedPositionChange.padEnd(columnWidths.position)}\``;
+      )}| ${formattedPositionChange.padEnd(columnWidths.position)}\``;
     })
     .join("\n");
 
