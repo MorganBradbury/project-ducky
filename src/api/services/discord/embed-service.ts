@@ -266,7 +266,7 @@ export async function updateLeaderboardEmbed() {
   const currentMonthName = monthFormatter.format(currentDate);
   // Create embed
   const embed = new EmbedBuilder()
-    .setTitle(`🟢  Monthly Leaderboard (${currentMonthName})`)
+    .setTitle(`🟢  Leaderboard (${currentMonthName})`)
     .setColor(`#${EMBED_COLOURS.ANALYSIS}`)
     .setTimestamp()
     .setDescription(leaderboardText);
