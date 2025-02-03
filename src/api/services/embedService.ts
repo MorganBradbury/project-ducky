@@ -318,8 +318,8 @@ export async function sendNewUserNotification(
     .addFields(
       { name: "FACEIT ID", value: faceitId },
       {
-        name: "🔗 Webhook",
-        value: `[Link](${LINKS.WEBHOOK})`,
+        name: "Webhook",
+        value: `[🔗 Link](${LINKS.WEBHOOK})`,
       }
     )
     .setColor("#c2a042");
