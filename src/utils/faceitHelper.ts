@@ -198,7 +198,7 @@ export async function generatePlayerStatsTable(
           );
 
         // Return player stats with the level icon
-        return `\`${skillLevelForPlayer} ${name} ${paddedKDA}  ${elo}\``;
+        return `${skillLevelForPlayer} ${name} ${paddedKDA}  ${elo}`;
       })
   );
 }
