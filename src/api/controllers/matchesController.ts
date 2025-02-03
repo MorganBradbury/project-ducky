@@ -20,6 +20,7 @@ import {
 } from "../services/embedService";
 import { processEmbedsToThreads } from "../services/threadService";
 
+const processedMatchIds = new Set<string>();
 // Main controller function to handle the webhook for match events
 export const handleMatchesHook = async (
   req: Request,
@@ -48,6 +49,12 @@ export const handleMatchesHook = async (
 
     if (eventId === AcceptedEventTypes.match_created) {
       console.log("Request received for match being configured: ", req.body);
+      // Check if the match has already been processed
+      if (processedMatchIds.has(matchId)) {
+        console.log(`Match ${matchId} already processed, skipping.`);
+        return; // Skip further processing if match ID is already in the set
+      }
+      processedMatchIds.add(matchId);
       await getMatchAnalysis(matchId);
     }
 
@@ -64,6 +71,9 @@ export const handleMatchesHook = async (
     if (eventId === AcceptedEventTypes.match_cancelled) {
       await cancelMatch(matchId);
     }
+
+    // Add the match ID to the set after processing
+    processedMatchIds.add(matchId);
 
     res.status(200).json({ message: "Webhook data received and processed." });
     return;
