@@ -10,7 +10,7 @@ export const getMatchVoiceChannelId = async (
 ): Promise<string | null> => {
   try {
     const channels = await client.guilds
-      .fetch(config.GUILD_ID)
+      .fetch(config.DISCORD_GUILD_ID)
       .then((guild) => guild.channels.fetch());
     return (
       Array.from(channels.values()).find(

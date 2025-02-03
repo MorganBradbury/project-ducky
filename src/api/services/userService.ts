@@ -14,7 +14,7 @@ export const runEloUpdate = async (users: SystemUser[]) => {
       return;
     }
 
-    const guild = await client.guilds.fetch(config.GUILD_ID); // Cache the guild object
+    const guild = await client.guilds.fetch(config.DISCORD_GUILD_ID); // Cache the guild object
 
     await Promise.all(
       users.map(async (user) => {

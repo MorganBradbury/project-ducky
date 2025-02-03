@@ -13,7 +13,7 @@ export const updateServerRoles = async (
       return;
     }
 
-    const guild = await client.guilds.fetch(config.GUILD_ID); // Cache the guild object
+    const guild = await client.guilds.fetch(config.DISCORD_GUILD_ID); // Cache the guild object
     const skillLevelRoleName = `Level ${player.skillLevel}`;
 
     // Fetch all roles in the guild
@@ -59,7 +59,7 @@ export const updateLinkedRole = async (
     }
 
     // Get the guild
-    const guild = await client.guilds.fetch(config.GUILD_ID);
+    const guild = await client.guilds.fetch(config.DISCORD_GUILD_ID);
     if (!guild) {
       console.error("Guild not found.");
       return;

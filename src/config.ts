@@ -1,36 +1,22 @@
 import dotenv from "dotenv";
 dotenv.config();
 
-// Utility function to load and validate environment variables
-const loadEnvVar = (key: string, defaultValue?: string) => {
-  const value = process.env[key] || defaultValue;
-  if (!value) {
-    throw new Error(`Missing required environment variable: ${key}`);
-  }
-  return value;
-};
-
 // Load and validate environment variables
 export const config = {
-  FACEIT_API_KEY: loadEnvVar("FACEIT_API_KEY"),
-  DISCORD_BOT_TOKEN: loadEnvVar("DISCORD_BOT_TOKEN"),
-  CLIENT_ID: loadEnvVar("CLIENT_ID"),
-  GUILD_ID: loadEnvVar("GUILD_ID"),
-  BOT_UPDATES_CHANNEL_ID: loadEnvVar("BOT_UPDATES_CHANNEL_ID"),
-  MATCHROOM_ANALYSIS_CHANNEL_ID: loadEnvVar("MATCHROOM_ANALYSIS_CHANNEL_ID"),
-  SERVER_OWNER_ID: loadEnvVar("SERVER_OWNER_ID"),
-  BOT_LIVE_SCORE_CARDS_CHANNEL: loadEnvVar("BOT_LIVE_SCORE_CARDS_CHANNEL"),
-  NEW_USER_CHANNEL: loadEnvVar("NEW_USER_CHANNEL"),
-  LEADERBOARD_CHANNEL: loadEnvVar("LEADERBOARD_CHANNEL"),
+  FACEIT_API_KEY: process.env.FACEIT_API_KEY || "",
 
-  MYSQL: {
-    host: loadEnvVar("MYSQLHOST"),
-    user: loadEnvVar("MYSQLUSER"),
-    password: loadEnvVar("MYSQLPASSWORD"),
-    database: loadEnvVar("MYSQL_DATABASE"),
-    port: Number(loadEnvVar("MYSQLPORT", "3306")), // Default to 3306 if not set
-    waitForConnections: true,
-    connectionLimit: 10,
-    queueLimit: 0,
-  },
+  DISCORD_BOT_TOKEN: process.env.DISCORD_BOT_TOKEN || "",
+  DISCORD_CLIENT_ID: process.env.DISCORD_CLIENT_ID || "",
+  DISCORD_GUILD_ID: process.env.DISCORD_GUILD_ID || "",
+
+  CHANNEL_MATCH_RESULTS: process.env.CHANNEL_MATCH_RESULTS || "",
+  CHANNEL_MAP_ANALYSIS: process.env.CHANNEL_MAP_ANALYSIS || "",
+  CHANNEL_LIVE_MATCHES: process.env.CHANNEL_LIVE_MATCHES || "",
+  CHANNEL_JOIN_REQUESTS: process.env.CHANNEL_JOIN_REQUESTS || "",
+  CHANNEL_LEADERBOARD: process.env.CHANNEL_LEADERBOARD || "",
+
+  CHANNEL_GENERAL: process.env.CHANNEL_GENERAL || "",
+  CHANNEL_UPDATES: process.env.CHANNEL_UPDATES || "",
+
+  BOT_ID_PATCHBOT: process.env.BOT_ID_PATCHBOT || "",
 };

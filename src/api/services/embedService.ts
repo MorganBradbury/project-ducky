@@ -85,7 +85,7 @@ export async function matchEndNotification(match: Match) {
       )
       .setTimestamp();
 
-    await sendEmbedMessage(embed, config.BOT_UPDATES_CHANNEL_ID, match.matchId);
+    await sendEmbedMessage(embed, config.CHANNEL_MATCH_RESULTS, match.matchId);
   } catch (error) {
     console.error("Error sending match finish notification:", error);
   }
@@ -204,7 +204,7 @@ export const createMatchAnalysisEmbed = (
     .setColor("#ff5733");
 
   // Pass the embed and the button to sendEmbedMessage
-  sendEmbedMessage(embed, config.MATCHROOM_ANALYSIS_CHANNEL_ID);
+  sendEmbedMessage(embed, config.CHANNEL_MAP_ANALYSIS);
   return;
 };
 
@@ -239,17 +239,13 @@ export async function createLiveScoreCard(match: Match) {
     .setFooter({ text: `${match.matchId}` })
     .setColor(`#${EMBED_COLOURS.LIVE_SCORE}`);
 
-  await sendEmbedMessage(
-    embed,
-    config.BOT_LIVE_SCORE_CARDS_CHANNEL,
-    match.matchId
-  );
+  await sendEmbedMessage(embed, config.CHANNEL_LIVE_MATCHES, match.matchId);
 }
 
 export async function updateLiveScoreCard(match: Match) {
   const targetMessage = await findMatchMessage(
     match.matchId,
-    config.BOT_LIVE_SCORE_CARDS_CHANNEL
+    config.CHANNEL_LIVE_MATCHES
   );
 
   if (!targetMessage) {
@@ -280,10 +276,7 @@ export async function deleteMatchCards(
   matchId?: string,
   forceDelete?: boolean
 ) {
-  const channelIDs = [
-    config.MATCHROOM_ANALYSIS_CHANNEL_ID,
-    config.BOT_LIVE_SCORE_CARDS_CHANNEL,
-  ];
+  const channelIDs = [config.CHANNEL_MAP_ANALYSIS, config.CHANNEL_LIVE_MATCHES];
 
   for (const channelId of channelIDs) {
     try {
@@ -295,9 +288,9 @@ export async function deleteMatchCards(
 
       const messages = await channel.messages.fetch({ limit: 100 });
 
-      if (channelId === config.BOT_LIVE_SCORE_CARDS_CHANNEL) {
+      if (channelId === config.CHANNEL_LIVE_MATCHES) {
         await deleteLiveScoreCard(messages, matchId);
-      } else if (channelId === config.MATCHROOM_ANALYSIS_CHANNEL_ID) {
+      } else if (channelId === config.CHANNEL_MAP_ANALYSIS) {
         await deleteAnalysisEmbeds(messages, forceDelete);
       }
     } catch (error) {
@@ -324,11 +317,11 @@ export async function sendNewUserNotification(
     )
     .setColor("#c2a042");
 
-  await sendEmbedMessage(embed, config.NEW_USER_CHANNEL);
+  await sendEmbedMessage(embed, config.CHANNEL_JOIN_REQUESTS);
 }
 
 export async function updateLeaderboardEmbed() {
-  const channel = await client.channels.fetch(config.LEADERBOARD_CHANNEL);
+  const channel = await client.channels.fetch(config.CHANNEL_LEADERBOARD);
   if (!channel || !channel.isTextBased()) return;
   try {
     let messages = await channel.messages.fetch({ limit: 5 });
@@ -366,7 +359,7 @@ export async function updateLeaderboardEmbed() {
     .setDescription(leaderboardText);
 
   // Send the embed
-  await sendEmbedMessage(embed, config.LEADERBOARD_CHANNEL);
+  await sendEmbedMessage(embed, config.CHANNEL_LEADERBOARD);
 }
 
 // Function to format leaderboard data

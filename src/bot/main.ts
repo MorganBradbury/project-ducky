@@ -2,23 +2,26 @@ import { REST, Routes, Interaction } from "discord.js";
 import client from "./client";
 import { config } from "../config";
 import { commands, commandsMap } from "./commands";
-import "./events/newMemberJoined";
-import "./events/manageVoiceChannels";
-import "./events/memberLeftServer";
-import "./events/newMemberVerified";
-import "./events/newUpdates";
+import "./events/welcome";
+import "./events/manage-voice-states";
+import "./events/leaver";
+import "./events/register";
+import "./events/updates";
 
 // Refresh commands and log ready status
 client.once("ready", async () => {
-  console.log(`${client.user?.tag} is online!`);
   try {
-    console.log("Refreshing application (/) commands...");
     await new REST({ version: "10" })
       .setToken(config.DISCORD_BOT_TOKEN)
-      .put(Routes.applicationGuildCommands(config.CLIENT_ID, config.GUILD_ID), {
-        body: commands,
-      });
-    console.log("Commands refreshed.");
+      .put(
+        Routes.applicationGuildCommands(
+          config.DISCORD_CLIENT_ID,
+          config.DISCORD_GUILD_ID
+        ),
+        {
+          body: commands,
+        }
+      );
   } catch (error) {
     console.error("Error refreshing commands:", error);
   }
