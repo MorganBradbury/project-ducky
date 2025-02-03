@@ -1,0 +1,62 @@
+export const SQL_QUERIES = {
+  INSERT_USER: `
+  INSERT INTO users (discordUsername, faceitUsername, previousElo, gamePlayerId, faceitId)
+  VALUES (?, ?, ?, ?, ?)
+  `,
+  UPDATE_USER_ELO: `
+  UPDATE users
+  SET previousElo = ?
+  WHERE userId = ?
+  `,
+  SELECT_ALL_USERS: `
+  SELECT userId, discordUsername, faceitUsername, previousElo, gamePlayerId, faceitId, startOfMonthElo, startOfMonthPosition
+  FROM users
+  `,
+  DELETE_USER: `
+  DELETE FROM users
+  WHERE discordUsername = ?
+  `,
+  INSERT_MATCH: `
+  INSERT INTO matches (matchId, trackedPlayers, mapName, teamId, faction, voiceChannelId)
+  VALUES (?, ?, ?, ?, ?, ?)
+  ON DUPLICATE KEY UPDATE matchId = matchId
+`,
+  DELETE_MATCH: `
+  DELETE FROM matches
+  WHERE matchId = ?
+  `,
+
+  CHECK_MATCH_EXISTS: `
+  SELECT 1
+  FROM matches
+  WHERE matchId = ?
+  LIMIT 1
+`,
+  SELECT_MATCH_DETAILS: `
+  SELECT * FROM matches
+  WHERE matchId = ?
+  LIMIT 1
+`,
+  UPDATE_ACTIVE_SCORES_CHANNEL_ID: `
+  UPDATE matches
+  SET liveScoresChannelId = ?
+  WHERE matchId = ?
+  `,
+  UPDATE_MATCH_PROCESSED: `
+  UPDATE matches
+  SET processed = ?
+  WHERE matchId = ?
+`,
+  CHECK_MATCH_PROCESSED: `
+  SELECT processed
+  FROM matches
+  WHERE matchId = ?
+  LIMIT 1
+`,
+  UPDATE_PLAYER_ELO_AND_POSITION: `
+  UPDATE users
+  SET startOfMonthElo = ?,
+  startOfMonthPosition = ?
+  WHERE userId = ?
+`,
+};
