@@ -289,9 +289,9 @@ function formatLeaderboardTable(
   };
 
   // Create the divider line
-  const divider = `${"-".repeat(columnWidths.player + 1)}-${"-".repeat(
+  const divider = `${"-".repeat(columnWidths.player + 1)}|${"-".repeat(
     columnWidths.elo + 2
-  )}-${"-".repeat(columnWidths.change)}-${"-".repeat(columnWidths.position)}`;
+  )}|${"-".repeat(columnWidths.change)}|${"-".repeat(columnWidths.position)}`;
 
   // Function to format player names
   function formatPlayerName(index: number, playerName: string): string {
@@ -324,7 +324,7 @@ function formatLeaderboardTable(
         .padEnd(columnWidths.elo)}`;
       const changeThisMonth =
         Number(user.startOfMonthElo) === user.previousElo
-          ? `➖`
+          ? `💤`
           : Number(user.startOfMonthElo) > user.previousElo
           ? `👎 -${Number(user.startOfMonthElo) - user.previousElo}`
           : `🔥 +${user.previousElo - Number(user.startOfMonthElo)}`;
@@ -334,7 +334,7 @@ function formatLeaderboardTable(
           ? ""
           : user.startOfMonthPosition > currentIndex
           ? `🔼 ${user.startOfMonthPosition - currentIndex}`
-          : `🔽 ${index + 1 - user.startOfMonthPosition}`;
+          : `🔽 ${currentIndex - user.startOfMonthPosition}`;
 
       return `\`${formatPlayerName(
         startIndex + index,
