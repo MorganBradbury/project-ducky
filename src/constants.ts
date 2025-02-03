@@ -34,7 +34,6 @@ export enum AcceptedEventTypes {
   match_finished = "match_status_finished",
   match_cancelled = "match_status_cancelled",
   match_created = "match_object_created",
-  match_configuring = "match_status_configuring",
 }
 
 export const getMapEmoji = (mapName: string): string => {
