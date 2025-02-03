@@ -330,12 +330,12 @@ function formatLeaderboardTable(
           : Number(user.startOfMonthElo) > user.previousElo
           ? `👎 -${Number(user.startOfMonthElo) - user.previousElo}`
           : `🔥 +${user.previousElo - Number(user.startOfMonthElo)}`;
-
+      const currentIndex = index + 1;
       const formattedPositionChange =
-        user.startOfMonthPosition === index + 1
+        user.startOfMonthPosition === currentIndex
           ? ""
-          : user.startOfMonthPosition > index + 1
-          ? `🔼 ${user.startOfMonthPosition - index + 1}`
+          : user.startOfMonthPosition > currentIndex
+          ? `🔼 ${user.startOfMonthPosition - currentIndex}`
           : `🔽 ${index + 1 - user.startOfMonthPosition}`;
 
       return `\`${formatPlayerName(
