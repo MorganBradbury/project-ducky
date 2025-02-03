@@ -319,7 +319,7 @@ function formatLeaderboardTable(
         .padEnd(columnWidths.elo)}`;
       const changeThisMonth =
         Number(user.startOfMonthElo) === user.previousElo
-          ? `-`
+          ? `💤`
           : Number(user.startOfMonthElo) > user.previousElo
           ? `👎 -${Number(user.startOfMonthElo) - user.previousElo}`
           : `🔥 +${user.previousElo - Number(user.startOfMonthElo)}`;
@@ -328,8 +328,8 @@ function formatLeaderboardTable(
         user.startOfMonthPosition === index + 1
           ? ""
           : user.startOfMonthPosition > index + 1
-          ? `${user.startOfMonthPosition - index + 1}▲`
-          : `${index + 1 - user.startOfMonthPosition}▲`;
+          ? `🔼 ${user.startOfMonthPosition - index + 1}`
+          : `⬇️ ${index + 1 - user.startOfMonthPosition}`;
 
       return `\`${formatPlayerName(
         startIndex + index,
