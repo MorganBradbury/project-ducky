@@ -308,13 +308,7 @@ function formatLeaderboardTable(
   let output = "";
 
   if (showHeaders) {
-    output +=
-      "`Player       | Elo  | ➕/-   | ▼/▲`" +
-      "\n" +
-      "`" +
-      divider +
-      "`" +
-      "\n";
+    output += "`Player       | Elo  | ➕/-   | ▼/▲`" + "\n" + "`";
   }
 
   output += users
