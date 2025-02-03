@@ -1,23 +1,6 @@
-import { config } from "../config";
 import { SystemUser } from "../types/system-user";
-import mysql, { RowDataPacket } from "mysql2/promise";
-import { SQL_QUERIES } from "./queries";
 import { Match } from "../types/Faceit/match";
-
-// Create a connection pool
-const pool = mysql.createPool({ ...config.MYSQL });
-
-// Helper function for connection handling
-const useConnection = async <T>(
-  callback: (connection: mysql.PoolConnection) => Promise<T>
-): Promise<T> => {
-  const connection = await pool.getConnection();
-  try {
-    return await callback(connection);
-  } finally {
-    connection.release();
-  }
-};
+import prisma from "../api/services/prisma";
 
 // Add a new user
 export const addUser = async (
@@ -27,23 +10,23 @@ export const addUser = async (
   gamePlayerId: string,
   playerId: string
 ): Promise<number> => {
-  return useConnection(async (connection) => {
-    try {
-      const [result] = await connection.query(SQL_QUERIES.INSERT_USER, [
+  try {
+    const user = await prisma.users.create({
+      data: {
         discordUsername,
-        faceitName,
-        elo,
+        faceitUsername: faceitName,
+        previousElo: elo,
         gamePlayerId,
-        playerId,
-      ]);
-      return (result as any).insertId;
-    } catch (err: any) {
-      if (err.code === "ER_DUP_ENTRY") {
-        throw new Error(`You are already on the tracker 😅`);
-      }
-      throw err;
+        faceitId: playerId,
+      },
+    });
+    return user.userId;
+  } catch (err: any) {
+    if (err.code === "P2002") {
+      throw new Error(`You are already on the tracker 😅`);
     }
-  });
+    throw err;
+  }
 };
 
 // Update user's Elo
@@ -51,161 +34,135 @@ export const updateUserElo = async (
   userId: number,
   newElo: number
 ): Promise<boolean> => {
-  return useConnection(async (connection) => {
-    const [result] = await connection.query(SQL_QUERIES.UPDATE_USER_ELO, [
-      newElo,
-      userId,
-    ]);
-    if ((result as any).affectedRows === 0) {
-      throw new Error("No rows updated. Check if the userId exists.");
-    }
-    return true;
+  const result = await prisma.users.update({
+    where: { userId },
+    data: { previousElo: newElo },
   });
+  return result !== null;
 };
 
 // Retrieve all users
 export const getAllUsers = async (): Promise<SystemUser[]> => {
-  return useConnection(async (connection) => {
-    const [rows] = await connection.query(SQL_QUERIES.SELECT_ALL_USERS);
-    return rows as SystemUser[];
-  });
+  return await prisma.users.findMany();
 };
 
 // Delete a user
 export const deleteUser = async (discordUsername: string): Promise<boolean> => {
-  return useConnection(async (connection) => {
-    const [result] = await connection.query(SQL_QUERIES.DELETE_USER, [
-      discordUsername,
-    ]);
-    if ((result as any).affectedRows === 0) {
-      throw new Error("User not found.");
-    }
-    return true;
+  const result = await prisma.users.delete({
+    where: { discordUsername },
   });
+  return result !== null;
 };
 
+// Insert a match
 export const insertMatch = async (match: Match): Promise<void> => {
   try {
-    // Perform the database insert
-    await pool.query(SQL_QUERIES.INSERT_MATCH, [
-      match.matchId,
-      JSON.stringify(match.trackedTeam.trackedPlayers), // Store gamePlayerIds as JSON string
-      match.mapName, // Map selected for the match
-      match.trackedTeam.teamId, // Store teamId
-      match.trackedTeam.faction,
-      match.voiceChannelId,
-    ]);
+    await prisma.matches.create({
+      data: {
+        matchId: match.matchId,
+        trackedPlayers: JSON.stringify(match.trackedTeam.trackedPlayers),
+        mapName: match.mapName,
+        teamId: match.trackedTeam.teamId,
+        faction: match.trackedTeam.faction,
+        voiceChannelId: match.voiceChannelId,
+      },
+    });
     console.log(`Match ${match.matchId} inserted successfully.`);
   } catch (error) {
     console.error(`Error inserting match ${match.matchId}:`, error);
   }
 };
 
+// Mark match as complete
 export const markMatchComplete = async (matchId: string): Promise<void> => {
-  await pool.query(SQL_QUERIES.DELETE_MATCH, [matchId]);
-};
-
-export const checkMatchExists = async (matchId: string): Promise<boolean> => {
-  return useConnection(async (connection) => {
-    const [rows] = await connection.query<any[]>(
-      SQL_QUERIES.CHECK_MATCH_EXISTS, // Use the query from SQL_QUERIES
-      [matchId]
-    );
-    return rows.length > 0; // Returns true if a record is found
+  await prisma.matches.delete({
+    where: { matchId },
   });
 };
 
+// Check if match exists
+export const checkMatchExists = async (matchId: string): Promise<boolean> => {
+  const match = await prisma.matches.findUnique({
+    where: { matchId },
+  });
+  return match !== null;
+};
+
+// Get match data from database
+// Get match data from database
 export const getMatchDataFromDb = async (
   matchId: string
 ): Promise<Match | null> => {
-  return useConnection(async (connection) => {
-    const [rows] = await connection.query<RowDataPacket[]>(
-      SQL_QUERIES.SELECT_MATCH_DETAILS, // Use the query from SQL_QUERIES
-      [matchId]
-    );
-
-    if (rows.length > 0) {
-      const match = rows[0];
-      //matchId, trackedPlayers, mapName, teamId, faction, voiceChannelId, voiceChannelName, liveScoresChannelId
-
-      const returnedMatch: Match = {
-        matchId: match?.matchId,
-        mapName: match?.mapName,
-        trackedTeam: {
-          teamId: match?.teamId,
-          faction: match?.faction,
-          trackedPlayers: match?.trackedPlayers,
-        },
-        voiceChannelId: match?.voiceChannelId,
-      };
-      return returnedMatch;
-    }
-
-    return null; // Return null if no match is found
+  const match = await prisma.matches.findUnique({
+    where: { matchId },
   });
+
+  if (match) {
+    return {
+      matchId: match.matchId,
+      mapName: match.mapName,
+      trackedTeam: {
+        teamId: match.teamId,
+        faction: match.faction,
+        // Parse trackedPlayers correctly here
+        trackedPlayers: JSON.parse(match.trackedPlayers as string), // Ensure it's treated as a string for parsing
+      },
+      voiceChannelId: match.voiceChannelId || '',
+    };
+  }
+  return null;
 };
 
+
+// Update live scores channel for a match
 export const updateLiveScoresChannelIdForMatch = async (
   matchId: string,
   newChannelId: string
 ): Promise<void> => {
-  return useConnection(async (connection) => {
-    const [result] = await connection.query<RowDataPacket[]>(
-      SQL_QUERIES.UPDATE_ACTIVE_SCORES_CHANNEL_ID,
-      [newChannelId, matchId]
-    );
-
-    if ((result as any).affectedRows > 0) {
-      console.log(
-        `Successfully updated activeScoresChannelId for match ${matchId}`
-      );
-    } else {
-      console.log(`No match found with matchId ${matchId}`);
-    }
+  const result = await prisma.matches.update({
+    where: { matchId },
+    data: { liveScoresChannelId: newChannelId },
   });
+
+  if (result) {
+    console.log(`Successfully updated liveScoresChannelId for match ${matchId}`);
+  } else {
+    console.log(`No match found with matchId ${matchId}`);
+  }
 };
 
 // Update the 'processed' column for a match
 export const updateMatchProcessed = async (
   matchId: string
 ): Promise<boolean> => {
-  return useConnection(async (connection) => {
-    const [result] = await connection.query(
-      SQL_QUERIES.UPDATE_MATCH_PROCESSED,
-      [true, matchId]
-    );
-    if ((result as any).affectedRows === 0) {
-      throw new Error(`Match ${matchId} not found or already processed.`);
-    }
-    return true;
+  const result = await prisma.matches.update({
+    where: { matchId },
+    data: { processed: true },
   });
+  return result !== null;
 };
 
 // Check if a match has already been processed
 export const isMatchProcessed = async (matchId: string): Promise<boolean> => {
-  return useConnection(async (connection) => {
-    const [rows] = await connection.query<RowDataPacket[]>(
-      SQL_QUERIES.CHECK_MATCH_PROCESSED,
-      [matchId]
-    );
-    return rows.length > 0 && rows[0]?.processed === 1; // Returns true if processed
+  const match = await prisma.matches.findUnique({
+    where: { matchId },
+    select: { processed: true },
   });
+  return match?.processed === true;
 };
 
-// Update the 'processed' column for a match
+// Update player's Elo and start position
 export const updatePlayerEloAndPosition = async (
   userId: number,
   startOfMonthElo: string,
   startOfMonthPosition: number
 ): Promise<boolean> => {
-  return useConnection(async (connection) => {
-    const [result] = await connection.query(
-      SQL_QUERIES.UPDATE_PLAYER_ELO_AND_POSITION,
-      [startOfMonthElo, startOfMonthPosition, userId]
-    );
-    if ((result as any).affectedRows === 0) {
-      throw new Error(`User ${userId} not found or already processed.`);
-    }
-    return true;
+  const result = await prisma.users.update({
+    where: { userId },
+    data: {
+      startOfMonthElo,
+      startOfMonthPosition,
+    },
   });
+  return result !== null;
 };
