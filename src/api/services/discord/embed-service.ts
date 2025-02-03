@@ -284,7 +284,7 @@ function formatLeaderboardTable(
   const columnWidths = {
     player: 11, // Player column width
     elo: 4, // Elo column width
-    change: 7,
+    change: 6,
     position: 4,
   };
 
@@ -315,8 +315,8 @@ function formatLeaderboardTable(
         Number(user.startOfMonthElo) === user.previousElo
           ? `💤`
           : Number(user.startOfMonthElo) > user.previousElo
-          ? `👎 -${Number(user.startOfMonthElo) - user.previousElo}`
-          : `🔥 +${user.previousElo - Number(user.startOfMonthElo)}`;
+          ? `👎-${Number(user.startOfMonthElo) - user.previousElo}`
+          : `🔥+${user.previousElo - Number(user.startOfMonthElo)}`;
       const currentIndex = index + 1;
       const formattedPositionChange =
         user.startOfMonthPosition === currentIndex
