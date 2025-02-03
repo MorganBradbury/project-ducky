@@ -284,7 +284,7 @@ function formatLeaderboardTable(
   const columnWidths = {
     player: 12, // Player column width
     elo: 4, // Elo column width
-    change: 6,
+    change: 7,
     position: 4,
   };
 
