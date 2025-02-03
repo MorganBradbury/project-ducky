@@ -157,8 +157,9 @@ export const updateLeaderboard = async (
       String(faceitElo),
       startOfMonthPosition
     );
-    updateLeaderboardEmbed();
   }
+
+  updateLeaderboardEmbed();
 
   res.send("Leaderboard updated");
 };
