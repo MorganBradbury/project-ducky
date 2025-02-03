@@ -85,7 +85,7 @@ export const updateLiveScores = async (
   const match = await getMatchDataFromDb(matchId);
   if (!match) {
     console.log(`No match data found for ${matchId} in DB`);
-    return;
+    res.status(200).json({ message: "Match data not found", match });
   }
 
   const liveScore = await FaceitService.getMatchScore(
