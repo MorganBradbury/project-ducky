@@ -110,8 +110,7 @@ export async function matchEndNotification(match: Match) {
           value: `[🔗 Link](${LINKS.MATCHROOM}/${match?.matchId})`,
         }
       )
-      .setFooter({ text: `${match.matchId}` })
-      .setTimestamp();
+      .setFooter({ text: `${match.matchId}` });
 
     await sendEmbedMessage(embed, config.CHANNEL_MATCH_RESULTS, match.matchId);
   } catch (error) {
