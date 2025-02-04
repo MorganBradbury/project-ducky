@@ -79,6 +79,8 @@ export const endMatch = async (matchId: string) => {
     }
 
     await updateMatchProcessed(matchId);
+    await deleteLiveScoreCard(matchId);
+
     // Stop the worker associated with this matchId
     try {
       await axios.post(
@@ -99,7 +101,6 @@ export const endMatch = async (matchId: string) => {
       await updateVoiceChannelStatus(match.voiceChannelId, "");
     }
 
-    await deleteLiveScoreCard(matchId);
     await updateLeaderboardEmbed();
   } catch (error) {
     console.log(error);
