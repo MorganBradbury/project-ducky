@@ -81,9 +81,11 @@ export const updateLiveScores = async (
   req: Request,
   res: Response
 ): Promise<void> => {
+  console.log("Request received to update live scores");
   const matchId = req?.body?.matchId;
   const isMatchAlreadyProcessed = await isMatchProcessed(matchId);
   if (isMatchAlreadyProcessed) {
+    res.status(200).json({ message: "Match is already processed", matchId });
     return;
   }
   const match = await getMatchDataFromDb(matchId);

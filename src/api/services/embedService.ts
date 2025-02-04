@@ -304,6 +304,7 @@ export async function updateLiveScoreCard(match: Match) {
 
   await targetMessage.edit({ embeds: updatedEmbeds });
   console.log(`Live score updated for matchId: ${match.matchId}`);
+  return;
 }
 
 export async function deleteLiveScoreCard(matchId?: string) {
