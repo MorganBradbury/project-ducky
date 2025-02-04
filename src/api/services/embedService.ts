@@ -421,18 +421,18 @@ function formatLeaderboardTable(
         .padEnd(columnWidths.elo)}`;
       const changeThisMonth =
         Number(user.startOfMonthElo) === user.previousElo
-          ? `💤`
+          ? ``
           : Number(user.startOfMonthElo) > user.previousElo
-          ? `🔻-${Number(user.startOfMonthElo) - user.previousElo}`
-          : `🔥+${user.previousElo - Number(user.startOfMonthElo)}`;
+          ? `-${Number(user.startOfMonthElo) - user.previousElo}`
+          : `+${user.previousElo - Number(user.startOfMonthElo)}`;
       const currentIndex = index + 1;
       const startingPosition = user.startOfMonthPosition || 1;
       const formattedPositionChange =
         user.startOfMonthPosition === currentIndex
           ? ""
           : startingPosition > currentIndex
-          ? `🔼${startingPosition - currentIndex}`
-          : `🔻${currentIndex - startingPosition}`;
+          ? `⌃${startingPosition - currentIndex}`
+          : `⌄${currentIndex - startingPosition}`;
 
       return `\`${formatPlayerName(
         startIndex + index,
