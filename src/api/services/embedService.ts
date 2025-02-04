@@ -357,20 +357,6 @@ export async function sendNewUserNotification(
 }
 
 export async function updateLeaderboardEmbed() {
-  const channel = await client.channels.fetch(config.CHANNEL_LEADERBOARD);
-  if (!channel || !channel.isTextBased()) return;
-  try {
-    let messages = await channel.messages.fetch({ limit: 5 });
-    while (messages.size > 0) {
-      for (const message of messages.values()) {
-        await message.delete();
-      }
-      messages = await channel.messages.fetch({ limit: 5 });
-    }
-  } catch (error) {
-    console.error("Error deleting messages:", error);
-  }
-
   const users = await getAllUsers();
 
   // Sort users by ELO in descending order
