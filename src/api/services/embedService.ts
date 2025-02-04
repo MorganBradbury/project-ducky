@@ -101,7 +101,7 @@ export async function matchEndNotification(match: Match) {
           value: `${playerStatsTable.join("\n")}`,
         },
         {
-          name: "Match page",
+          name: "Matchroom page",
           value: `[🔗 Link](${LINKS.MATCHROOM}/${match?.matchId})`,
         }
       )
@@ -217,7 +217,7 @@ export const createMatchAnalysisEmbed = (
       { name: "They likely pick", value: mostLikelyPicks, inline: true },
       { name: "They likely ban", value: mostLikelyBans, inline: true },
       {
-        name: "Match page",
+        name: "Matchroom page",
         value: `[🔗 Link](${LINKS.MATCHROOM}/${matchId})`,
         inline: false,
       }
@@ -264,7 +264,7 @@ export async function createLiveScoreCard(match: Match) {
       },
       EMPTY_FIELD,
       {
-        name: "Match page",
+        name: "Matchroom page",
         value: `[🔗 Link](${LINKS.MATCHROOM}/${match?.matchId})`,
         inline: true,
       }
