@@ -1,6 +1,9 @@
 import { Client, GatewayIntentBits, Partials } from "discord.js";
 import { config } from "../config";
-import { updateLeaderboardEmbed } from "../api/services/embedService";
+import {
+  deleteLiveScoreCard,
+  updateLeaderboardEmbed,
+} from "../api/services/embedService";
 const client = new Client({
   intents: [
     GatewayIntentBits.Guilds,
@@ -18,6 +21,7 @@ const client = new Client({
   try {
     await client.login(config.DISCORD_BOT_TOKEN);
     console.log("Bot logged in successfully!");
+    deleteLiveScoreCard("1-fb19355e-c020-41f7-b986-dfe62412b6ad");
     updateLeaderboardEmbed();
   } catch (error) {
     console.error("Error logging in to Discord:", error);
