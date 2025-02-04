@@ -9,6 +9,7 @@ import { FaceitService } from "../services/faceitService";
 import {
   getAllUsers,
   getMatchDataFromDb,
+  isMatchProcessed,
   updatePlayerEloAndPosition,
 } from "../../db/dbCommands";
 import { AcceptedEventTypes } from "../../constants";
@@ -81,8 +82,12 @@ export const updateLiveScores = async (
   res: Response
 ): Promise<void> => {
   const matchId = req?.body?.matchId;
-
+  const isMatchAlreadyProcessed = await isMatchProcessed(matchId);
+  if (isMatchAlreadyProcessed) {
+    return;
+  }
   const match = await getMatchDataFromDb(matchId);
+
   if (!match) {
     console.log(`No match data found for ${matchId} in DB`);
     res.status(200).json({ message: "Match data not found", match });

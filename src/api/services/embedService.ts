@@ -28,6 +28,13 @@ export async function sendEmbedMessage(
   channelId: string,
   matchId?: string
 ) {
+  const channelHeadersMap: Record<string, string> = {
+    [config.CHANNEL_LIVE_MATCHES]: "Live matches:",
+    [config.CHANNEL_MATCH_RESULTS]: "Match results",
+    [config.CHANNEL_MAP_ANALYSIS]: "Map analysis",
+    [config.CHANNEL_LEADERBOARD]: "Leaderboard (LIVE)",
+  };
+
   try {
     const channel = (await client.channels.fetch(channelId)) as TextChannel;
 
@@ -57,15 +64,23 @@ export async function sendEmbedMessage(
           await lastMessage.edit({ embeds: [...existingEmbeds, embed] });
           console.log(`Appended new embed to existing message.`);
         } else {
-          // If embed limit is reached, send a new message
-          await channel.send({ embeds: [embed] });
-          console.log(`Embed limit reached, sent a new message.`);
+          // If embed limit is reached, send a new message with a header
+          const headerEmbed = new EmbedBuilder().setTitle(
+            channelHeadersMap[channelId] || "Updates"
+          );
+
+          await channel.send({ embeds: [headerEmbed, embed] });
+          console.log(`Embed limit reached, sent a new message with a header.`);
         }
       }
     } else {
-      // If no message exists, send a new one
-      await channel.send({ embeds: [embed] });
-      console.log(`Sent new embed message.`);
+      // If no message exists, send a new one with a header
+      const headerEmbed = new EmbedBuilder().setTitle(
+        channelHeadersMap[channelId] || "Updates"
+      );
+
+      await channel.send({ embeds: [headerEmbed, embed] });
+      console.log(`Sent new embed message with a header.`);
     }
   } catch (error) {
     console.error("Error sending embedMessage", error);

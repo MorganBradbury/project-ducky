@@ -64,38 +64,46 @@ export const startMatch = async (matchId: string) => {
 };
 
 export const endMatch = async (matchId: string) => {
-  console.log("Processing endMatch()", matchId);
+  try {
+    console.log("Processing endMatch()", matchId);
 
-  const isMatchAlreadyProcessed = await isMatchProcessed(matchId);
-  if (isMatchAlreadyProcessed) {
-    return;
+    const isMatchAlreadyProcessed = await isMatchProcessed(matchId);
+    if (isMatchAlreadyProcessed) {
+      return;
+    }
+
+    let match = await getMatchDataFromDb(matchId);
+
+    if (!match) {
+      return;
+    }
+
+    await updateMatchProcessed(matchId);
+    // Stop the worker associated with this matchId
+    try {
+      await axios.post(
+        "https://live-game-service-production.up.railway.app/api/end",
+        { matchId }
+      );
+      console.log("sent request to worker service to end", matchId);
+    } catch (error) {
+      console.log("Request failed to live game service for", matchId);
+    }
+
+    // deletes record from DB.
+    await markMatchComplete(matchId);
+    await matchEndNotification(match);
+    await runEloUpdate(match.trackedTeam.trackedPlayers);
+
+    if (match?.voiceChannelId) {
+      await updateVoiceChannelStatus(match.voiceChannelId, "");
+    }
+
+    await deleteLiveScoreCard(matchId);
+    await updateLeaderboardEmbed();
+  } catch (error) {
+    console.log(error);
   }
-
-  let match = await getMatchDataFromDb(matchId);
-
-  if (!match) {
-    return;
-  }
-
-  await updateMatchProcessed(matchId);
-  // Stop the worker associated with this matchId
-  await axios.post(
-    "https://live-game-service-production.up.railway.app/api/end",
-    { matchId }
-  );
-  console.log("sent request to worker service to end", matchId);
-
-  // deletes record from DB.
-  await markMatchComplete(matchId);
-  await matchEndNotification(match);
-  await runEloUpdate(match.trackedTeam.trackedPlayers);
-
-  if (match?.voiceChannelId) {
-    await updateVoiceChannelStatus(match.voiceChannelId, "");
-  }
-
-  await deleteLiveScoreCard(matchId);
-  await updateLeaderboardEmbed();
 };
 
 export const cancelMatch = async (matchId: string) => {
