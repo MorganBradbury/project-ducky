@@ -221,7 +221,8 @@ export const createMatchAnalysisEmbed = (
       }
     )
     .setFooter({ text: `${matchId}` })
-    .setColor("#ff5733");
+    .setColor("#ff5733")
+    .setTimestamp();
 
   // Pass the embed and the button to sendEmbedMessage
   sendEmbedMessage(embed, config.CHANNEL_MAP_ANALYSIS, matchId);
