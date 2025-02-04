@@ -18,6 +18,8 @@ export const addUser = async (
         previousElo: elo,
         gamePlayerId,
         faceitId: playerId,
+        startOfMonthElo: elo.toString(),
+        startOfMonthPosition: 0,
       },
     });
     return user.userId;
