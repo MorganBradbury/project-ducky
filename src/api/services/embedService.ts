@@ -167,7 +167,7 @@ export const createMatchAnalysisEmbed = (
   const mostLikelyBans = sortedMapData
     .slice()
     .sort((a: any, b: any) => a.totalPlayedTimes - b.totalPlayedTimes) // Sort by least played first
-    .slice(0, 4) // Take the least played 3 maps
+    .slice(0, 3) // Take the least played 3 maps
     .map(
       (map: any) =>
         `${getMapEmoji(map.mapName)} ${formattedMapName(map.mapName)}`
