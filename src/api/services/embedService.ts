@@ -208,7 +208,7 @@ export const createMatchAnalysisEmbed = (
         inline: true,
       },
       {
-        name: `Map stats for Team ${enemyFactionCaptain.nickname} (Last 50 games)`,
+        name: `Map stats for Team ${enemyFactionCaptain.nickname}`,
         value:
           "`Map name     | Played | Win % `\n" +
           "`-------------|--------|-------`\n" +
