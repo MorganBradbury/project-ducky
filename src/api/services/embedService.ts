@@ -41,21 +41,26 @@ export async function sendEmbedMessage(
     const messages = await channel.messages.fetch({ limit: 1 });
     const lastMessage = messages.first();
 
-    console.log(messages);
-
     if (lastMessage) {
       if (channelId === config.CHANNEL_LEADERBOARD) {
-        // Replace existing embeds (only 1 embed in message)
+        // Replace existing embeds (only 1 embed in leaderboard message)
         await lastMessage.edit({ embeds: [embed] });
         console.log(`Replaced embed in leaderboard message.`);
       } else {
-        // Preserve existing embeds and append the new one
+        // Preserve existing embeds and append the new one if limit allows
         const existingEmbeds = lastMessage.embeds.map((embedData) =>
           EmbedBuilder.from(embedData)
         );
 
-        await lastMessage.edit({ embeds: [...existingEmbeds, embed] });
-        console.log(`Appended new embed to existing message.`);
+        if (existingEmbeds.length < 10) {
+          // Append the new embed if the limit isn't reached
+          await lastMessage.edit({ embeds: [...existingEmbeds, embed] });
+          console.log(`Appended new embed to existing message.`);
+        } else {
+          // If embed limit is reached, send a new message
+          await channel.send({ embeds: [embed] });
+          console.log(`Embed limit reached, sent a new message.`);
+        }
       }
     } else {
       // If no message exists, send a new one
