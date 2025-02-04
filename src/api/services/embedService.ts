@@ -41,6 +41,8 @@ export async function sendEmbedMessage(
     const messages = await channel.messages.fetch({ limit: 1 });
     const lastMessage = messages.first();
 
+    console.log(messages);
+
     if (lastMessage) {
       if (channelId === config.CHANNEL_LEADERBOARD) {
         // Replace existing embeds (only 1 embed in message)
