@@ -431,7 +431,7 @@ function formatLeaderboardTable(
         user.startOfMonthPosition === currentIndex
           ? ""
           : startingPosition > currentIndex
-          ? `🔺${startingPosition - currentIndex}`
+          ? `+${startingPosition - currentIndex}`
           : `🔻${currentIndex - startingPosition}`;
 
       return `\`${formatPlayerName(
