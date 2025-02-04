@@ -419,17 +419,19 @@ function formatLeaderboardTable(
       const formattedElo = `${user.previousElo
         .toString()
         .padEnd(columnWidths.elo)}`;
+      // Leave the change empty if no change in elo
       const changeThisMonth =
         Number(user.startOfMonthElo) === user.previousElo
-          ? ``
+          ? "" // Leave empty when no change
           : Number(user.startOfMonthElo) > user.previousElo
           ? `- ${Number(user.startOfMonthElo) - user.previousElo}`
           : `+ ${user.previousElo - Number(user.startOfMonthElo)}`;
+
       const currentIndex = index + 1;
       const startingPosition = user.startOfMonthPosition || 1;
       const formattedPositionChange =
         user.startOfMonthPosition === currentIndex
-          ? ""
+          ? "" // No change in position
           : startingPosition > currentIndex
           ? `+${startingPosition - currentIndex}`
           : `-${currentIndex - startingPosition}`;
