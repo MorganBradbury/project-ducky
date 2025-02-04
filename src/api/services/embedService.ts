@@ -432,7 +432,7 @@ function formatLeaderboardTable(
           ? ""
           : startingPosition > currentIndex
           ? `+${startingPosition - currentIndex}`
-          : `🔻${currentIndex - startingPosition}`;
+          : `-${currentIndex - startingPosition}`;
 
       return `\`${formatPlayerName(
         startIndex + index,
