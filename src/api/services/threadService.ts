@@ -1,9 +1,9 @@
 import { ChannelType } from "discord.js";
 import client from "../../bot/client";
+import { config } from "../../config";
 
 export async function processEmbedsToThreads() {
-  const channelId = "1310572627932479529"; // Fixed channel ID
-  const channel = await client.channels.fetch(channelId);
+  const channel = await client.channels.fetch(config.CHANNEL_MATCH_RESULTS);
 
   if (!channel || channel.type !== ChannelType.GuildText) {
     console.error("Invalid channel provided. Ensure it is a text channel.");
@@ -14,7 +14,7 @@ export async function processEmbedsToThreads() {
   const embedsByDate = new Map();
 
   // Fetch all messages from the channel
-  let messages = await channel.messages.fetch({ limit: 100 });
+  let messages = await channel.messages.fetch({ limit: 10 });
   while (messages.size > 0) {
     for (const message of messages.values()) {
       if (message.embeds.length > 0) {

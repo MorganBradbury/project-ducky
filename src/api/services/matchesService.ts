@@ -17,7 +17,7 @@ import { updateVoiceChannelStatus } from "./channelService";
 import {
   createLiveScoreCard,
   createMatchAnalysisEmbed,
-  deleteMatchCards,
+  deleteLiveScoreCard,
   matchEndNotification,
   updateLeaderboardEmbed,
 } from "./embedService";
@@ -94,13 +94,13 @@ export const endMatch = async (matchId: string) => {
     await updateVoiceChannelStatus(match.voiceChannelId, "");
   }
 
-  await deleteMatchCards(matchId);
+  await deleteLiveScoreCard(matchId);
   await updateLeaderboardEmbed();
 };
 
 export const cancelMatch = async (matchId: string) => {
   console.log("Processing cancelMatch()", matchId);
-  await deleteMatchCards(matchId);
+  await deleteLiveScoreCard(matchId);
 
   let match = await getMatchDataFromDb(matchId);
   if (!match) {
