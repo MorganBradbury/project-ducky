@@ -137,7 +137,7 @@ client.on("messageCreate", async (message) => {
         `<#${config.CHANNEL_GENERAL}>: A place to chat and interact with the community.\n` +
         `<#${config.CHANNEL_LIVE_MATCHES}>: Stay up-to-date with ongoing matches.\n` +
         `<#${config.CHANNEL_MATCH_RESULTS}>: Check out the latest match results.\n` +
-        `<#${config.CHANNEL_MAP_ANALYSIS}>: Bot-generated analysis for your matches. This shows the opponents pick/ ban habbits to help you pick the best map\n` +
+        `<#${config.CHANNEL_MAP_ANALYSIS}>: Map analysis for your matches. Summarizes what maps your opponents play\n` +
         `<#${config.CHANNEL_LEADERBOARD}>: See the current standings and rankings within the discord.\n` +
         `<#${config.CHANNEL_UPDATES}>: Get information on the latest updates for CS`
     );
