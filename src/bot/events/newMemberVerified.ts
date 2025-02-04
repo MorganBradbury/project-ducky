@@ -12,6 +12,7 @@ import {
   sendNewUserNotification,
   updateLeaderboardEmbed,
 } from "../../api/services/embedService";
+import { config } from "../../config";
 
 const monitoredChannelId = "1327303978223931462"; // Replace with the ID of the channel to monitor
 
@@ -122,12 +123,20 @@ client.on("messageCreate", async (message) => {
     );
 
     // Send a welcome message
-    const welcomeChannelId = "1309222763994808370";
+    const welcomeChannelId = config.CHANNEL_GENERAL;
     const welcomeChannel = await client.channels.fetch(welcomeChannelId);
     const totalUsers = message.guild?.memberCount;
     await (welcomeChannel as TextChannel).send(
-      `👋  Hi <@${message.author.id}>. Welcome to Duckclub. You are duck #${totalUsers}.`
+      `👋  Hi <@${message.author.id}>. Welcome to Duckclub. You are duck #${totalUsers}.\n\n` +
+        `Here are some useful channels you can check out:\n\n` + // Line break here
+        `**#General** - <#${config.CHANNEL_GENERAL}>: A place to chat and interact with the community.\n` +
+        `**#Live Matches** - <#${config.CHANNEL_LIVE_MATCHES}>: Stay up-to-date with ongoing matches.\n` +
+        `**#Match Results** - <#${config.CHANNEL_MATCH_RESULTS}>: Check out the latest match results.\n` +
+        `**#Map Analysis** - <#${config.CHANNEL_MAP_ANALYSIS}>: Bot-generated analysis for your matches. This shows the opponents pick/ ban habbits to help you pick the best map\n` +
+        `**#Leaderboard** - <#${config.CHANNEL_LEADERBOARD}>: See the current standings and rankings within the discord.\n` +
+        `**#Updates** - <#${config.CHANNEL_UPDATES}>: Get information on the latest updates for CS`
     );
+
     console.log(`Sent welcome message to channel ${welcomeChannelId}`);
     await sendNewUserNotification(userTag, player.id);
     updateLeaderboardEmbed();
