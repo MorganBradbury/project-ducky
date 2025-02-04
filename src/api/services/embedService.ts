@@ -275,8 +275,7 @@ export async function createLiveScoreCard(match: Match) {
       }
     )
     .setFooter({ text: `${match.matchId}` })
-    .setColor(`#${EMBED_COLOURS.LIVE_SCORE}`)
-    .setTimestamp();
+    .setColor(`#${EMBED_COLOURS.LIVE_SCORE}`);
 
   await sendEmbedMessage(embed, config.CHANNEL_LIVE_MATCHES, match.matchId);
 }
