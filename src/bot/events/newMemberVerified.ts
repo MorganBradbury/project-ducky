@@ -1,6 +1,6 @@
 import { TextChannel } from "discord.js";
 import { FaceitService } from "../../api/services/faceitService";
-import { addUser } from "../../db/dbCommands";
+import { addUser, deleteUser } from "../../db/dbCommands";
 import { Player } from "../../types/Faceit/player";
 import { updateNickname } from "../../utils/nicknameUtils";
 import client from "../client";
@@ -65,6 +65,11 @@ client.on("messageCreate", async (message) => {
       return;
     }
 
+    try {
+      await deleteUser(message.author.tag);
+    } catch (error) {
+      console.log(`User doesn't already exist: ${message.author.tag}`);
+    }
     // Add the user to the database and update roles/nicknames
     await addUser(
       userTag,
