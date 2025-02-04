@@ -219,7 +219,7 @@ export async function findMatchMessage(matchId: string, channelId: string) {
     return null;
   }
 
-  const messages = await channel.messages.fetch({ limit: 10 });
+  const messages = await channel.messages.fetch({ limit: 25 });
   return messages.find((message) =>
     message.embeds.some((embed) => embed.footer?.text === matchId)
   );
@@ -230,18 +230,23 @@ export function prepareScoreUpdate(
   match: Match,
   newScore: string
 ) {
-  const embed = targetMessage.embeds[0];
-  const currentTitle = embed.title;
-  const currentScore = currentTitle?.split(" (")[1]?.split(")")[0];
+  const updatedEmbeds = targetMessage.embeds.map((embed) => {
+    // Check if this embed is the one for the match
+    if (embed.footer?.text === match.matchId) {
+      const currentTitle = embed.title;
+      const currentScore = currentTitle?.split(" (")[1]?.split(")")[0];
 
-  if (currentScore === newScore) {
-    return { shouldUpdate: false, updatedEmbed: null };
-  }
+      if (currentScore === newScore) {
+        return embed; // No changes needed
+      }
 
-  const { mapEmoji, formattedMapName } = formatMapInfo(match.mapName);
-  const updatedEmbed = EmbedBuilder.from(embed).setTitle(
-    `${mapEmoji}  ${formattedMapName}  (${newScore})`
-  );
+      const { mapEmoji, formattedMapName } = formatMapInfo(match.mapName);
+      return EmbedBuilder.from(embed).setTitle(
+        `${mapEmoji}  ${formattedMapName}  (${newScore})`
+      );
+    }
+    return embed; // Leave other embeds unchanged
+  });
 
-  return { shouldUpdate: true, updatedEmbed };
+  return { updatedEmbeds };
 }

@@ -30,14 +30,36 @@ export async function sendEmbedMessage(
 ) {
   try {
     const channel = (await client.channels.fetch(channelId)) as TextChannel;
+
+    // Check if this embed has already been sent to prevent duplicates
     if (await checkIfAlreadySent(matchId || null, channel)) {
       console.log(`Embed already sent for matchId: ${matchId}`);
       return;
     }
 
-    return channel.send({
-      embeds: [embed],
-    });
+    // Fetch the last message in the channel
+    const messages = await channel.messages.fetch({ limit: 1 });
+    const lastMessage = messages.first();
+
+    if (lastMessage) {
+      if (channelId === config.CHANNEL_LEADERBOARD) {
+        // Replace existing embeds (only 1 embed in message)
+        await lastMessage.edit({ embeds: [embed] });
+        console.log(`Replaced embed in leaderboard message.`);
+      } else {
+        // Preserve existing embeds and append the new one
+        const existingEmbeds = lastMessage.embeds.map((embedData) =>
+          EmbedBuilder.from(embedData)
+        );
+
+        await lastMessage.edit({ embeds: [...existingEmbeds, embed] });
+        console.log(`Appended new embed to existing message.`);
+      }
+    } else {
+      // If no message exists, send a new one
+      await channel.send({ embeds: [embed] });
+      console.log(`Sent new embed message.`);
+    }
   } catch (error) {
     console.error("Error sending embedMessage", error);
   }
@@ -268,45 +290,48 @@ export async function updateLiveScoreCard(match: Match) {
   );
 
   const newScore = matchScore.join(":");
-  const { shouldUpdate, updatedEmbed } = prepareScoreUpdate(
-    targetMessage,
-    match,
-    newScore
-  );
+  const { updatedEmbeds } = prepareScoreUpdate(targetMessage, match, newScore);
 
-  if (shouldUpdate && updatedEmbed) {
-    await targetMessage.edit({ embeds: [updatedEmbed] });
-    console.log(`Live score updated for matchId: ${match.matchId}`);
-  }
+  await targetMessage.edit({ embeds: updatedEmbeds });
+  console.log(`Live score updated for matchId: ${match.matchId}`);
 }
 
-export async function deleteMatchCards(matchId?: string) {
-  const channelIDs = [config.CHANNEL_MAP_ANALYSIS, config.CHANNEL_LIVE_MATCHES];
+export async function deleteLiveScoreCard(matchId?: string) {
+  const channelId = config.CHANNEL_LIVE_MATCHES;
 
-  for (const channelId of channelIDs) {
-    try {
-      const channel = await client.channels.fetch(channelId);
-      if (!channel || !channel.isTextBased()) {
-        console.error(`Channel ${channelId} is invalid or not text-based.`);
-        continue;
-      }
-
-      const messages = await channel.messages.fetch({ limit: 20 });
-
-      const targetMessage = messages.find((message: Message) =>
-        message.embeds.some((embed) => embed.footer?.text === matchId)
-      );
-
-      if (targetMessage) {
-        await targetMessage.delete();
-        console.log(`Embed deleted for matchId: ${matchId}}`);
-      }
-    } catch (error) {
-      console.error(
-        `Failed to process messages in channel ${channelId}:`,
-        error
-      );
+  try {
+    const channel = await client.channels.fetch(channelId);
+    if (!channel || !channel.isTextBased()) {
+      console.error(`Channel ${channelId} is invalid or not text-based.`);
+      return;
     }
+
+    const messages = await channel.messages.fetch({ limit: 5 });
+
+    const targetMessage = messages.find((message: Message) =>
+      message.embeds.some((embed) => embed.footer?.text === matchId)
+    );
+
+    if (targetMessage) {
+      // Filter out the embed with the given matchId
+      const updatedEmbeds = targetMessage.embeds.filter(
+        (embed) => embed.footer?.text !== matchId
+      );
+
+      if (updatedEmbeds.length > 0) {
+        // If there are remaining embeds, update the message without the deleted embed
+        await targetMessage.edit({ embeds: updatedEmbeds });
+        console.log(`Embed removed from message for matchId: ${matchId}`);
+      } else {
+        // If no embeds remain, delete the message entirely
+        await targetMessage.delete();
+        console.log(
+          `Message deleted as no embeds remained for matchId: ${matchId}`
+        );
+      }
+    }
+  } catch (error) {
+    console.error(`Failed to process messages in channel ${channelId}:`, error);
   }
 }
 
@@ -370,7 +395,6 @@ export async function updateLeaderboardEmbed() {
   await sendEmbedMessage(embed, config.CHANNEL_LEADERBOARD);
 }
 
-// Function to format leaderboard data
 function formatLeaderboardTable(
   users: SystemUser[],
   startIndex: number,
