@@ -55,7 +55,7 @@ export async function sendEmbedMessage(
         // Check total size of existing embeds + new embed
         const totalSize = getTotalEmbedSize([...existingEmbeds, embed]);
 
-        if (existingEmbeds.length < 10 && totalSize <= 6000) {
+        if (existingEmbeds.length < 7 && totalSize <= 6000) {
           // Append the new embed if the limit isn't reached
           await lastMessage.edit({ embeds: [...existingEmbeds, embed] });
           console.log(`Appended new embed to existing message.`);
