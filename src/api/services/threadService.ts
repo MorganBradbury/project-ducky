@@ -1,4 +1,4 @@
-import { ChannelType } from "discord.js";
+import { ChannelType, ThreadChannel } from "discord.js";
 import client from "../../bot/client";
 import { config } from "../../config";
 
@@ -10,25 +10,24 @@ export async function processEmbedsToThreads() {
     return;
   }
 
-  // Map to group embed messages by date
-  const embedsByDate = new Map();
+  const yesterday = new Date();
+  yesterday.setDate(yesterday.getDate() - 1);
+  const dateKey = yesterday.toISOString().split("T")[0]; // Format YYYY-MM-DD
+  const [year, month, day] = dateKey.split("-");
+  const formattedDate = `${day}/${month}/${year.slice(-2)}`; // DD/MM/YY format
 
-  // Fetch all messages from the channel
-  let messages = await channel.messages.fetch({ limit: 10 });
+  let messages = await channel.messages.fetch({ limit: 100 });
+  const embeds: any[] = [];
+
+  // Fetch all messages and collect embeds
   while (messages.size > 0) {
     for (const message of messages.values()) {
       if (message.embeds.length > 0) {
-        const dateKey = message.createdAt.toISOString().split("T")[0]; // Get the date in YYYY-MM-DD format
-
-        if (!embedsByDate.has(dateKey)) {
-          embedsByDate.set(dateKey, []);
-        }
-
-        embedsByDate.get(dateKey).push(message);
+        embeds.push(...message.embeds);
       }
     }
 
-    // Fetch the next set of messages
+    // Fetch next batch of messages
     const lastMessage = messages.last();
     messages = await channel.messages.fetch({
       limit: 100,
@@ -36,37 +35,33 @@ export async function processEmbedsToThreads() {
     });
   }
 
-  // Process each date group
-  for (const [date, embedMessages] of embedsByDate.entries()) {
-    // Convert the date to DD/MM/YY format
-    const [year, month, day] = date.split("-");
-    const formattedDate = `${day}/${month}/${year.slice(-2)}`;
-    const threadName = `${formattedDate} (${embedMessages.length})`;
+  // Only create a thread if there are embeds to store
+  if (embeds.length > 0) {
+    const thread = await channel.threads.create({
+      name: `${formattedDate} (${embeds.length})`,
+      autoArchiveDuration: 10080, // 7 days
+    });
 
-    // Check if a thread with this name already exists
-    const existingThreads = await channel.threads.fetchActive();
-    const existingThread = existingThreads.threads.find(
-      (thread) => thread.name === threadName
-    );
-    const thread =
-      existingThread ||
-      (await channel.threads.create({
-        name: threadName,
-        autoArchiveDuration: 10080, // Set maximum archive duration (7 days)
-      }));
-
-    // Add messages to the thread
-    for (const embedMessage of embedMessages) {
-      await thread.send({
-        embeds: embedMessage.embeds,
-      });
-
-      // Delete the original message
-      await embedMessage.delete();
+    // Send all embeds to the thread in batches
+    const chunkSize = 10; // Discord allows 10 embeds per message
+    for (let i = 0; i < embeds.length; i += chunkSize) {
+      await thread.send({ embeds: embeds.slice(i, i + chunkSize) });
     }
   }
 
+  // Delete all messages & threads
+  let remainingMessages = await channel.messages.fetch({ limit: 100 });
+  while (remainingMessages.size > 0) {
+    await Promise.all(remainingMessages.map((message) => message.delete()));
+    remainingMessages = await channel.messages.fetch({ limit: 100 });
+  }
+
+  const threads = await channel.threads.fetchActive();
+  await Promise.all(
+    threads.threads.map((thread: ThreadChannel) => thread.delete())
+  );
+
   console.log(
-    "Process completed: All embed messages moved to threads and deleted from the channel."
+    "Process completed: All embeds moved, and channel fully cleared."
   );
 }
