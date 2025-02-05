@@ -31,35 +31,38 @@ export async function sendEmbedMessage(
   try {
     const channel = (await client.channels.fetch(channelId)) as TextChannel;
 
-    // Check if this embed has already been sent to prevent duplicates
+    // Prevent duplicate embeds
     if (await checkIfAlreadySent(matchId || null, channel)) {
       console.log(`Embed already sent for matchId: ${matchId}`);
       return;
     }
 
-    // Fetch the last message in the channel
+    // Fetch last message in the channel
     const messages = await channel.messages.fetch({ limit: 1 });
     const lastMessage = messages.first();
 
     if (lastMessage) {
       if (channelId === config.CHANNEL_LEADERBOARD) {
-        // Replace existing embeds (only 1 embed in leaderboard message)
+        // Replace existing leaderboard embed
         await lastMessage.edit({ embeds: [embed] });
         console.log(`Replaced embed in leaderboard message.`);
       } else {
-        // Preserve existing embeds and append the new one if limit allows
+        // Get existing embeds
         const existingEmbeds = lastMessage.embeds.map((embedData) =>
           EmbedBuilder.from(embedData)
         );
 
-        if (existingEmbeds.length < 10) {
+        // Check total size of existing embeds + new embed
+        const totalSize = getTotalEmbedSize([...existingEmbeds, embed]);
+
+        if (existingEmbeds.length < 10 && totalSize <= 6000) {
           // Append the new embed if the limit isn't reached
           await lastMessage.edit({ embeds: [...existingEmbeds, embed] });
           console.log(`Appended new embed to existing message.`);
         } else {
-          // If embed limit is reached, send a new message
+          // If embed limit or size is exceeded, send a new message
           await channel.send({ embeds: [embed] });
-          console.log(`Embed limit reached, sent a new message.`);
+          console.log(`Embed limit or size exceeded, sent a new message.`);
         }
       }
     } else {
@@ -70,6 +73,24 @@ export async function sendEmbedMessage(
   } catch (error) {
     console.error("Error sending embedMessage", error);
   }
+}
+
+// Helper function to calculate total embed size
+function getTotalEmbedSize(embeds: EmbedBuilder[]): number {
+  return embeds.reduce((acc, embed) => {
+    return (
+      acc +
+      (embed.data.title?.length || 0) +
+      (embed.data.description?.length || 0) +
+      (embed.data.footer?.text?.length || 0) +
+      (embed.data.author?.name?.length || 0) +
+      (embed.data.fields ?? []).reduce(
+        (sum, field) =>
+          sum + (field.name?.length || 0) + (field.value?.length || 0),
+        0
+      )
+    );
+  }, 0);
 }
 
 export async function matchEndNotification(match: Match) {
