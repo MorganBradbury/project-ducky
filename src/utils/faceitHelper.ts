@@ -230,11 +230,7 @@ export function prepareScoreUpdate(
   match: Match,
   newScore: string
 ) {
-  const updatedEmbeds = targetMessage.embeds.map(async (embed) => {
-    if (!(await checkMatchExists(match.matchId))) {
-      return null; // Skip if match doesn't exist
-    }
-
+  const updatedEmbeds = targetMessage.embeds.map((embed) => {
     // Check if this embed is the one for the match
     if (embed.footer?.text === match.matchId) {
       const currentTitle = embed.title;
@@ -249,7 +245,6 @@ export function prepareScoreUpdate(
         `${mapEmoji}  ${formattedMapName}  (${newScore})`
       );
     }
-
     return embed; // Leave other embeds unchanged
   });
 
