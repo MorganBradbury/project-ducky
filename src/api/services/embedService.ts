@@ -284,7 +284,7 @@ export async function createLiveScoreCard(match: Match) {
     .setTitle(`${mapEmoji}  ${formattedMapName}  (${matchScore.join(":")})`)
     .addFields(
       {
-        name: `Players in game`,
+        name: `Player(s) in game...`,
         value: homePlayers,
         inline: true,
       },
