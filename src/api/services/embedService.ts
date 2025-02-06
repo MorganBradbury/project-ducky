@@ -296,7 +296,7 @@ export async function createLiveScoreCard(match: Match) {
       }
     )
     .setFooter({ 
-      text: `MATCH_ID: ${match.matchId.padEnd(41, ".")}` 
+      text: `${match.matchId}` 
     }).setColor(`#${EMBED_COLOURS.LIVE_SCORE}`);
 
   await sendEmbedMessage(embed, config.CHANNEL_LIVE_MATCHES, match.matchId);
@@ -314,7 +314,7 @@ export const updateLiveScoreCards = async () => {
     const updatedEmbeds = (
       await Promise.all(
         msg.embeds.map(async (embed) => {
-          const matchId = embed.footer?.text.replace("MATCH_ID: ", "").replace(".", "");
+          const matchId = embed.footer?.text;
           if (!matchId) return null;
 
           const match = await getMatchDataFromDb(matchId);
