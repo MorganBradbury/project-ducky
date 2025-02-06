@@ -56,11 +56,6 @@ export async function processEmbedsToThreads() {
     remainingMessages = await channel.messages.fetch({ limit: 100 });
   }
 
-  const threads = await channel.threads.fetchActive();
-  await Promise.all(
-    threads.threads.map((thread: ThreadChannel) => thread.delete())
-  );
-
   console.log(
     "Process completed: All embeds moved, and channel fully cleared."
   );
