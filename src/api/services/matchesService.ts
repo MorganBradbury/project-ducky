@@ -1,6 +1,7 @@
 import {
   checkMatchExists,
   getAllUsers,
+  getMatchCount,
   getMatchDataFromDb,
   insertMatch,
   isMatchProcessed,
@@ -17,7 +18,6 @@ import { updateVoiceChannelStatus } from "./channelService";
 import {
   createLiveScoreCard,
   createMatchAnalysisEmbed,
-  deleteLiveScoreCard,
   matchEndNotification,
   updateLeaderboardEmbed,
 } from "./embedService";
@@ -49,18 +49,15 @@ export const startMatch = async (matchId: string) => {
 
   await createLiveScoreCard(match);
 
+  const matchCount = await getMatchCount();
+  if (matchCount === 0) {
+    await axios.post(
+      "https://live-game-service-production.up.railway.app/api/start",
+      { matchId }
+    );
+  }
+
   await insertMatch(match);
-
-  console.log("worker started for", {
-    matchId,
-    vcid: match?.voiceChannelId || "Not in VC",
-  });
-
-  await axios.post(
-    "https://live-game-service-production.up.railway.app/api/start",
-    { matchId }
-  );
-  console.log("sent request to worker service to start", matchId);
 };
 
 export const endMatch = async (matchId: string) => {
@@ -79,21 +76,22 @@ export const endMatch = async (matchId: string) => {
     }
 
     await updateMatchProcessed(matchId);
-    await deleteLiveScoreCard(matchId);
+    await markMatchComplete(matchId);
 
-    // Stop the worker associated with this matchId
     try {
-      await axios.post(
-        "https://live-game-service-production.up.railway.app/api/end",
-        { matchId }
-      );
+      const matchCount = await getMatchCount();
+      console.log("match count in endMatch", matchCount);
+      if (matchCount === 0) {
+        await axios.post(
+          "https://live-game-service-production.up.railway.app/api/end",
+          { matchId }
+        );
+      }
       console.log("sent request to worker service to end", matchId);
     } catch (error) {
       console.log("Request failed to live game service for", matchId);
     }
 
-    // deletes record from DB.
-    await markMatchComplete(matchId);
     await matchEndNotification(match);
     await runEloUpdate(match.trackedTeam.trackedPlayers);
 
@@ -109,7 +107,6 @@ export const endMatch = async (matchId: string) => {
 
 export const cancelMatch = async (matchId: string) => {
   console.log("Processing cancelMatch()", matchId);
-  await deleteLiveScoreCard(matchId);
 
   let match = await getMatchDataFromDb(matchId);
   if (!match) {
@@ -117,18 +114,25 @@ export const cancelMatch = async (matchId: string) => {
     return;
   }
 
-  // Mark match as complete in the database
-  await markMatchComplete(matchId);
-
-  // Stop the worker associated with this matchId
-  await axios.post(
-    "https://live-game-service-production.up.railway.app/api/end",
-    { matchId }
-  );
-  console.log("sent request to worker service to cancel", matchId);
-
   if (match?.voiceChannelId) {
     await updateVoiceChannelStatus(match.voiceChannelId, "");
+  }
+
+  // Mark match as complete in the database
+  await markMatchComplete(matchId);
+  // Stop the worker associated with this matchId
+  try {
+    const matchCount = await getMatchCount();
+    console.log("match count in cancelMatch", matchCount);
+    if (matchCount === 0) {
+      await axios.post(
+        "https://live-game-service-production.up.railway.app/api/end",
+        { matchId }
+      );
+    }
+    console.log("sent request to worker service to end", matchId);
+  } catch (error) {
+    console.log("Request failed to live game service for", matchId);
   }
 };
 

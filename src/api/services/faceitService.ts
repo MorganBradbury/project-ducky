@@ -124,7 +124,7 @@ class FaceitApiClient {
   async getMatchScore(
     matchId: string,
     teamFaction: string,
-    finished: boolean
+    finished: boolean = false
   ): Promise<number[]> {
     const queryUrl = finished
       ? `/matches/${matchId}/stats`

@@ -6,18 +6,11 @@ import {
   startMatch,
 } from "../services/matchesService"; // Centralized match flow logic
 import { FaceitService } from "../services/faceitService";
-import {
-  getAllUsers,
-  getMatchDataFromDb,
-  isMatchProcessed,
-  updatePlayerEloAndPosition,
-} from "../../db/dbCommands";
+import { getAllUsers, updatePlayerEloAndPosition } from "../../db/dbCommands";
 import { AcceptedEventTypes } from "../../constants";
-import { getScoreStatusText } from "../../utils/faceitHelper";
-import { updateVoiceChannelStatus } from "../services/channelService";
 import {
   updateLeaderboardEmbed,
-  updateLiveScoreCard,
+  updateLiveScoreCards,
 } from "../services/embedService";
 import { processEmbedsToThreads } from "../services/threadService";
 
@@ -77,38 +70,13 @@ export const handleMatchesHook = async (
   }
 };
 
-export const updateLiveScores = async (
+export const updateAllLiveMatchScores = async (
   req: Request,
   res: Response
 ): Promise<void> => {
-  console.log("Request received to update live scores");
-  const matchId = req?.body?.matchId;
-  const isMatchAlreadyProcessed = await isMatchProcessed(matchId);
-  if (isMatchAlreadyProcessed) {
-    res.status(200).json({ message: "Match is already processed", matchId });
-    return;
-  }
-  const match = await getMatchDataFromDb(matchId);
+  console.log("Request received to update all live scores.");
 
-  if (!match) {
-    console.log(`No match data found for ${matchId} in DB`);
-    res.status(200).json({ message: "Match data not found", match });
-    return;
-  }
-
-  const liveScore = await FaceitService.getMatchScore(
-    matchId,
-    match?.trackedTeam.faction,
-    false
-  );
-
-  if (match?.voiceChannelId) {
-    const status = await getScoreStatusText(match.mapName, liveScore.join(":"));
-    await updateVoiceChannelStatus(match.voiceChannelId, status);
-  }
-
-  await updateLiveScoreCard(match);
-
+  updateLiveScoreCards();
   res.status(200).json({ message: "Live scores updated successfully" });
 };
 

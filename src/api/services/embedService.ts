@@ -13,15 +13,15 @@ import { Match } from "../../types/Faceit/match";
 import { FaceitService } from "./faceitService";
 import {
   checkIfAlreadySent,
-  findMatchMessage,
   formatMapInfo,
   formattedMapName,
   generatePlayerStatsTable,
-  prepareScoreUpdate,
+  getScoreStatusText,
 } from "../../utils/faceitHelper";
 import client from "../../bot/client";
-import { getAllUsers } from "../../db/dbCommands";
+import { getAllUsers, getMatchDataFromDb } from "../../db/dbCommands";
 import { SystemUser } from "../../types/systemUser";
+import { updateVoiceChannelStatus } from "./channelService";
 
 export async function sendEmbedMessage(
   embed: EmbedBuilder,
@@ -301,69 +301,64 @@ export async function createLiveScoreCard(match: Match) {
   await sendEmbedMessage(embed, config.CHANNEL_LIVE_MATCHES, match.matchId);
 }
 
-export async function updateLiveScoreCard(match: Match) {
-  const targetMessage = await findMatchMessage(
-    match.matchId,
+export const updateLiveScoreCards = async () => {
+  const channel = (await client.channels.fetch(
     config.CHANNEL_LIVE_MATCHES
-  );
+  )) as TextChannel;
+  const messages = await channel.messages.fetch();
 
-  if (!targetMessage) {
-    console.error(`No message found with matchId: ${match.matchId}`);
-    return;
-  }
+  for (const msg of messages.values()) {
+    let updated = false;
 
-  const matchScore = await FaceitService.getMatchScore(
-    match.matchId,
-    match.trackedTeam.faction,
-    false
-  );
+    const updatedEmbeds = (
+      await Promise.all(
+        msg.embeds.map(async (embed) => {
+          const matchId = embed.footer?.text;
+          if (!matchId) return null;
 
-  const newScore = matchScore.join(":");
-  const { updatedEmbeds } = prepareScoreUpdate(targetMessage, match, newScore);
+          const match = await getMatchDataFromDb(matchId);
 
-  await targetMessage.edit({ embeds: updatedEmbeds });
-  console.log(`Live score updated for matchId: ${match.matchId}`);
-  return;
-}
+          // If match doesn't exist, return null (embed will be removed)
+          if (!match) return null;
 
-export async function deleteLiveScoreCard(matchId?: string) {
-  const channelId = config.CHANNEL_LIVE_MATCHES;
+          const score = await FaceitService.getMatchScore(
+            matchId,
+            match.trackedTeam.faction
+          );
+          const newScore = score.join(":");
 
-  try {
-    const channel = await client.channels.fetch(channelId);
-    if (!channel || !channel.isTextBased()) {
-      console.error(`Channel ${channelId} is invalid or not text-based.`);
-      return;
+          // Extract current score from the embed title
+          const currentTitle = embed.title || "";
+          const currentScoreMatch = currentTitle.match(/\((\d+:\d+)\)/);
+          const currentScore = currentScoreMatch ? currentScoreMatch[1] : null;
+
+          // If score hasn't changed, return the embed unchanged
+          if (currentScore === newScore) return embed;
+
+          // Update voice channel status if applicable
+          if (match.voiceChannelId) {
+            const status = await getScoreStatusText(match.mapName, newScore);
+            await updateVoiceChannelStatus(match.voiceChannelId, status);
+          }
+
+          updated = true;
+          return EmbedBuilder.from(embed).setTitle(
+            `${currentTitle.split(" (")[0]} (${newScore})`
+          );
+        })
+      )
+    ).filter((embed) => embed !== null); // Remove null entries (deleted matches)
+
+    // If all embeds were removed, delete the message
+    if (updatedEmbeds.length === 0) {
+      await msg.delete();
+      continue;
     }
 
-    const messages = await channel.messages.fetch({ limit: 5 });
-
-    const targetMessage = messages.find((message: Message) =>
-      message.embeds.some((embed) => embed.footer?.text === matchId)
-    );
-
-    if (targetMessage) {
-      // Filter out the embed with the given matchId
-      const updatedEmbeds = targetMessage.embeds.filter(
-        (embed) => embed.footer?.text !== matchId
-      );
-
-      if (updatedEmbeds.length > 0) {
-        // If there are remaining embeds, update the message without the deleted embed
-        await targetMessage.edit({ embeds: updatedEmbeds });
-        console.log(`Embed removed from message for matchId: ${matchId}`);
-      } else {
-        // If no embeds remain, delete the message entirely
-        await targetMessage.delete();
-        console.log(
-          `Message deleted as no embeds remained for matchId: ${matchId}`
-        );
-      }
-    }
-  } catch (error) {
-    console.error(`Failed to process messages in channel ${channelId}:`, error);
+    // Only edit the message if at least one embed was updated
+    if (updated) await msg.edit({ embeds: updatedEmbeds });
   }
-}
+};
 
 export async function sendNewUserNotification(
   userName: string,

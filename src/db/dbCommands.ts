@@ -171,3 +171,7 @@ export const updatePlayerEloAndPosition = async (
   });
   return result !== null;
 };
+
+export const getMatchCount = async (): Promise<number> => {
+  return await prisma.matches.count();
+};
