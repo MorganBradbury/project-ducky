@@ -52,8 +52,7 @@ export const startMatch = async (matchId: string) => {
   const matchCount = await getMatchCount();
   if (matchCount === 0) {
     await axios.post(
-      "https://live-game-service-production.up.railway.app/api/start",
-      { matchId }
+      "https://live-game-service-production.up.railway.app/api/start"
     );
   }
 
@@ -83,8 +82,7 @@ export const endMatch = async (matchId: string) => {
       console.log("match count in endMatch", matchCount);
       if (matchCount === 0) {
         await axios.post(
-          "https://live-game-service-production.up.railway.app/api/end",
-          { matchId }
+          "https://live-game-service-production.up.railway.app/api/end"
         );
       }
       console.log("sent request to worker service to end", matchId);
@@ -126,8 +124,7 @@ export const cancelMatch = async (matchId: string) => {
     console.log("match count in cancelMatch", matchCount);
     if (matchCount === 0) {
       await axios.post(
-        "https://live-game-service-production.up.railway.app/api/end",
-        { matchId }
+        "https://live-game-service-production.up.railway.app/api/end"
       );
     }
     console.log("sent request to worker service to end", matchId);
