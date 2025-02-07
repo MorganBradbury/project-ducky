@@ -210,7 +210,7 @@ export const createMatchAnalysisEmbed = (
         map.totalPlayedTimes === 0 ||
         isNaN(parseFloat(map.winPercentage))
           ? "N/A"
-          : Math.ceil(parseFloat(map.winPercentage)).toString() + "%"; // Round up the win percentage to nearest whole number
+          : Math.round(parseFloat(map.winPercentage)).toString() + "%"; // Round up the win percentage to nearest whole number
       return `\`${formattedMapName(map.mapName).padEnd(
         12
       )} | ${map.totalPlayedTimes
