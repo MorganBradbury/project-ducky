@@ -14,9 +14,7 @@ export const eloNumbers: any = {
   "6": "⁶",
   "7": "⁷",
   "8": "⁸",
-  "9": "⁹",
-  "[": "⁽",
-  "]": "⁾",
+  "9": "⁹"
 };
 
 export const activeMapPool = [
@@ -84,7 +82,8 @@ export const LINKS = {
 export const EMBED_COLOURS = {
   MAP_WIN: "00FF00",
   MAP_LOSS: "FF0000",
-  LIVE_SCORE: "464DD4",
+  // LIVE_SCORE: "464DD4",
+   LIVE_SCORE: "C758B8",
   ANALYSIS: "FF5733",
 };
 
