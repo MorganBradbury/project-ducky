@@ -31,6 +31,12 @@ export async function sendEmbedMessage(
   try {
     const channel = (await client.channels.fetch(channelId)) as TextChannel;
 
+    // Prevent duplicate embeds
+    if (await checkIfAlreadySent(matchId || null, channel)) {
+      console.log(`Embed already sent for matchId: ${matchId}`);
+      return;
+    }
+
     // Fetch last message in the channel
     const messages = await channel.messages.fetch({ limit: 1 });
     const lastMessage = messages.first();
@@ -60,11 +66,6 @@ export async function sendEmbedMessage(
         }
       }
     } else {
-      // Prevent duplicate embeds
-      if (await checkIfAlreadySent(matchId || null, channel)) {
-        console.log(`Embed already sent for matchId: ${matchId}`);
-        return;
-      }
       // If no message exists, send a new one
       await channel.send({ embeds: [embed] });
       console.log(`Sent new embed message.`);
