@@ -182,8 +182,10 @@ export const createMatchAnalysisEmbed = (
     .addFields(
       { name: `Team ${homePlayers.captain.nickname}`, value: homePlayers.columns[0], inline: true },
       { name: "\u200b", value: homePlayers.columns[1], inline: true },
+      { name: "\u200b", value: "\u200b", inline: true },
       { name: `Team ${enemyPlayers.captain.nickname}`, value: enemyPlayers.columns[0], inline: true },
       { name: "\u200b", value: enemyPlayers.columns[1], inline: true },
+      { name: "\u200b", value: "\u200b", inline: true },
       { name: `Map stats for Team ${enemyPlayers.captain.nickname}`,
         value: "`Map name     | Played | Win % `\n" + mapDataTable },
       { name: "You should ban:", 
