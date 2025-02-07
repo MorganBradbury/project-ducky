@@ -237,8 +237,8 @@ export const createMatchAnalysisEmbed = (
           "`Map name     | Played | Win % `\n" +
           mapDataTable,
       },
-      { name: "They likely pick", value: mostLikelyPicks, inline: true },
-      { name: "They likely ban", value: mostLikelyBans, inline: true },
+      { name: "You should ban:", value: mostLikelyPicks, inline: true },
+      { name: "You shouldn't ban:", value: mostLikelyBans, inline: true },
       {
         name: "Matchroom page",
         value: `[🔗 Link](${LINKS.MATCHROOM}/${matchId})`,
