@@ -146,8 +146,8 @@ export const createMatchAnalysisEmbed = (
 ) => {
   // Sorting the game data: first by most played times, then by average win percentage if needed
   const sortedMapData = gameData.sort((a: any, b: any) => {
-    const aWinPercentage = parseFloat(a.averageWinPercentage);
-    const bWinPercentage = parseFloat(b.averageWinPercentage);
+    const aWinPercentage = parseFloat(a.winPercentage);
+    const bWinPercentage = parseFloat(b.winPercentage);
 
     if (b.totalPlayedTimes === a.totalPlayedTimes) {
       return bWinPercentage - aWinPercentage;
@@ -205,12 +205,12 @@ export const createMatchAnalysisEmbed = (
   // Creating the map stats table content (without map icons)
   const mapDataTable = sortedMapData
     .map((map: any) => {
-      // Ensure averageWinPercentage is a valid number by parsing the string to a float
+      // Ensure winPercentage is a valid number by parsing the string to a float
       const formattedWinPercentage =
         map.totalPlayedTimes === 0 ||
-        isNaN(parseFloat(map.averageWinPercentage))
+        isNaN(parseFloat(map.winPercentage))
           ? "N/A"
-          : Math.ceil(parseFloat(map.averageWinPercentage)).toString() + "%"; // Round up the win percentage to nearest whole number
+          : Math.ceil(parseFloat(map.winPercentage)).toString() + "%"; // Round up the win percentage to nearest whole number
       return `\`${formattedMapName(map.mapName).padEnd(
         12
       )} | ${map.totalPlayedTimes

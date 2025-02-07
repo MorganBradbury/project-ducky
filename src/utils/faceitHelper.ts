@@ -137,7 +137,7 @@ export const formatMapData = (
     mapName,
     totalPlayedTimes: stats.totalPlayedTimes,
     totalWins: stats.totalWins,
-    averageWinPercentage: (stats.totalWinPercentage / playerCount).toFixed(2),
+    winPercentage: (stats.totalWins / stats.totalPlayedTimes).toFixed(2),
   }));
 };
 
