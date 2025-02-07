@@ -144,112 +144,64 @@ export const createMatchAnalysisEmbed = (
   playersData: any,
   gameData: any
 ) => {
-  // Sorting the game data: first by most played times, then by average win percentage if needed
-  const sortedMapData = gameData.sort((a: any, b: any) => {
-    const aWinPercentage = parseFloat(a.winPercentage);
-    const bWinPercentage = parseFloat(b.winPercentage);
-
-    if (b.totalPlayedTimes === a.totalPlayedTimes) {
-      return bWinPercentage - aWinPercentage;
-    }
-    return b.totalPlayedTimes - a.totalPlayedTimes;
-  });
-
-  // Extracting teams and their players
-  const homeFaction = playersData.homeFaction;
-  const enemyFaction = playersData.enemyFaction;
-
-  const homeFactionCaptain = homeFaction.find((player: any) => player.captain);
-  const enemyFactionCaptain = enemyFaction.find(
-    (player: any) => player.captain
+  const sortedMapData = gameData.sort((a: any, b: any) => 
+    b.totalPlayedTimes === a.totalPlayedTimes 
+      ? parseFloat(b.winPercentage) - parseFloat(a.winPercentage)
+      : b.totalPlayedTimes - a.totalPlayedTimes
   );
 
-  // Adding skill level icons next to each player name
-  const homePlayers = homeFaction
-    .map(
-      (player: any) =>
-        `${getSkillLevelEmoji(player.faceitLevel)} ${player.nickname}${
-          player.captain ? "*" : ""
-        }`
-    )
-    .join("\n");
-  const enemyPlayers = enemyFaction
-    .map(
-      (player: any) =>
-        `${getSkillLevelEmoji(player.faceitLevel)} ${player.nickname}${
-          player.captain ? "*" : ""
-        }`
-    )
-    .join("\n");
+  const formatPlayers = (players: any[]) => {
+    const formatted = players.map(player => 
+      `${getSkillLevelEmoji(player.faceitLevel)} ${player.nickname}${player.captain ? "*" : ""}`
+    );
+    return [formatted.slice(0, 3).join("\n"), formatted.slice(3).join("\n")];
+  };
 
-  // Getting most likely picks and bans with map emojis
-  const mostLikelyPicks = sortedMapData
-    .slice(0, 4)
-    .map(
-      (map: any) =>
-        `${getMapEmoji(map.mapName)} ${formattedMapName(map.mapName)}`
-    )
-    .join("\n");
+  const formatMapData = (maps: any[], sortFn = (a: any, b: any) => 0, limit = maps.length) =>
+    maps.slice().sort(sortFn).slice(0, limit)
+      .map(map => `${getMapEmoji(map.mapName)} ${formattedMapName(map.mapName)}`)
+      .join("\n");
 
-  // Sort maps in ascending order of played times for most likely bans
-  const mostLikelyBans = sortedMapData
-    .slice()
-    .sort((a: any, b: any) => a.totalPlayedTimes - b.totalPlayedTimes) // Sort by least played first
-    .slice(0, 3) // Take the least played 3 maps
-    .map(
-      (map: any) =>
-        `${getMapEmoji(map.mapName)} ${formattedMapName(map.mapName)}`
-    )
-    .join("\n");
+  const [homePlayers, enemyPlayers] = [playersData.homeFaction, playersData.enemyFaction]
+    .map(faction => ({
+      captain: faction.find((player: any) => player.captain),
+      columns: formatPlayers(faction)
+    }));
 
-  // Creating the map stats table content (without map icons)
   const mapDataTable = sortedMapData
-    .map((map: any) => {
-      // Ensure winPercentage is a valid number by parsing the string to a float
-      const formattedWinPercentage =
-        map.totalPlayedTimes === 0 ||
-        isNaN(parseFloat(map.winPercentage))
-          ? "N/A"
-          : Math.round(parseFloat(map.winPercentage)).toString() + "%"; // Round up the win percentage to nearest whole number
-      return `\`${formattedMapName(map.mapName).padEnd(
-        12
-      )} | ${map.totalPlayedTimes
-        .toString()
-        .padEnd(6)} | ${formattedWinPercentage.padEnd(6)}\``;
+    .map((map:any) => {
+      const winPercent = map.totalPlayedTimes === 0 || isNaN(parseFloat(map.winPercentage))
+        ? "N/A"
+        : Math.round(parseFloat(map.winPercentage)) + "%";
+      return `\`${formattedMapName(map.mapName).padEnd(12)} | ${map.totalPlayedTimes.toString().padEnd(6)} | ${winPercent.padEnd(6)}\``;
     })
     .join("\n");
 
-  // Create the embed
   const embed = new EmbedBuilder()
     .setTitle("Matchroom Analysis")
     .addFields(
-      {
-        name: `Team ${homeFactionCaptain.nickname}`,
-        value: homePlayers,
-      },
-      {
-        name: `Team ${enemyFactionCaptain.nickname}`,
-        value: enemyPlayers,
-      },
-      {
-        name: `Map stats for Team ${enemyFactionCaptain.nickname}`,
-        value:
-          "`Map name     | Played | Win % `\n" +
-          mapDataTable,
-      },
-      { name: "You should ban:", value: mostLikelyPicks, inline: true },
-      { name: "You shouldn't ban:", value: mostLikelyBans, inline: true },
-      {
-        name: "Matchroom page",
+      { name: `Team ${homePlayers.captain.nickname}`, value: homePlayers.columns[0], inline: true },
+      { name: "\u200b", value: homePlayers.columns[1], inline: true },
+      { name: "\u200b", value: "\u200b", inline: false },
+      { name: `Team ${enemyPlayers.captain.nickname}`, value: enemyPlayers.columns[0], inline: true },
+      { name: "\u200b", value: enemyPlayers.columns[1], inline: true },
+      { name: "\u200b", value: "\u200b", inline: false },
+      { name: `Map stats for Team ${enemyPlayers.captain.nickname}`,
+        value: "`Map name     | Played | Win % `\n" + mapDataTable },
+      { name: "You should ban:", 
+        value: formatMapData(sortedMapData, undefined, 4), 
+        inline: true },
+      { name: "You shouldn't ban:", 
+        value: formatMapData(sortedMapData, (a, b) => a.totalPlayedTimes - b.totalPlayedTimes, 3), 
+        inline: true },
+      { name: "Matchroom page",
         value: `[🔗 Link](${LINKS.MATCHROOM}/${matchId})`,
-        inline: false,
-      }
+        inline: false }
     )
-    .setFooter({ text: `${matchId}` })
+    .setFooter({ text: matchId })
     .setColor("#ff5733")
     .setTimestamp();
 
-  // Pass the embed and the button to sendEmbedMessage
   sendEmbedMessage(embed, config.CHANNEL_MAP_ANALYSIS, matchId);
   return;
 };
