@@ -172,7 +172,7 @@ export const createMatchAnalysisEmbed = (
           player.captain ? "*" : ""
         }`
     )
-    .join("\n");
+    .join(" | ");
   const enemyPlayers = enemyFaction
     .map(
       (player: any) =>
@@ -226,12 +226,10 @@ export const createMatchAnalysisEmbed = (
       {
         name: `Team ${homeFactionCaptain.nickname}`,
         value: homePlayers,
-        inline: true,
       },
       {
         name: `Team ${enemyFactionCaptain.nickname}`,
         value: enemyPlayers,
-        inline: true,
       },
       {
         name: `Map stats for Team ${enemyFactionCaptain.nickname}`,
