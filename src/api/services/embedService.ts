@@ -172,7 +172,7 @@ export const createMatchAnalysisEmbed = (
           player.captain ? "*" : ""
         }`
     )
-    .join(" | ");
+    .join("  |  ");
   const enemyPlayers = enemyFaction
     .map(
       (player: any) =>
@@ -180,7 +180,7 @@ export const createMatchAnalysisEmbed = (
           player.captain ? "*" : ""
         }`
     )
-    .join("\n");
+    .join("  |  ");
 
   // Getting most likely picks and bans with map emojis
   const mostLikelyPicks = sortedMapData
