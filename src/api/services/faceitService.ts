@@ -222,9 +222,8 @@ class FaceitApiClient {
         if (attempt < maxAttempts) {
           await new Promise((resolve) => setTimeout(resolve, retryDelay));
         }
-      } catch (error) {
-        console.error(`Attempt ${attempt} failed with error:`, error);
-
+      } catch (error: any) {
+        console.warn(`Attempt ${attempt} failed with status:`, error?.response?.status || 'Unknown status');
         if (attempt < maxAttempts) {
           await new Promise((resolve) => setTimeout(resolve, retryDelay));
         } else {

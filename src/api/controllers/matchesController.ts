@@ -74,7 +74,6 @@ export const updateAllLiveMatchScores = async (
   req: Request,
   res: Response
 ): Promise<void> => {
-  console.log("Request received to update all live scores.");
 
   updateLiveScoreCards();
   res.status(200).json({ message: "Live scores updated successfully" });
