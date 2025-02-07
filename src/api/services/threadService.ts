@@ -1,4 +1,4 @@
-import { ChannelType, ThreadChannel } from "discord.js";
+import { ChannelType, ThreadChannel, Message } from "discord.js";
 import client from "../../bot/client";
 import { config } from "../../config";
 
@@ -17,13 +17,13 @@ export async function processEmbedsToThreads() {
   const formattedDate = `${day}/${month}/${year.slice(-2)}`; // DD/MM/YY format
 
   let messages = await channel.messages.fetch({ limit: 100 });
-  const embeds: any[] = [];
+  const messagesWithEmbeds: { message: Message; embeds: any[] }[] = [];
 
-  // Fetch all messages and collect embeds
+  // Fetch all messages and collect their embeds
   while (messages.size > 0) {
     for (const message of messages.values()) {
       if (message.embeds.length > 0) {
-        embeds.push(...message.embeds);
+        messagesWithEmbeds.push({ message, embeds: message.embeds });
       }
     }
 
@@ -35,17 +35,23 @@ export async function processEmbedsToThreads() {
     });
   }
 
+  // Sort messages based on their created timestamp (oldest first)
+  messagesWithEmbeds.sort((a, b) => a.message.createdTimestamp - b.message.createdTimestamp);
+
+  // Extract ordered embeds
+  const sortedEmbeds = messagesWithEmbeds.flatMap((entry) => entry.embeds);
+
   // Only create a thread if there are embeds to store
-  if (embeds.length > 0) {
+  if (sortedEmbeds.length > 0) {
     const thread = await channel.threads.create({
-      name: `${formattedDate} (${embeds.length})`,
+      name: `${formattedDate} (${sortedEmbeds.length})`,
       autoArchiveDuration: 10080, // 7 days
     });
 
     // Send all embeds to the thread in batches
     const chunkSize = 10; // Discord allows 10 embeds per message
-    for (let i = 0; i < embeds.length; i += chunkSize) {
-      await thread.send({ embeds: embeds.slice(i, i + chunkSize) });
+    for (let i = 0; i < sortedEmbeds.length; i += chunkSize) {
+      await thread.send({ embeds: sortedEmbeds.slice(i, i + chunkSize) });
     }
   }
 
@@ -56,7 +62,5 @@ export async function processEmbedsToThreads() {
     remainingMessages = await channel.messages.fetch({ limit: 100 });
   }
 
-  console.log(
-    "Process completed: All embeds moved, and channel fully cleared."
-  );
+  console.log("Process completed: All embeds moved, and channel fully cleared.");
 }
