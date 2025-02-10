@@ -16,31 +16,29 @@ client.on(
         // Find the highest Room category number
         const roomCategories = guild.channels.cache.filter(
           (channel): channel is CategoryChannel =>
-            channel.type === ChannelType.GuildCategory && /^🏠 Room #\d+$/.test(channel.name)
+            channel.type === ChannelType.GuildCategory && /^🏠 ROOM #\d+$/.test(channel.name)
         );
 
         const highestNumber = [...roomCategories.values()]
           .map((category) =>
-            parseInt(category.name.match(/Room #(\d+)/)?.[1] || "0", 10)
+            parseInt(category.name.match(/ROOM #(\d+)/)?.[1] || "0", 10)
           )
           .reduce((max, num) => Math.max(max, num), 0);
 
         // Create a new category
         const roomCategory = await guild.channels.create({
-          name: `🏠 Room #${highestNumber + 1}`,
+          name: `🏠 ROOM #${highestNumber + 1}`,
           type: ChannelType.GuildCategory,
         });
-
         console.log(`Created category: ${roomCategory.name}`);
 
         // Create a voice channel inside the new category
         const roomVoiceChannel = await guild.channels.create({
-          name: `🔊┃Room #${highestNumber + 1}`,
+          name: `🔊┃VOICE`,
           type: ChannelType.GuildVoice,
           parent: roomCategory.id,
           permissionOverwrites: joinedChannel.permissionOverwrites.cache.map((overwrite) => overwrite), // Copy permissions
         });
-
         console.log(`Created new voice channel: ${roomVoiceChannel.name}`);
 
         // Move the user into the new voice channel
@@ -59,7 +57,7 @@ client.on(
       if (
         leftChannel &&
         leftChannel.parent &&
-        /^🏠 Room #\d+$/.test(leftChannel.parent.name) &&
+        /^🏠 ROOM #\d+$/.test(leftChannel.parent.name) &&
         leftChannel.id !== CREATE_ROOM_CHANNEL_ID
       ) {
         const category = leftChannel.parent as CategoryChannel;
