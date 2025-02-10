@@ -13,28 +13,28 @@ client.on(
 
       // Handle user joining the "Create a Room" channel
       if (joinedChannel && joinedChannel.id === CREATE_ROOM_CHANNEL_ID) {
-        // Find the highest Room category number
-        const roomCategories = guild.channels.cache.filter(
-          (channel): channel is CategoryChannel =>
-            channel.type === ChannelType.GuildCategory && /^🏠 ROOM #\d+$/.test(channel.name)
+        // Find the highest Room number by looking at voice channels
+        const existingRooms = guild.channels.cache.filter(
+          (channel): channel is VoiceChannel =>
+            channel.type === ChannelType.GuildVoice && /^🔊┃Room #\d+$/.test(channel.name)
         );
 
-        const highestNumber = [...roomCategories.values()]
-          .map((category) =>
-            parseInt(category.name.match(/ROOM #(\d+)/)?.[1] || "0", 10)
+        const highestNumber = [...existingRooms.values()]
+          .map((channel) =>
+            parseInt(channel.name.match(/Room #(\d+)/)?.[1] || "0", 10)
           )
           .reduce((max, num) => Math.max(max, num), 0);
 
-        // Create a new category
+        // Create a new category with minimal visible name using special characters
         const roomCategory = await guild.channels.create({
-          name: `🏠 ROOM #${highestNumber + 1}`,
+          name: "⠀", // Braille pattern blank character (appears almost invisible)
           type: ChannelType.GuildCategory,
         });
-        console.log(`Created category: ${roomCategory.name}`);
+        console.log(`Created category: ${roomCategory.id}`);
 
-        // Create a voice channel inside the new category
+        // Create a voice channel inside the new category with the room number
         const roomVoiceChannel = await guild.channels.create({
-          name: `🔊┃VOICE`,
+          name: `🔊┃Room #${highestNumber + 1}`,
           type: ChannelType.GuildVoice,
           parent: roomCategory.id,
           permissionOverwrites: joinedChannel.permissionOverwrites.cache.map((overwrite) => overwrite), // Copy permissions
@@ -57,7 +57,7 @@ client.on(
       if (
         leftChannel &&
         leftChannel.parent &&
-        /^🏠 ROOM #\d+$/.test(leftChannel.parent.name) &&
+        leftChannel.parent.name === "⠀" && // Check for our special category name
         leftChannel.id !== CREATE_ROOM_CHANNEL_ID
       ) {
         const category = leftChannel.parent as CategoryChannel;
@@ -75,7 +75,7 @@ client.on(
           }
           // Delete the category
           await category.delete();
-          console.log(`Deleted category and its channels: ${category.name}`);
+          console.log(`Deleted empty category and its channels: ${category.id}`);
         }
       }
     } catch (error) {
