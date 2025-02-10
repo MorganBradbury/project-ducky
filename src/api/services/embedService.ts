@@ -114,20 +114,17 @@ export async function matchEndNotification(match: Match) {
       match.trackedTeam.faction
     );
 
-    const { formattedMapName, mapEmoji } = formatMapInfo(match.mapName);
+    const formattedMapInfo = formatMapInfo(match.mapName);
+    const mapEmoji = await getMapEmoji(match.mapName);
 
     const embed = new EmbedBuilder()
       .setColor(`#${mapWin ? EMBED_COLOURS.MAP_WIN : EMBED_COLOURS.MAP_LOSS}`)
       .setTitle(
-        `${mapEmoji}  ${formattedMapName}  (${finalScore.join(":") || "N/A"})`
+        `${mapEmoji}  ${formattedMapInfo.formattedMapName}  (${finalScore.join(":") || "N/A"})`
       )
       .addFields({
         name: "Scoreboard (K/D/A)",
         value: `${playerStatsTable.join("\n")}`,
-      })
-      .setFooter({ 
-        text: "View match details", 
-        iconURL: undefined 
       })
       .setURL(`${LINKS.MATCHROOM}/${match?.matchId}`)
       .setTimestamp();
