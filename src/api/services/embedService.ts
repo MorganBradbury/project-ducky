@@ -135,7 +135,7 @@ export async function matchEndNotification(match: Match) {
   }
 }
 
-export const createMatchAnalysisEmbed = (
+export const createMatchAnalysisEmbed = async (
   matchId: string,
   playersData: any,
   gameData: any
@@ -146,26 +146,36 @@ export const createMatchAnalysisEmbed = (
       : b.totalPlayedTimes - a.totalPlayedTimes
   );
 
-  const formatPlayers = (players: any[]) => {
-    const formatted = players.map(player => 
-      `${getSkillLevelEmoji(player.faceitLevel)} ${player.nickname}${player.captain ? "*" : ""}`
+  const formatPlayers = async (players: any[]) => {
+    const formatted = await Promise.all(
+      players.map(async (player) => {
+        const emoji = await getSkillLevelEmoji(player.faceitLevel);
+        return `${emoji} ${player.nickname}${player.captain ? "*" : ""}`;
+      })
     );
     return [formatted.slice(0, 3).join("\n"), formatted.slice(3).join("\n")];
   };
 
-  const formatMapData = (maps: any[], sortFn = (a: any, b: any) => 0, limit = maps.length) =>
-    maps.slice().sort(sortFn).slice(0, limit)
-      .map(map => `${getMapEmoji(map.mapName)} ${formattedMapName(map.mapName)}`)
-      .join("\n");
+  const formatMapData = async (maps: any[], sortFn = (a: any, b: any) => 0, limit = maps.length) => {
+    const sortedMaps = maps.slice().sort(sortFn).slice(0, limit);
+    const formattedMaps = await Promise.all(
+      sortedMaps.map(async (map) => {
+        const emoji = await getMapEmoji(map.mapName);
+        return `${emoji} ${formattedMapName(map.mapName)}`;
+      })
+    );
+    return formattedMaps.join("\n");
+  };
 
-  const [homePlayers, enemyPlayers] = [playersData.homeFaction, playersData.enemyFaction]
-    .map(faction => ({
+  const [homePlayers, enemyPlayers] = await Promise.all(
+    [playersData.homeFaction, playersData.enemyFaction].map(async (faction) => ({
       captain: faction.find((player: any) => player.captain),
-      columns: formatPlayers(faction)
-    }));
+      columns: await formatPlayers(faction)
+    }))
+  );
 
   const mapDataTable = sortedMapData
-    .map((map:any) => {
+    .map((map: any) => {
       const winPercent = map.totalPlayedTimes === 0 || isNaN(parseFloat(map.winPercentage))
         ? "N/A"
         : Math.round(parseFloat(map.winPercentage)) + "%";
@@ -185,10 +195,10 @@ export const createMatchAnalysisEmbed = (
       { name: `Map stats for Team ${enemyPlayers.captain.nickname}`,
         value: "`Map name     | Played | Win % `\n" + mapDataTable },
       { name: "They mostly play:", 
-        value: formatMapData(sortedMapData, undefined, 4), 
+        value: await formatMapData(sortedMapData, undefined, 4), 
         inline: true },
       { name: "They will ban:", 
-        value: formatMapData(sortedMapData, (a, b) => a.totalPlayedTimes - b.totalPlayedTimes, 3), 
+        value: await formatMapData(sortedMapData, (a, b) => a.totalPlayedTimes - b.totalPlayedTimes, 3), 
         inline: true },
       { name: "Matchroom page",
         value: `[🔗 Link](${LINKS.MATCHROOM}/${matchId})`,
@@ -199,8 +209,8 @@ export const createMatchAnalysisEmbed = (
     .setTimestamp();
 
   sendEmbedMessage(embed, config.CHANNEL_MAP_ANALYSIS, matchId);
-  return;
 };
+
 
 export async function createLiveScoreCard(match: Match) {
   const homePlayers = (
