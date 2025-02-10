@@ -25,9 +25,9 @@ client.on(
           )
           .reduce((max, num) => Math.max(max, num), 0);
 
-        // Create a new category with minimal visible name using special characters
+        // Create a new category with a hyphen name
         const roomCategory = await guild.channels.create({
-          name: "⠀", // Braille pattern blank character (appears almost invisible)
+          name: "-",
           type: ChannelType.GuildCategory,
         });
         console.log(`Created category: ${roomCategory.id}`);
@@ -57,7 +57,7 @@ client.on(
       if (
         leftChannel &&
         leftChannel.parent &&
-        leftChannel.parent.name === "⠀" && // Check for our special category name
+        leftChannel.parent.name === "-" && // Check for hyphen category name
         leftChannel.id !== CREATE_ROOM_CHANNEL_ID
       ) {
         const category = leftChannel.parent as CategoryChannel;
