@@ -1,3 +1,5 @@
+import { getServerBoostLevel } from "./api/services/channelService";
+
 export enum ChannelIcons {
   Active = "🟢",
   Inactive = "🟠",
@@ -34,7 +36,10 @@ export enum AcceptedEventTypes {
   match_created = "match_object_created",
 }
 
-export const getMapEmoji = (mapName: string): string => {
+export const getMapEmoji = async (mapName: string): Promise<string> => {
+  const serverBoostLevel = await getServerBoostLevel();
+  const canShowEmojis = serverBoostLevel >= 2;
+  
   const mapEmojis: { [key: string]: string } = {
     de_ancient: "<:de_ancient:1324386141981507656>",
     de_anubis: "<:de_anubis:1324386143462227990>",
@@ -46,10 +51,13 @@ export const getMapEmoji = (mapName: string): string => {
     de_train: "<:de_train:1324434992494940231>",
   };
 
-  return mapEmojis[mapName.toLowerCase()] || `:${mapName.toLowerCase()}:`; // Default to text-based emoji if not found
+  return canShowEmojis ? mapEmojis[mapName.toLowerCase()] : ``;
 };
 
-export const getSkillLevelEmoji = (faceitLevel: number): string => {
+export const getSkillLevelEmoji = async (faceitLevel: number): Promise<string> => {
+  const serverBoostLevel = await getServerBoostLevel();
+  const canShowEmojis = serverBoostLevel >= 2;
+  
   const skillLevelEmojis: { [key: number]: string } = {
     1: "<:level_1:1313100283273936896>",
     2: "<:level_2:1313100284301545522>",
@@ -63,7 +71,7 @@ export const getSkillLevelEmoji = (faceitLevel: number): string => {
     10: "<:level_10:1314528913380081717>", // Added level 10 as well
   };
 
-  return skillLevelEmojis[faceitLevel] || `:${faceitLevel}:`; // Default to text-based emoji if not found
+  return canShowEmojis ? skillLevelEmojis[faceitLevel] : ``; // Default to text-based emoji if not found
 };
 
 export const API_VERSION = "v10";
