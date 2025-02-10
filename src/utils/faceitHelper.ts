@@ -173,7 +173,7 @@ export async function generatePlayerStatsTable(
           player?.gamePlayerId || ""
         );
 
-        const skillLevelForPlayer = getSkillLevelEmoji(
+        const skillLevelForPlayer =  await getSkillLevelEmoji(
           playerLevel?.skillLevel || 1
         );
 
