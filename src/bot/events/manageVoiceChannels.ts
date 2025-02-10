@@ -1,7 +1,8 @@
 import client from "../client";
-import { VoiceState, CategoryChannel, VoiceChannel, ChannelType } from "discord.js";
+import { VoiceState, CategoryChannel, VoiceChannel } from "discord.js";
 
 const CREATE_ROOM_CHANNEL_ID = "1328693484533710878"; // "Create a Room" channel ID
+const ROOM_CATEGORY_ID = "1309222763994808372"; // Replace with the ID of the category to create rooms under
 
 client.on(
   "voiceStateUpdate",
@@ -13,70 +14,68 @@ client.on(
 
       // Handle user joining the "Create a Room" channel
       if (joinedChannel && joinedChannel.id === CREATE_ROOM_CHANNEL_ID) {
-        // Find the highest Room number by looking at voice channels
-        const existingRooms = guild.channels.cache.filter(
+        // Fetch the category where rooms are created
+        const category = guild.channels.cache.get(
+          ROOM_CATEGORY_ID
+        ) as CategoryChannel;
+
+        if (!category || category.type !== 4) {
+          console.error(
+            "Category not found or is not a valid category channel."
+          );
+          return;
+        }
+
+        // Find the highest Room number in the category
+        const roomChannels = Array.from(
+          category.children.cache.values()
+        ).filter(
           (channel): channel is VoiceChannel =>
-            channel.type === ChannelType.GuildVoice && /^🔊┃Room #\d+$/.test(channel.name)
+            channel.type === 2 && /^🔊┃Room #\d+$/.test(channel.name)
         );
 
-        const highestNumber = [...existingRooms.values()]
+        const highestNumber = roomChannels
           .map((channel) =>
             parseInt(channel.name.match(/Room #(\d+)/)?.[1] || "0", 10)
           )
           .reduce((max, num) => Math.max(max, num), 0);
 
-        // Create a new category with a hyphen name
-        const roomCategory = await guild.channels.create({
-          name: "-",
-          type: ChannelType.GuildCategory,
+        // Create the new room with '#' before the number
+        const roomName = `🔊┃Room #${highestNumber + 1}`;
+        const createdChannel = await guild.channels.create({
+          name: roomName,
+          type: 2, // Voice channel
+          parent: ROOM_CATEGORY_ID,
+          permissionOverwrites: joinedChannel.permissionOverwrites.cache.map(
+            (overwrite) => overwrite
+          ), // Copy permissions
         });
-        console.log(`Created category: ${roomCategory.id}`);
 
-        // Create a voice channel inside the new category with the room number
-        const roomVoiceChannel = await guild.channels.create({
-          name: `🔊┃Room #${highestNumber + 1}`,
-          type: ChannelType.GuildVoice,
-          parent: roomCategory.id,
-          permissionOverwrites: joinedChannel.permissionOverwrites.cache.map((overwrite) => overwrite), // Copy permissions
-        });
-        console.log(`Created new voice channel: ${roomVoiceChannel.name}`);
+        console.log(`Created new channel: ${roomName}`);
 
-        // Move the user into the new voice channel
-        if (roomVoiceChannel instanceof VoiceChannel) {
+        // Move the user into the new channel
+        if (createdChannel instanceof VoiceChannel) {
           const member = newState.member;
           if (member && member.voice.channel) {
-            await member.voice.setChannel(roomVoiceChannel);
+            await member.voice.setChannel(createdChannel);
             console.log(
-              `Moved user ${member.user.tag} to the newly created channel: ${roomVoiceChannel.name}`
+              `Moved user ${member.user.tag} to the newly created channel: ${roomName}`
             );
           }
+        } else {
+          console.error("Created channel is not a VoiceChannel.");
         }
       }
 
-      // Handle when a voice room inside a category becomes empty
+      // Handle when a room becomes empty
       if (
         leftChannel &&
-        leftChannel.parent &&
-        leftChannel.parent.name === "-" && // Check for hyphen category name
-        leftChannel.id !== CREATE_ROOM_CHANNEL_ID
+        leftChannel.parentId === ROOM_CATEGORY_ID &&
+        leftChannel.id !== CREATE_ROOM_CHANNEL_ID && // Ensure we do not delete "Create a Room"
+        leftChannel.members.size === 0
       ) {
-        const category = leftChannel.parent as CategoryChannel;
-        const channelsInCategory = category.children.cache;
-
-        // Check if all channels inside the category are empty
-        const allEmpty = channelsInCategory.every(
-          (channel) => channel.isVoiceBased() && channel.members.size === 0
-        );
-
-        if (allEmpty) {
-          // Delete all channels in the category
-          for (const channel of channelsInCategory.values()) {
-            await channel.delete();
-          }
-          // Delete the category
-          await category.delete();
-          console.log(`Deleted empty category and its channels: ${category.id}`);
-        }
+        await leftChannel.delete();
+        console.log(`Deleted empty channel: ${leftChannel.name}`);
       }
     } catch (error) {
       if (error instanceof Error) {
@@ -87,3 +86,4 @@ client.on(
     }
   }
 );
+
