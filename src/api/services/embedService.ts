@@ -121,16 +121,15 @@ export async function matchEndNotification(match: Match) {
       .setTitle(
         `${mapEmoji}  ${formattedMapName}  (${finalScore.join(":") || "N/A"})`
       )
-      .addFields(
-        {
-          name: "Scoreboard (K/D/A)",
-          value: `${playerStatsTable.join("\n")}`,
-        },
-        {
-          name: "Matchroom page",
-          value: `[🔗 Link](${LINKS.MATCHROOM}/${match?.matchId})`,
-        }
-      )
+      .addFields({
+        name: "Scoreboard (K/D/A)",
+        value: `${playerStatsTable.join("\n")}`,
+      })
+      .setFooter({ 
+        text: "View match details", 
+        iconURL: undefined 
+      })
+      .setURL(`${LINKS.MATCHROOM}/${match?.matchId}`)
       .setTimestamp();
 
     await sendEmbedMessage(embed, config.CHANNEL_MATCH_RESULTS, match.matchId);
@@ -237,16 +236,13 @@ export async function createLiveScoreCard(match: Match) {
         value: homePlayers,
         inline: true,
       },
-      EMPTY_FIELD,
-      {
-        name: "Matchroom page",
-        value: `[🔗 Link](${LINKS.MATCHROOM}/${match?.matchId})`,
-        inline: true,
-      }
+      EMPTY_FIELD
     )
+    .setURL(`${LINKS.MATCHROOM}/${match?.matchId}`)
     .setFooter({ 
       text: `${match.matchId}` 
-    }).setColor(`#${EMBED_COLOURS.LIVE_SCORE}`);
+    })
+    .setColor(`#${EMBED_COLOURS.LIVE_SCORE}`);
 
   await sendEmbedMessage(embed, config.CHANNEL_LIVE_MATCHES, match.matchId);
 }
