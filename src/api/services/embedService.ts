@@ -213,9 +213,8 @@ export async function createLiveScoreCard(match: Match) {
           player.gamePlayerId || ""
         );
         console.log(playerLevel);
-        return `${getSkillLevelEmoji(playerLevel?.skillLevel || 1)} ${
-          player.faceitUsername
-        }`;
+        const skillEmoji = await getSkillLevelEmoji(playerLevel?.skillLevel || 1);
+        return `${skillEmoji} ${player.faceitUsername}`;
       })
     )
   ).join("\n");
@@ -226,10 +225,11 @@ export async function createLiveScoreCard(match: Match) {
     false
   );
 
-  const { formattedMapName, mapEmoji } = formatMapInfo(match.mapName);
+  const formattedMapInfo = formatMapInfo(match.mapName);
+  const mapEmoji = await getMapEmoji(match.mapName);
 
   const embed = new EmbedBuilder()
-    .setTitle(`${mapEmoji}  ${formattedMapName}  (${matchScore.join(":")})`)
+    .setTitle(`${mapEmoji}  ${formattedMapInfo.formattedMapName}  (${matchScore.join(":")})`)
     .addFields(
       {
         name: `Player(s) in game...`,
