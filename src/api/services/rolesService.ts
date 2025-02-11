@@ -27,9 +27,17 @@ export const updateServerRoles = async (
       return;
     }
 
-    // Remove all roles containing "Level" from the member
+    // Check if the user already has the correct role
+    if (member.roles.cache.has(targetRole.id)) {
+      console.log(
+        `Member ${member.user.tag} already has the correct role (${skillLevelRoleName}), skipping update.`
+      );
+      return;
+    }
+
+    // Remove all "Level" roles except the correct one
     const levelRoles = member.roles.cache.filter((role: Role) =>
-      role.name.includes("Level")
+      role.name.includes("Level") && role.id !== targetRole.id
     );
 
     await Promise.all(
@@ -38,14 +46,16 @@ export const updateServerRoles = async (
       )
     );
 
+    // Add the correct role
     await member.roles.add(targetRole);
     console.log(
-      `Assigned role ${skillLevelRoleName} to member ${member.user.tag}.`
+      `Updated role to ${skillLevelRoleName} for member ${member.user.tag}.`
     );
   } catch (error) {
     console.error("Error updating server roles:", error);
   }
 };
+
 
 export const updateLinkedRole = async (
   member: GuildMember,
