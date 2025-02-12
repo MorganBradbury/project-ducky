@@ -51,7 +51,7 @@ export const getMapEmoji = async (mapName: string): Promise<string> => {
     de_train: "<:de_train:1324434992494940231>",
   };
 
-  return canShowEmojis ? mapEmojis[mapName.toLowerCase()] || "" : "[🔗]";
+  return canShowEmojis ? mapEmojis[mapName.toLowerCase()] || "" : "";
 };
 
 export const getSkillLevelEmoji = async (faceitLevel: number): Promise<string> => {
@@ -71,7 +71,7 @@ export const getSkillLevelEmoji = async (faceitLevel: number): Promise<string> =
     10: "<:level_10:1314528913380081717>",
   };
 
-  return canShowEmojis ? skillLevelEmojis[faceitLevel] || "" : "[🔗]";
+  return canShowEmojis ? skillLevelEmojis[faceitLevel] || "" : "";
 };
 
 export const API_VERSION = "v10";
