@@ -53,7 +53,7 @@ export const updateVoiceChannelStatus = async (
         } seconds`
       );
     } else {
-      console.error("Error updating voice channel status:", error?.message || "");
+      console.error("Error updating voice channel status");
     }
     return false;
   }
