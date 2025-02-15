@@ -42,6 +42,18 @@ export const retakesCommand = {
         return;
       }
 
+      const findServerLocation = (countryCode: string): string => {
+        const countryMap: Record<string, string> = {
+          fr: "France",
+          gb: "United Kingdom",
+          nl: "Netherlands",
+          dk: "Denmark",
+          de: "Germany",
+        };
+
+        return countryMap[countryCode.toLowerCase()] || "Unknown Country";
+      };
+
       // Create embeds for each server
       const embeds = retakeServers.map((server: any) =>
         new EmbedBuilder()
@@ -49,6 +61,7 @@ export const retakesCommand = {
           .setTitle(`Server ID: ${server.ID}`)
           .setDescription(
             `**Map:** ${server.CurrentMap}\n` +
+              `**Location:** ${findServerLocation(server.CountryCode)}\n` +
               `**Players:** ${server.Online}/${server.TotalSlots}\n` +
               `**Connect IP:** \`${server.IP}:${server.Port}\``
           )
