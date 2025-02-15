@@ -14,7 +14,7 @@ export const helpCommand = {
       const commandFields = Array.from(commandsMap.values())
         .map((cmd) => {
           const optionsText = cmd.options?.length
-            ? " " + cmd.options.map((opt) => `\`<${opt.name}>\``).join(" ")
+            ? " " + cmd.options.map((opt: any) => `\`<${opt.name}>\``).join(" ")
             : "";
 
           return `\`/${cmd.name}\`${optionsText} - ${cmd.description}`;

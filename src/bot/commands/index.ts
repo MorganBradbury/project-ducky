@@ -13,4 +13,4 @@ export const commands = [
 ];
 
 // export
-export const commandsMap = new Map(commands.map((cmd) => [cmd.name, cmd]));
+export const commandsMap = new Map(commands.map((cmd: any) => [cmd.name, cmd]));
