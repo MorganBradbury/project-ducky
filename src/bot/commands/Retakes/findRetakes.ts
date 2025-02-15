@@ -1,8 +1,4 @@
-import {
-  ChatInputCommandInteraction,
-  EmbedBuilder,
-  MessageFlags,
-} from "discord.js";
+import { ChatInputCommandInteraction, EmbedBuilder } from "discord.js";
 import { fetchRetakeServers } from "../../../api/services/retakeService";
 
 export const retakesCommand = {
@@ -32,6 +28,9 @@ export const retakesCommand = {
       // Acknowledge the interaction
       await interaction.deferReply({ ephemeral: true });
 
+      // Ensure the map name is always 30 characters long by padding with spaces
+      const paddedMapName = mapName.padEnd(30, " ");
+
       // Fetch retake servers for the selected map
       const retakeServers = await fetchRetakeServers(mapName);
 
@@ -55,12 +54,12 @@ export const retakesCommand = {
       };
 
       // Create embeds for each server
-      const embeds = retakeServers.map((server: any) =>
+      const embeds = retakeServers.map((server: any, index: number) =>
         new EmbedBuilder()
           .setColor("#FFA500")
-          .setTitle(`Server ID: ${server.ID}`)
+          .setTitle(`Retakes #${index}`)
           .setDescription(
-            `**Map:** ${server.CurrentMap}\n` +
+            `**Map:** ${paddedMapName}\n` + // Use padded map name here
               `**Location:** ${findServerLocation(server.CountryCode)}\n` +
               `**Players:** ${server.Online}/${server.TotalSlots}\n` +
               `**Connect IP:** \`${server.IP}:${server.Port}\``
