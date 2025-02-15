@@ -5,6 +5,7 @@
   "scripts": {
     "build": "tsc",
     "start-server": "node dist/api/server.js",
+    "dev-server": "concurrently \"tsc --watch\" \"nodemon dist/api/server.js\"",
     "start": "node dist/bot/main.js",
     "dev": "tsc --watch && nodemon dist/bot/main.js"
   },
@@ -23,7 +24,8 @@
     "@types/express": "^5.0.0",
     "@types/node": "^22.9.3",
     "@types/ws": "^8.5.13",
-    "nodemon": "^3.1.7",
+    "concurrently": "^9.1.2",
+    "nodemon": "^3.1.9",
     "prisma": "^6.3.0",
     "ts-node": "^10.9.2",
     "ts-node-dev": "^2.0.0",
