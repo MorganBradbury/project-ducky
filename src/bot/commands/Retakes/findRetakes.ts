@@ -1,67 +1,44 @@
 import {
   ChatInputCommandInteraction,
-  SlashCommandBuilder,
+  EmbedBuilder,
   MessageFlags,
+  SlashCommandBuilder,
 } from "discord.js";
-import { fetchRetakeServers } from "../../../api/services/retakeService";
 
 export const retakesCommand = {
-  data: new SlashCommandBuilder()
-    .setName("retakes")
-    .setDescription("Choose a map for retakes.")
-    .addStringOption((option) =>
-      option
-        .setName("map")
-        .setDescription("Select a map for retakes")
-        .setRequired(true)
-        .addChoices(
-          { name: "Dust2", value: "de_dust2" },
-          { name: "Mirage", value: "de_mirage" },
-          { name: "Inferno", value: "de_inferno" },
-          { name: "Vertigo", value: "de_vertigo" },
-          { name: "Overpass", value: "de_overpass" }
-        )
-    ),
-
+  name: "retakes",
+  description: "Start a retakes game on a selected map",
+  options: [
+    {
+      name: "mapname",
+      type: 3, // STRING type
+      description: "Select a map to play retakes on",
+      required: true,
+      choices: [
+        { name: "Mirage", value: "de_mirage" },
+        { name: "Nuke", value: "de_nuke" },
+        { name: "Inferno", value: "de_inferno" },
+      ],
+    },
+  ],
   execute: async (interaction: ChatInputCommandInteraction) => {
-    const mapName = interaction.options.getString("map", true);
-
     try {
-      // Show that the bot is processing the request
-      await interaction.deferReply({ ephemeral: true });
+      const mapName = interaction.options.getString("mapname");
 
-      // Fetch retake servers based on the selected map
-      const retakeServers = await fetchRetakeServers(mapName);
+      const embed = new EmbedBuilder()
+        .setTitle("Retakes Game")
+        .setColor("#FFA500")
+        .setDescription(`A retakes game is starting on **${mapName}**!`);
 
-      if (!retakeServers.message || retakeServers.message.length === 0) {
-        await interaction.editReply({
-          content: `No retake servers found for map: ${mapName}`,
-        });
-        return;
-      }
-
-      // Build the message with server details
-      const serverDetailsMessage = retakeServers
-        .map((server: any) => {
-          return [
-            `**Server ID:** ${server.ID}`,
-            `**Map:** ${server.CurrentMap}`,
-            `**Players:** ${server.Online}/${server.TotalSlots}`,
-            `**Connect IP:** ${server.IP}:${server.Port}`,
-            "",
-          ].join("\n");
-        })
-        .join("\n");
-
-      // Send the server details message
-      await interaction.editReply({
-        content: `Here are the available retake servers for map **${mapName}**:\n\n${serverDetailsMessage}`,
+      await interaction.reply({
+        embeds: [embed],
+        flags: MessageFlags.Ephemeral,
       });
     } catch (error) {
-      console.error("Error in retakes command:", error);
-      await interaction.editReply({
-        content:
-          "An error occurred while fetching retake servers. Please try again later.",
+      console.error("Error executing retakes command:", error);
+      await interaction.reply({
+        content: `Failed to start retakes game: ${error}`,
+        ephemeral: true,
       });
     }
   },
