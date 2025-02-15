@@ -3,6 +3,7 @@ import axios from "axios";
 const API_URL = "https://xplay.gg/api/play/getAllServers";
 
 export const fetchRetakeServers = async (currentMap?: string) => {
+  console.log("finding retakes for " + currentMap);
   try {
     const response = await axios.get(API_URL);
     const servers = response.data.serversList; // Correctly accessing serversList inside message

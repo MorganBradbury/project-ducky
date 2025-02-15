@@ -1,72 +1,68 @@
 import {
   ChatInputCommandInteraction,
-  AutocompleteInteraction,
+  SlashCommandBuilder,
   MessageFlags,
 } from "discord.js";
 import { fetchRetakeServers } from "../../../api/services/retakeService";
 
-// This command is registered with autocomplete for selecting a map
 export const retakesCommand = {
-  name: "retakes",
-  description: "Choose a map for retakes.",
-  options: [
-    {
-      name: "map",
-      description: "Select a map for retakes",
-      type: 3, // String type
-      required: true,
-      autocomplete: true, // Enable autocomplete for map selection
-    },
-  ],
+  data: new SlashCommandBuilder()
+    .setName("retakes")
+    .setDescription("Choose a map for retakes.")
+    .addStringOption((option) =>
+      option
+        .setName("map")
+        .setDescription("Select a map for retakes")
+        .setRequired(true)
+        .addChoices(
+          { name: "Dust2", value: "de_dust2" },
+          { name: "Mirage", value: "de_mirage" },
+          { name: "Inferno", value: "de_inferno" },
+          { name: "Vertigo", value: "de_vertigo" },
+          { name: "Overpass", value: "de_overpass" }
+        )
+    ),
+
   execute: async (interaction: ChatInputCommandInteraction) => {
-    // Handle the retakes command after a map is selected
-    const mapName = interaction.options.getString("map");
+    const mapName = interaction.options.getString("map", true);
 
-    // Fetch retake servers based on the selected map
-    const retakeServers = await fetchRetakeServers(mapName || "de_mirage");
+    try {
+      // Show that the bot is processing the request
+      await interaction.deferReply({ ephemeral: true });
 
-    if (!retakeServers.message || retakeServers.message.length === 0) {
-      await interaction.reply({
-        content: `No retake servers found for map: ${mapName}`,
-        flags: MessageFlags.Ephemeral,
+      // Fetch retake servers based on the selected map
+      const retakeServers = await fetchRetakeServers(mapName);
+
+      if (!retakeServers.message || retakeServers.message.length === 0) {
+        await interaction.editReply({
+          content: `No retake servers found for map: ${mapName}`,
+        });
+        return;
+      }
+
+      // Build the message with server details
+      const serverDetailsMessage = retakeServers
+        .map((server: any) => {
+          return [
+            `**Server ID:** ${server.ID}`,
+            `**Map:** ${server.CurrentMap}`,
+            `**Players:** ${server.Online}/${server.TotalSlots}`,
+            `**Connect IP:** ${server.IP}:${server.Port}`,
+            "",
+          ].join("\n");
+        })
+        .join("\n");
+
+      // Send the server details message
+      await interaction.editReply({
+        content: `Here are the available retake servers for map **${mapName}**:\n\n${serverDetailsMessage}`,
       });
-      return;
+    } catch (error) {
+      console.error("Error in retakes command:", error);
+      await interaction.editReply({
+        content:
+          "An error occurred while fetching retake servers. Please try again later.",
+      });
     }
-
-    // Build the message with server details
-    let serverDetailsMessage = "";
-    retakeServers.message.forEach((server: any) => {
-      serverDetailsMessage += `**Server ID:** ${server.ID}\n`;
-      serverDetailsMessage += `**Map:** ${server.CurrentMap}\n`;
-      serverDetailsMessage += `**Players:** ${server.Online}/${server.TotalSlots}\n`;
-      serverDetailsMessage += `**Connect IP:** ${server.IP}:${server.Port}\n\n`;
-    });
-
-    // Send the server details message
-    await interaction.reply({
-      content: `Here are the available retake servers for map **${mapName}**:\n\n${serverDetailsMessage}`,
-    });
-  },
-  // Autocomplete handler for the map selection
-  autocomplete: async (interaction: AutocompleteInteraction) => {
-    const focusedOption = interaction.options.getFocused();
-    const mapOptions = [
-      "dust2",
-      "mirage",
-      "inferno",
-      "vertigo",
-      "overpass",
-      // Add more maps as needed
-    ];
-
-    // Filter map options based on user input
-    const filteredOptions = mapOptions.filter((map) =>
-      map.toLowerCase().includes(focusedOption.toLowerCase())
-    );
-
-    // Respond with filtered map options
-    await interaction.respond(
-      filteredOptions.map((map) => ({ name: map, value: map }))
-    );
   },
 };
