@@ -32,7 +32,7 @@ const mapNameLookup = (mapName: string): string => {
 // Utility function to pad Connect IP field to exactly 46 characters
 const padConnectIP = (ip: string, port: string): string => {
   const ipString = `connect ${ip}:${port}`;
-  const targetLength = 28;
+  const targetLength = 27;
   const paddingLength = targetLength - ipString.length;
   if (paddingLength > 0) {
     return ipString + " ".repeat(paddingLength); // Pad with spaces if the length is less than 46
@@ -107,7 +107,7 @@ export const retakesCommand = {
             .setDescription(
               `${mapIcon} ${mapNameLookup(mapName)}   /   ${findServerLocation(
                 server.CountryCode
-              )}\n` + `**Connect IP:**  \`${paddedConnectIP}\``
+              )}\n` + `\`${paddedConnectIP}\``
             );
         })
       );
