@@ -2,7 +2,7 @@ import { ChatInputCommandInteraction, EmbedBuilder } from "discord.js";
 import { fetchRetakeServers } from "../../../api/services/retakeService";
 import { getMapEmoji } from "../../../constants";
 
-const findServerLocation = (countryCode: string): string => {
+const lookupCountryName = (countryCode: string): string => {
   const countryMap: Record<string, { name: string; flag: string }> = {
     fr: { name: "France", flag: "🇫🇷" },
     gb: { name: "UK", flag: "🇬🇧" },
@@ -12,7 +12,20 @@ const findServerLocation = (countryCode: string): string => {
   };
 
   const country = countryMap[countryCode.toLowerCase()];
-  return country ? `${country.flag}` : "Unknown Country";
+  return country ? country.name : "Unknown Country";
+};
+
+const lookupCountryFlag = (countryCode: string): string => {
+  const countryMap: Record<string, { name: string; flag: string }> = {
+    fr: { name: "France", flag: "🇫🇷" },
+    gb: { name: "UK", flag: "🇬🇧" },
+    nl: { name: "Netherlands", flag: "🇳🇱" },
+    dk: { name: "Denmark", flag: "🇩🇰" },
+    de: { name: "Germany", flag: "🇩🇪" },
+  };
+
+  const country = countryMap[countryCode.toLowerCase()];
+  return country ? country.flag : "Unknown Flag";
 };
 
 const mapNameLookup = (mapName: string): string => {
@@ -85,17 +98,16 @@ export const retakesCommand = {
           return new EmbedBuilder()
             .setColor("#FFA500")
             .setTitle(
-              `${findServerLocation(server.CountryCode)} Retakes #${
-                index + 1
-              } ${
+              `${lookupCountryFlag(server.CountryCode)} Retakes #${index + 1} ${
                 server.Online === 0
                   ? "[ᴇᴍᴘᴛʏ]"
                   : `[${server.Online}/${server.TotalSlots}]`
               }`
             )
             .setDescription(
-              `${mapIcon} ${mapNameLookup(mapName)}\n` +
-                `**Connect IP:**  \`${paddedConnectIP}\``
+              `${mapIcon} ${mapNameLookup(mapName)} | ${lookupCountryName(
+                server.CountryCode
+              )}\n` + `**Connect IP:**  \`${paddedConnectIP}\``
             );
         })
       );
