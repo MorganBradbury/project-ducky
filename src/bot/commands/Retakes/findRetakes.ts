@@ -85,12 +85,15 @@ export const retakesCommand = {
           return new EmbedBuilder()
             .setColor("#FFA500")
             .setTitle(
-              `Retakes #${index + 1} ${server.Online === 0 ? "[ᴇᴍᴘᴛʏ]" : ""}`
+              `Retakes #${index + 1} ${
+                server.Online === 0
+                  ? "[ᴇᴍᴘᴛʏ]"
+                  : `[${server.Online}/${server.TotalSlots}]`
+              }`
             )
             .setDescription(
               `**Map:**  ${mapIcon} ${mapNameLookup(mapName)}\n` +
                 `**Location:**  ${findServerLocation(server.CountryCode)}\n` +
-                `**Players:**  ${server.Online}/${server.TotalSlots}\n` +
                 `**Connect IP:**  \`${paddedConnectIP}\``
             );
         })
