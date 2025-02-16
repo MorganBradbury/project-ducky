@@ -12,7 +12,7 @@ const findServerLocation = (countryCode: string): string => {
   };
 
   const country = countryMap[countryCode.toLowerCase()];
-  return country ? `${country.flag}` : "Unknown Country";
+  return country ? `${country.flag} ${country.name}` : "Unknown Country";
 };
 
 const mapNameLookup = (mapName: string): string => {
