@@ -73,7 +73,7 @@ export const retakesCommand = {
         const retakeMessages = messages.filter(
           (msg) =>
             msg.author.id === interaction.client.user?.id && // Only messages from the bot
-            msg.embeds.some((embed) => embed.title?.includes("Retakes")) // Only messages with a "Retakes" embed
+            msg.embeds.some((embed) => embed.title?.includes("Retakes #")) // Only messages with a "Retakes" embed
         );
         for (const msg of retakeMessages.values()) {
           await msg.delete();
