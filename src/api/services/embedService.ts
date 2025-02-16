@@ -120,7 +120,9 @@ export async function matchEndNotification(match: Match) {
     const embed = new EmbedBuilder()
       .setColor(`#${mapWin ? EMBED_COLOURS.MAP_WIN : EMBED_COLOURS.MAP_LOSS}`)
       .setTitle(
-        `${mapEmoji}  ${formattedMapInfo.formattedMapName}  (${finalScore.join(":") || "N/A"})`
+        `${mapEmoji}  ${formattedMapInfo.formattedMapName}  (${
+          finalScore.join(":") || "N/A"
+        })`
       )
       .addFields({
         name: "Scoreboard (K/D/A)",
@@ -140,8 +142,8 @@ export const createMatchAnalysisEmbed = async (
   playersData: any,
   gameData: any
 ) => {
-  const sortedMapData = gameData.sort((a: any, b: any) => 
-    b.totalPlayedTimes === a.totalPlayedTimes 
+  const sortedMapData = gameData.sort((a: any, b: any) =>
+    b.totalPlayedTimes === a.totalPlayedTimes
       ? parseFloat(b.winPercentage) - parseFloat(a.winPercentage)
       : b.totalPlayedTimes - a.totalPlayedTimes
   );
@@ -150,13 +152,19 @@ export const createMatchAnalysisEmbed = async (
     const formatted = await Promise.all(
       players.map(async (player) => {
         const emoji = await getSkillLevelEmoji(player.faceitLevel);
-        return `${emoji} ${player.nickname}${player.captain ? "*" : ""}`;
+        return `${emoji} ${player.nickname.replace(/[*_`~]/g, "\\$&")}${
+          player.captain ? "*" : ""
+        }`;
       })
     );
     return [formatted.slice(0, 3).join("\n"), formatted.slice(3).join("\n")];
   };
 
-  const formatMapData = async (maps: any[], sortFn = (a: any, b: any) => 0, limit = maps.length) => {
+  const formatMapData = async (
+    maps: any[],
+    sortFn = (a: any, b: any) => 0,
+    limit = maps.length
+  ) => {
     const sortedMaps = maps.slice().sort(sortFn).slice(0, limit);
     const formattedMaps = await Promise.all(
       sortedMaps.map(async (map) => {
@@ -168,41 +176,68 @@ export const createMatchAnalysisEmbed = async (
   };
 
   const [homePlayers, enemyPlayers] = await Promise.all(
-    [playersData.homeFaction, playersData.enemyFaction].map(async (faction) => ({
-      captain: faction.find((player: any) => player.captain),
-      columns: await formatPlayers(faction)
-    }))
+    [playersData.homeFaction, playersData.enemyFaction].map(
+      async (faction) => ({
+        captain: faction.find((player: any) => player.captain),
+        columns: await formatPlayers(faction),
+      })
+    )
   );
 
   const mapDataTable = sortedMapData
     .map((map: any) => {
-      const winPercent = map.totalPlayedTimes === 0 || isNaN(parseFloat(map.winPercentage))
-        ? "N/A"
-        : Math.round(parseFloat(map.winPercentage)) + "%";
-      return `\`${formattedMapName(map.mapName).padEnd(12)} | ${map.totalPlayedTimes.toString().padEnd(6)} | ${winPercent.padEnd(6)}\``;
+      const winPercent =
+        map.totalPlayedTimes === 0 || isNaN(parseFloat(map.winPercentage))
+          ? "N/A"
+          : Math.round(parseFloat(map.winPercentage)) + "%";
+      return `\`${formattedMapName(map.mapName).padEnd(
+        12
+      )} | ${map.totalPlayedTimes.toString().padEnd(6)} | ${winPercent.padEnd(
+        6
+      )}\``;
     })
     .join("\n");
 
   const embed = new EmbedBuilder()
     .setTitle("Matchroom Analysis")
     .addFields(
-      { name: `Team ${homePlayers.captain.nickname}`, value: homePlayers.columns[0], inline: true },
+      {
+        name: `Team ${homePlayers.captain.nickname}`,
+        value: homePlayers.columns[0],
+        inline: true,
+      },
       { name: "\u200b", value: homePlayers.columns[1], inline: true },
       { name: "\u200b", value: "\u200b", inline: true },
-      { name: `Team ${enemyPlayers.captain.nickname}`, value: enemyPlayers.columns[0], inline: true },
+      {
+        name: `Team ${enemyPlayers.captain.nickname}`,
+        value: enemyPlayers.columns[0],
+        inline: true,
+      },
       { name: "\u200b", value: enemyPlayers.columns[1], inline: true },
       { name: "\u200b", value: "\u200b", inline: true },
-      { name: `Map stats for Team ${enemyPlayers.captain.nickname}`,
-        value: "`Map name     | Played | Win % `\n" + mapDataTable },
-      { name: "They mostly play:", 
-        value: await formatMapData(sortedMapData, undefined, 4), 
-        inline: true },
-      { name: "They will ban:", 
-        value: await formatMapData(sortedMapData, (a, b) => a.totalPlayedTimes - b.totalPlayedTimes, 3), 
-        inline: true },
-      { name: "Matchroom page",
+      {
+        name: `Map stats for Team ${enemyPlayers.captain.nickname}`,
+        value: "`Map name     | Played | Win % `\n" + mapDataTable,
+      },
+      {
+        name: "They mostly play:",
+        value: await formatMapData(sortedMapData, undefined, 4),
+        inline: true,
+      },
+      {
+        name: "They will ban:",
+        value: await formatMapData(
+          sortedMapData,
+          (a, b) => a.totalPlayedTimes - b.totalPlayedTimes,
+          3
+        ),
+        inline: true,
+      },
+      {
+        name: "Matchroom page",
         value: `[🔗 Link](${LINKS.MATCHROOM}/${matchId})`,
-        inline: false }
+        inline: false,
+      }
     )
     .setFooter({ text: matchId })
     .setColor("#ff5733")
@@ -210,7 +245,6 @@ export const createMatchAnalysisEmbed = async (
 
   sendEmbedMessage(embed, config.CHANNEL_MAP_ANALYSIS, matchId);
 };
-
 
 export async function createLiveScoreCard(match: Match) {
   const homePlayers = (
@@ -220,7 +254,9 @@ export async function createLiveScoreCard(match: Match) {
           player.gamePlayerId || ""
         );
         console.log(playerLevel);
-        const skillEmoji = await getSkillLevelEmoji(playerLevel?.skillLevel || 1);
+        const skillEmoji = await getSkillLevelEmoji(
+          playerLevel?.skillLevel || 1
+        );
         return `${skillEmoji} ${player.faceitUsername}`;
       })
     )
@@ -236,7 +272,11 @@ export async function createLiveScoreCard(match: Match) {
   const mapEmoji = await getMapEmoji(match.mapName);
 
   const embed = new EmbedBuilder()
-    .setTitle(`${mapEmoji}  ${formattedMapInfo.formattedMapName}  (${matchScore.join(":")})`)
+    .setTitle(
+      `${mapEmoji}  ${formattedMapInfo.formattedMapName}  (${matchScore.join(
+        ":"
+      )})`
+    )
     .addFields(
       {
         name: `Player(s) in game...`,
@@ -246,8 +286,8 @@ export async function createLiveScoreCard(match: Match) {
       EMPTY_FIELD
     )
     .setURL(`${LINKS.MATCHROOM}/${match?.matchId}`)
-    .setFooter({ 
-      text: `${match.matchId}` 
+    .setFooter({
+      text: `${match.matchId}`,
     })
     .setColor(`#${EMBED_COLOURS.LIVE_SCORE}`);
 
