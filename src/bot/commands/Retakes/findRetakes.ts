@@ -29,7 +29,7 @@ export const retakesCommand = {
       await interaction.deferReply({ ephemeral: true });
 
       // Ensure the map name is always 30 characters long by padding with spaces
-      const paddedMapName = mapName.padEnd(40, ".");
+      const paddedMapName = mapName.padEnd(90, ".");
 
       // Fetch retake servers for the selected map
       const retakeServers = await fetchRetakeServers(mapName);
