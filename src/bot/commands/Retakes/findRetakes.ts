@@ -92,8 +92,8 @@ export const retakesCommand = {
               }`
             )
             .setDescription(
-              `**Map:**  ${mapIcon} ${mapNameLookup(mapName)}\n` +
-                `**Location:**  ${findServerLocation(server.CountryCode)}\n` +
+              `${mapIcon} ${mapNameLookup(mapName)}\n` +
+                `${findServerLocation(server.CountryCode)}\n` +
                 `**Connect IP:**  \`${paddedConnectIP}\``
             );
         })
