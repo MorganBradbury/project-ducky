@@ -92,9 +92,9 @@ export const retakesCommand = {
               }`
             )
             .setDescription(
-              `${mapIcon} ${mapNameLookup(mapName)}\n` +
-                `${findServerLocation(server.CountryCode)}\n` +
-                `**Connect IP:**  \`${paddedConnectIP}\``
+              `${mapIcon} ${mapNameLookup(mapName)}   |   ${findServerLocation(
+                server.CountryCode
+              )}\n` + `**Connect IP:**  \`${paddedConnectIP}\``
             );
         })
       );
