@@ -28,6 +28,17 @@ const mapNameLookup = (mapName: string): string => {
   return map[mapName.toLowerCase()] || "Unknown Map";
 };
 
+// Utility function to pad Connect IP field to exactly 46 characters
+const padConnectIP = (ip: string, port: string): string => {
+  const ipString = `${ip}:${port}`;
+  const targetLength = 46;
+  const paddingLength = targetLength - ipString.length;
+  if (paddingLength > 0) {
+    return ipString + " ".repeat(paddingLength); // Pad with spaces if the length is less than 46
+  }
+  return ipString; // If already 46 or more, return the string as is
+};
+
 export const retakesCommand = {
   name: "retakes",
   description: "Find a retake server on xplay.gg",
@@ -55,9 +66,6 @@ export const retakesCommand = {
       // Acknowledge the interaction
       await interaction.deferReply({ ephemeral: true });
 
-      // Ensure the map name is always 30 characters long by padding with spaces
-      const paddedMapName = mapNameLookup(mapName).padEnd(90, " ");
-
       // Fetch retake servers for the selected map
       const retakeServers = await fetchRetakeServers(mapName);
 
@@ -72,16 +80,17 @@ export const retakesCommand = {
       const embeds = await Promise.all(
         retakeServers.map(async (server: any, index: number) => {
           const mapIcon = await getMapEmoji(mapName);
+          const paddedConnectIP = padConnectIP(server.IP, server.Port); // Pad Connect IP to 46 characters
           return new EmbedBuilder()
             .setColor("#FFA500")
             .setTitle(
               `Retakes #${index + 1} ${server.Online === 0 ? "[ᴇᴍᴘᴛʏ]" : ""}`
             )
             .setDescription(
-              `**Map:** ${mapIcon} ${paddedMapName}\n` + // Use padded map name here
+              `**Map:** ${mapIcon} ${mapNameLookup(mapName)}\n` +
                 `**Location:** ${findServerLocation(server.CountryCode)}\n` +
                 `**Players:** ${server.Online}/${server.TotalSlots}\n` +
-                `**Connect IP:** \`${server.IP}:${server.Port}\``
+                `**Connect IP:** \`${paddedConnectIP}\``
             );
         })
       );
