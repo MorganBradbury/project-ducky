@@ -5,7 +5,7 @@ import { getMapEmoji } from "../../../constants";
 const findServerLocation = (countryCode: string): string => {
   const countryMap: Record<string, { name: string; flag: string }> = {
     fr: { name: "France", flag: "🇫🇷" },
-    gb: { name: "United Kingdom", flag: "🇬🇧" },
+    gb: { name: "UK", flag: "🇬🇧" },
     nl: { name: "Netherlands", flag: "🇳🇱" },
     dk: { name: "Denmark", flag: "🇩🇰" },
     de: { name: "Germany", flag: "🇩🇪" },
