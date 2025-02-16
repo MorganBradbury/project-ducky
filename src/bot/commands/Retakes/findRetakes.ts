@@ -65,7 +65,7 @@ export const retakesCommand = {
       const mapName =
         interaction.options.getString("mapname", true) || "de_mirage";
       // Acknowledge the interaction
-      await interaction.deferReply({ ephemeral: true });
+      await interaction.deferReply();
 
       // Fetch retake servers for the selected map
       const retakeServers = await fetchRetakeServers(mapName);
