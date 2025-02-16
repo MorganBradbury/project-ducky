@@ -14,8 +14,7 @@ export const fetchRetakeServers = async (currentMap?: string) => {
           (server.CountryCode === "fr" ||
             server.CountryCode === "gb" ||
             server.CountryCode === "nl" ||
-            server.CountryCode === "dk" ||
-            server.CountryCode === "de") &&
+            server.CountryCode === "dk") &&
           (!currentMap || server.CurrentMap === currentMap) &&
           server.TotalSlots <= 9 &&
           server.Online != server.TotalSlots
