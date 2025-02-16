@@ -1,6 +1,6 @@
 import { ChatInputCommandInteraction, EmbedBuilder } from "discord.js";
 import { fetchRetakeServers } from "../../../api/services/retakeService";
-import { getMapEmoji } from "../../../constants";
+import { EMPTY_FIELD, getMapEmoji } from "../../../constants";
 
 const findServerLocation = (countryCode: string): string => {
   const countryMap: Record<string, { name: string; flag: string }> = {
@@ -87,11 +87,23 @@ export const retakesCommand = {
             .setTitle(
               `Retakes #${index + 1} ${server.Online === 0 ? "[ᴇᴍᴘᴛʏ]" : ""}`
             )
-            .setDescription(
-              `**Map:**  ${mapIcon} ${mapNameLookup(mapName)}\n` +
-                `**Location:**  ${findServerLocation(server.CountryCode)}\n` +
-                `**Players:**  ${server.Online}/${server.TotalSlots}\n` +
-                `**Connect IP:**  \`${paddedConnectIP}\``
+            .addFields(
+              {
+                name: "\u200B",
+                value: `${mapIcon} ${mapNameLookup(mapName)}`,
+                inline: true,
+              },
+              EMPTY_FIELD,
+              {
+                name: "\u200B",
+                value: findServerLocation(server.CountryCode),
+                inline: true,
+              },
+              {
+                name: "Players",
+                value: `${server.Online}/${server.TotalSlots}`,
+              },
+              { name: "Connect IP", value: `\`${paddedConnectIP}\`` }
             );
         })
       );
