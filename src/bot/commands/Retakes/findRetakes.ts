@@ -74,7 +74,7 @@ export const retakesCommand = {
         return new EmbedBuilder()
           .setColor("#FFA500")
           .setTitle(
-            `Retakes #${index + 1} ${server.Online === 0 ? "[EMPTY]" : ""}`
+            `Retakes #${index + 1} ${server.Online === 0 ? "[𝗘𝗠𝗣𝗧𝗬]" : ""}`
           )
           .setDescription(
             `**Map:** ${mapIcon} ${paddedMapName}\n` + // Use padded map name here
