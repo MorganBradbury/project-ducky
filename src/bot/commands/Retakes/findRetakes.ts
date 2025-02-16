@@ -57,7 +57,7 @@ export const retakesCommand = {
       const embeds = retakeServers.map((server: any, index: number) =>
         new EmbedBuilder()
           .setColor("#FFA500")
-          .setTitle(`Retakes #${index}`)
+          .setTitle(`Retakes #${index + 1}`)
           .setDescription(
             `**Map:** ${paddedMapName}\n` + // Use padded map name here
               `**Location:** ${findServerLocation(server.CountryCode)}\n` +
