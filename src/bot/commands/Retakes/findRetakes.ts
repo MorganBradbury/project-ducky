@@ -15,7 +15,7 @@ export const retakesCommand = {
         { name: "Nuke", value: "de_nuke" },
         { name: "Inferno", value: "de_inferno" },
         { name: "Anubis", value: "de_anubis" },
-        { name: "Dust 2", value: "de_nuke" },
+        { name: "Dust 2", value: "de_dust2" },
         { name: "Ancient", value: "de_ancient" },
         { name: "Train", value: "de_train" },
       ],
@@ -29,7 +29,7 @@ export const retakesCommand = {
       await interaction.deferReply({ ephemeral: true });
 
       // Ensure the map name is always 30 characters long by padding with spaces
-      const paddedMapName = mapName.padEnd(30, " ");
+      const paddedMapName = mapName.padEnd(40, ".");
 
       // Fetch retake servers for the selected map
       const retakeServers = await fetchRetakeServers(mapName);
