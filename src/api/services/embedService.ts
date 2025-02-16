@@ -271,6 +271,9 @@ export async function createLiveScoreCard(match: Match) {
   const formattedMapInfo = formatMapInfo(match.mapName);
   const mapEmoji = await getMapEmoji(match.mapName);
 
+  // Pad the matchId to 36 characters (the length of the provided matchId example)
+  const paddedMatchId = match.matchId.padEnd(40, " ");
+
   const embed = new EmbedBuilder()
     .setTitle(
       `${mapEmoji}  ${formattedMapInfo.formattedMapName}  (${matchScore.join(
@@ -287,7 +290,7 @@ export async function createLiveScoreCard(match: Match) {
     )
     .setURL(`${LINKS.MATCHROOM}/${match?.matchId}`)
     .setFooter({
-      text: `${match.matchId}`,
+      text: paddedMatchId,
     })
     .setColor(`#${EMBED_COLOURS.LIVE_SCORE}`);
 
@@ -306,7 +309,7 @@ export const updateLiveScoreCards = async () => {
     const updatedEmbeds = (
       await Promise.all(
         msg.embeds.map(async (embed) => {
-          const matchId = embed.footer?.text;
+          const matchId = embed.footer?.text.trimEnd();
           if (!matchId) return null;
 
           const match = await getMatchDataFromDb(matchId);
