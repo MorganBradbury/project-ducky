@@ -12,7 +12,7 @@ const findServerLocation = (countryCode: string): string => {
   };
 
   const country = countryMap[countryCode.toLowerCase()];
-  return country ? `${country.flag} ${country.name}` : "Unknown Country";
+  return country ? `${country.flag}` : "Unknown Country";
 };
 
 const mapNameLookup = (mapName: string): string => {
@@ -85,16 +85,17 @@ export const retakesCommand = {
           return new EmbedBuilder()
             .setColor("#FFA500")
             .setTitle(
-              `Retakes #${index + 1} ${
+              `${findServerLocation(server.CountryCode)} Retakes #${
+                index + 1
+              } ${
                 server.Online === 0
                   ? "[ᴇᴍᴘᴛʏ]"
                   : `[${server.Online}/${server.TotalSlots}]`
               }`
             )
             .setDescription(
-              `${mapIcon} ${mapNameLookup(mapName)}   |   ${findServerLocation(
-                server.CountryCode
-              )}\n` + `**Connect IP:**  \`${paddedConnectIP}\``
+              `${mapIcon} ${mapNameLookup(mapName)}\n` +
+                `**Connect IP:**  \`${paddedConnectIP}\``
             );
         })
       );

@@ -20,7 +20,7 @@ export const fetchRetakeServers = async (currentMap?: string) => {
           server.Online != server.TotalSlots
       )
       .sort((a: any, b: any) => a.Online - b.Online) // Sort by players online (ascending)
-      .slice(0, 6); // Limit to max 10 results
+      .slice(0, 7); // Limit to max 10 results
 
     return filteredServers;
   } catch (error) {
