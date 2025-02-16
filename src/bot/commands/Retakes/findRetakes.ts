@@ -2,7 +2,7 @@ import { ChatInputCommandInteraction, EmbedBuilder } from "discord.js";
 import { fetchRetakeServers } from "../../../api/services/retakeService";
 import { getMapEmoji } from "../../../constants";
 
-const lookupCountryName = (countryCode: string): string => {
+const findServerLocation = (countryCode: string): string => {
   const countryMap: Record<string, { name: string; flag: string }> = {
     fr: { name: "France", flag: "🇫🇷" },
     gb: { name: "UK", flag: "🇬🇧" },
@@ -12,20 +12,7 @@ const lookupCountryName = (countryCode: string): string => {
   };
 
   const country = countryMap[countryCode.toLowerCase()];
-  return country ? country.name : "Unknown Country";
-};
-
-const lookupCountryFlag = (countryCode: string): string => {
-  const countryMap: Record<string, { name: string; flag: string }> = {
-    fr: { name: "France", flag: "🇫🇷" },
-    gb: { name: "UK", flag: "🇬🇧" },
-    nl: { name: "Netherlands", flag: "🇳🇱" },
-    dk: { name: "Denmark", flag: "🇩🇰" },
-    de: { name: "Germany", flag: "🇩🇪" },
-  };
-
-  const country = countryMap[countryCode.toLowerCase()];
-  return country ? country.flag : "Unknown Flag";
+  return country ? `${country.flag}` : "Unknown Country";
 };
 
 const mapNameLookup = (mapName: string): string => {
@@ -98,14 +85,14 @@ export const retakesCommand = {
           return new EmbedBuilder()
             .setColor("#FFA500")
             .setTitle(
-              `${lookupCountryFlag(server.CountryCode)} Retakes #${index + 1} ${
+              `Retakes #${index + 1} ${
                 server.Online === 0
                   ? "[ᴇᴍᴘᴛʏ]"
                   : `[${server.Online}/${server.TotalSlots}]`
               }`
             )
             .setDescription(
-              `${mapIcon} ${mapNameLookup(mapName)} | ${lookupCountryName(
+              `${mapIcon} ${mapNameLookup(mapName)}   |   ${findServerLocation(
                 server.CountryCode
               )}\n` + `**Connect IP:**  \`${paddedConnectIP}\``
             );
