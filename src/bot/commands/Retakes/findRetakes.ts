@@ -1,6 +1,32 @@
 import { ChatInputCommandInteraction, EmbedBuilder } from "discord.js";
 import { fetchRetakeServers } from "../../../api/services/retakeService";
 
+const findServerLocation = (countryCode: string): string => {
+  const countryMap: Record<string, string> = {
+    fr: "France",
+    gb: "United Kingdom",
+    nl: "Netherlands",
+    dk: "Denmark",
+    de: "Germany",
+  };
+
+  return countryMap[countryCode.toLowerCase()] || "Unknown Country";
+};
+
+const mapNameLookup = (mapName: string): string => {
+  const countryMap: Record<string, string> = {
+    Mirage: "de_mirage",
+    Nuke: "de_nuke",
+    Dust2: "de_dust2",
+    Ancient: "de_ancient",
+    Anubis: "de_anubis",
+    Inferno: "de_inferno",
+    Train: "de_train",
+  };
+
+  return countryMap[mapName.toLowerCase()] || "Unknown Country";
+};
+
 export const retakesCommand = {
   name: "retakes",
   description: "Find a retake server on xplay.gg",
@@ -23,7 +49,9 @@ export const retakesCommand = {
   ],
   execute: async (interaction: ChatInputCommandInteraction) => {
     try {
-      const mapName = interaction.options.getString("mapname", true);
+      const mapName = mapNameLookup(
+        interaction.options.getString("mapname", true) || "de_mirage"
+      );
 
       // Acknowledge the interaction
       await interaction.deferReply({ ephemeral: true });
@@ -40,18 +68,6 @@ export const retakesCommand = {
         });
         return;
       }
-
-      const findServerLocation = (countryCode: string): string => {
-        const countryMap: Record<string, string> = {
-          fr: "France",
-          gb: "United Kingdom",
-          nl: "Netherlands",
-          dk: "Denmark",
-          de: "Germany",
-        };
-
-        return countryMap[countryCode.toLowerCase()] || "Unknown Country";
-      };
 
       // Create embeds for each server
       const embeds = retakeServers.map((server: any, index: number) =>
