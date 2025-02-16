@@ -3,15 +3,16 @@ import { fetchRetakeServers } from "../../../api/services/retakeService";
 import { getMapEmoji } from "../../../constants";
 
 const findServerLocation = (countryCode: string): string => {
-  const countryMap: Record<string, string> = {
-    fr: "France",
-    gb: "United Kingdom",
-    nl: "Netherlands",
-    dk: "Denmark",
-    de: "Germany",
+  const countryMap: Record<string, { name: string; flag: string }> = {
+    fr: { name: "France", flag: "🇫🇷" },
+    gb: { name: "United Kingdom", flag: "🇬🇧" },
+    nl: { name: "Netherlands", flag: "🇳🇱" },
+    dk: { name: "Denmark", flag: "🇩🇰" },
+    de: { name: "Germany", flag: "🇩🇪" },
   };
 
-  return countryMap[countryCode.toLowerCase()] || "Unknown Country";
+  const country = countryMap[countryCode.toLowerCase()];
+  return country ? `${country.flag} ${country.name}` : "Unknown Country";
 };
 
 const mapNameLookup = (mapName: string): string => {
