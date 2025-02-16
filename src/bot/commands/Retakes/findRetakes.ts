@@ -67,6 +67,19 @@ export const retakesCommand = {
       // Acknowledge the interaction
       await interaction.deferReply();
 
+      // Fetch the last 40 messages and delete retakes command messages from the bot
+      const messages = await interaction.channel?.messages.fetch({ limit: 40 });
+      if (messages) {
+        const retakeMessages = messages.filter(
+          (msg) =>
+            msg.author.id === interaction.client.user?.id && // Only messages from the bot
+            msg.embeds.some((embed) => embed.title?.includes("Retakes")) // Only messages with a "Retakes" embed
+        );
+        for (const msg of retakeMessages.values()) {
+          await msg.delete();
+        }
+      }
+
       // Fetch retake servers for the selected map
       const retakeServers = await fetchRetakeServers(mapName);
 
