@@ -31,8 +31,8 @@ const mapNameLookup = (mapName: string): string => {
 
 // Utility function to pad Connect IP field to exactly 46 characters
 const padConnectIP = (ip: string, port: string): string => {
-  const ipString = `${ip}:${port}`;
-  const targetLength = 21;
+  const ipString = `connect ${ip}:${port}`;
+  const targetLength = 28;
   const paddingLength = targetLength - ipString.length;
   if (paddingLength > 0) {
     return ipString + " ".repeat(paddingLength); // Pad with spaces if the length is less than 46
