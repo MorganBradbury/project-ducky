@@ -1,5 +1,6 @@
 import { ChatInputCommandInteraction, EmbedBuilder } from "discord.js";
 import { fetchRetakeServers } from "../../../api/services/retakeService";
+import { getMapEmoji } from "../../../constants";
 
 const findServerLocation = (countryCode: string): string => {
   const countryMap: Record<string, string> = {
@@ -68,17 +69,20 @@ export const retakesCommand = {
       }
 
       // Create embeds for each server
-      const embeds = retakeServers.map((server: any, index: number) =>
-        new EmbedBuilder()
+      const embeds = retakeServers.map(async (server: any, index: number) => {
+        const mapIcon = await getMapEmoji(mapName);
+        return new EmbedBuilder()
           .setColor("#FFA500")
-          .setTitle(`Retakes #${index + 1}`)
+          .setTitle(
+            `Retakes #${index + 1} ${server.Online === 0 ? "[EMPTY]" : ""}`
+          )
           .setDescription(
-            `**Map:** ${paddedMapName}\n` + // Use padded map name here
+            `**Map:** ${mapIcon} ${paddedMapName}\n` + // Use padded map name here
               `**Location:** ${findServerLocation(server.CountryCode)}\n` +
               `**Players:** ${server.Online}/${server.TotalSlots}\n` +
               `**Connect IP:** \`${server.IP}:${server.Port}\``
-          )
-      );
+          );
+      });
 
       // Send all embeds in the response
       await interaction.editReply({ embeds });
