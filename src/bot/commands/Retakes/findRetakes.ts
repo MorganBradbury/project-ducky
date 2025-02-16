@@ -49,15 +49,13 @@ export const retakesCommand = {
   ],
   execute: async (interaction: ChatInputCommandInteraction) => {
     try {
-      const mapName = mapNameLookup(
-        interaction.options.getString("mapname", true) || "de_mirage"
-      );
-
+      const mapName =
+        interaction.options.getString("mapname", true) || "de_mirage";
       // Acknowledge the interaction
       await interaction.deferReply({ ephemeral: true });
 
       // Ensure the map name is always 30 characters long by padding with spaces
-      const paddedMapName = mapName.padEnd(78, " ");
+      const paddedMapName = mapNameLookup(mapName.padEnd(78, " "));
 
       // Fetch retake servers for the selected map
       const retakeServers = await fetchRetakeServers(mapName);
