@@ -14,17 +14,17 @@ const findServerLocation = (countryCode: string): string => {
 };
 
 const mapNameLookup = (mapName: string): string => {
-  const countryMap: Record<string, string> = {
-    Mirage: "de_mirage",
-    Nuke: "de_nuke",
-    Dust2: "de_dust2",
-    Ancient: "de_ancient",
-    Anubis: "de_anubis",
-    Inferno: "de_inferno",
-    Train: "de_train",
+  const map: Record<string, string> = {
+    de_mirage: "Mirage",
+    de_nuke: "Nuke",
+    de_dust2: "Dust2",
+    de_ancient: "Ancient",
+    de_anubis: "Anubis",
+    de_inferno: "Inferno",
+    de_train: "Train",
   };
 
-  return countryMap[mapName.toLowerCase()] || "Unknown Country";
+  return map[mapName.toLowerCase()] || "Unknown Map";
 };
 
 export const retakesCommand = {
