@@ -88,10 +88,10 @@ export const retakesCommand = {
               `Retakes #${index + 1} ${server.Online === 0 ? "[ᴇᴍᴘᴛʏ]" : ""}`
             )
             .setDescription(
-              `**Map:** ${mapIcon} ${mapNameLookup(mapName)}\n` +
-                `**Location:** ${findServerLocation(server.CountryCode)}\n` +
-                `**Players:** ${server.Online}/${server.TotalSlots}\n` +
-                `**Connect IP:** \`${paddedConnectIP}\``
+              `**Map:**  ${mapIcon} ${mapNameLookup(mapName)}\n` +
+                `**Location:**  ${findServerLocation(server.CountryCode)}\n` +
+                `**Players:**  ${server.Online}/${server.TotalSlots}\n` +
+                `**Connect IP:**  \`${paddedConnectIP}\``
             );
         })
       );
