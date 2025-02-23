@@ -408,7 +408,7 @@ function formatLeaderboardTable(
   showHeaders: boolean
 ): string {
   const columnWidths = {
-    player: 11, // Player column width
+    player: 10, // Player column width
     elo: 4, // Elo column width
     change: 6,
     position: 4,
@@ -429,7 +429,7 @@ function formatLeaderboardTable(
   let output = "";
 
   if (showHeaders) {
-    output += "`Player      | Elo  | Diff  | Pos `" + "\n";
+    output += "`Player     | Elo  | Diff  | Pos `" + "\n";
   }
 
   output += users
