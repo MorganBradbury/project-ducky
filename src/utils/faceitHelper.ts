@@ -184,9 +184,9 @@ export async function generatePlayerStatsTable(
 
         const playerName = player?.faceitUsername || "Unknown";
         const name =
-          playerName.length > 8
-            ? `${playerName.substring(0, 7)}.`
-            : playerName.padEnd(8, " ");
+          playerName.length > 9
+            ? `${playerName.substring(0, 8)}.`
+            : playerName.padEnd(9, " ");
 
         const kda = `${stat.kills}/${stat.deaths}/${stat.assists}`;
         const paddedKDA = kda.padEnd(8, " ");
