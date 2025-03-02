@@ -368,7 +368,7 @@ export async function sendNewUserNotification(
   const message =
     `New user: ${userName}\n\n` +
     `**FACEIT ID**: ${faceitId}\n` +
-    `**Webhook**: [🔗 Link](${LINKS.WEBHOOK})`;
+    `**Webhook**: <${LINKS.WEBHOOK}>`;
 
   await client.channels.fetch(config.CHANNEL_JOIN_REQUESTS).then((channel) => {
     (channel as TextChannel).send(message);
