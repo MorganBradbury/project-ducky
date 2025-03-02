@@ -105,6 +105,8 @@ class FaceitApiClient {
       const voiceChannelId =
         (await getMatchVoiceChannelId(trackedTeamPlayers)) || undefined;
 
+      const queueName = response.data.competition_name.split("-")[0].trim();
+
       return {
         matchId: matchId,
         mapName: response.data.voting.map.pick[0] || null,
@@ -114,7 +116,7 @@ class FaceitApiClient {
           trackedPlayers: trackedTeamPlayers,
         },
         voiceChannelId,
-        matchQueue: response.data.competition_name.toUpperCase(),
+        matchQueue: queueName.toUpperCase(),
       };
     } catch (error) {
       console.error(`Error fetching match details for ${matchId}:`, error);
