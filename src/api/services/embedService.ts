@@ -18,7 +18,7 @@ import {
   generatePlayerStatsTable,
   getScoreStatusText,
 } from "../../utils/faceitHelper";
-import client from "../../bot/client";
+import client from "../client";
 import { getAllUsers, getMatchDataFromDb } from "../../db/dbCommands";
 import { SystemUser } from "../../types/systemUser";
 import { updateVoiceChannelStatus } from "./channelService";

@@ -2,7 +2,7 @@ import { SystemUser } from "../types/systemUser";
 import { checkMatchExists, getAllUsers } from "../db/dbCommands";
 import { FaceitService } from "../api/services/faceitService";
 import { EmbedBuilder, Message, TextChannel } from "discord.js";
-import client from "../bot/client";
+import client from "../api/client";
 import { Match } from "../types/Faceit/match";
 import { getMapEmoji, getSkillLevelEmoji } from "../constants";
 import { config } from "../config";

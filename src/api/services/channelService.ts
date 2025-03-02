@@ -1,5 +1,5 @@
 import { GuildPremiumTier, VoiceChannel } from "discord.js";
-import client from "../../bot/client";
+import client from "../client";
 import { config } from "../../config";
 import { SystemUser } from "../../types/systemUser";
 import axios, { AxiosError } from "axios";
@@ -60,6 +60,6 @@ export const updateVoiceChannelStatus = async (
 };
 
 export const getServerBoostLevel = async (): Promise<number> => {
-  const guild = await client.guilds.fetch(config.DISCORD_GUILD_ID); 
+  const guild = await client.guilds.fetch(config.DISCORD_GUILD_ID);
   return Number(guild.premiumTier.toString());
-}
+};

@@ -1,6 +1,6 @@
 import { Client, GatewayIntentBits, Partials } from "discord.js";
 import { config } from "../config";
-import { updateLeaderboardEmbed } from "../api/services/embedService";
+import { updateLeaderboardEmbed } from "./services/embedService";
 const client = new Client({
   intents: [
     GatewayIntentBits.Guilds,

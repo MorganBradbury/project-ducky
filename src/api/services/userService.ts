@@ -1,4 +1,4 @@
-import client from "../../bot/client";
+import client from "../client";
 import { config } from "../../config";
 import { addUser, deleteUser, updateUserElo } from "../../db/dbCommands";
 import { Player } from "../../types/Faceit/player";

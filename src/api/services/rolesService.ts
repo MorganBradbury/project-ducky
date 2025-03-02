@@ -1,5 +1,5 @@
 import { GuildMember, Role } from "discord.js";
-import client from "../../bot/client";
+import client from "../client";
 import { config } from "../../config";
 import { Player } from "../../types/Faceit/player";
 
@@ -36,8 +36,8 @@ export const updateServerRoles = async (
     }
 
     // Remove all "Level" roles except the correct one
-    const levelRoles = member.roles.cache.filter((role: Role) =>
-      role.name.includes("Level") && role.id !== targetRole.id
+    const levelRoles = member.roles.cache.filter(
+      (role: Role) => role.name.includes("Level") && role.id !== targetRole.id
     );
 
     await Promise.all(
@@ -55,7 +55,6 @@ export const updateServerRoles = async (
     console.error("Error updating server roles:", error);
   }
 };
-
 
 export const updateLinkedRole = async (
   member: GuildMember,
