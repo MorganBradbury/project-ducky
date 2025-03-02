@@ -1,9 +1,10 @@
 import client from "../../bot/client";
 import { config } from "../../config";
-import { updateUserElo } from "../../db/dbCommands";
+import { addUser, deleteUser, updateUserElo } from "../../db/dbCommands";
 import { Player } from "../../types/Faceit/player";
 import { SystemUser } from "../../types/systemUser";
 import { updateNickname } from "../../utils/nicknameUtils";
+import { updateLeaderboardEmbed } from "./embedService";
 import { FaceitService } from "./faceitService";
 import { updateServerRoles } from "./rolesService";
 
@@ -50,4 +51,36 @@ export const runEloUpdate = async (users: SystemUser[]) => {
   } catch (error) {
     console.log("Error running auto-update:", error);
   }
+};
+
+export const createVerifiedUser = async (
+  userTag: string,
+  faceitName: string
+): Promise<{
+  faceitElo: string;
+  skillLevel: string;
+  faceitId: string;
+} | null> => {
+  const player = await FaceitService?.getPlayer(faceitName);
+  if (!player) return null;
+
+  await deleteUser(userTag).catch(() =>
+    console.log(`No existing user: ${userTag}`)
+  );
+
+  await addUser(
+    userTag,
+    player.faceitName,
+    player.faceitElo,
+    player.gamePlayerId,
+    player.id
+  );
+
+  updateLeaderboardEmbed();
+
+  return {
+    faceitElo: player.faceitElo.toString(),
+    skillLevel: player.skillLevel.toString(),
+    faceitId: player.id,
+  };
 };
