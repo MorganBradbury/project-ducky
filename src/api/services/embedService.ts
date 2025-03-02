@@ -129,7 +129,7 @@ export async function matchEndNotification(match: Match) {
         value: `${playerStatsTable.join("\n")}`,
       })
       .setURL(`${LINKS.MATCHROOM}/${match?.matchId}`)
-      .setFooter({ text: `Match result - ${match.matchQueue}` })
+      .setFooter({ text: `✅ MATCH RESULT: ${match.matchQueue}` })
       .setTimestamp();
 
     await sendEmbedMessage(embed, config.CHANNEL_MATCH_RESULTS, match.matchId);
@@ -288,7 +288,7 @@ export async function createLiveScoreCard(match: Match) {
     )
     .setURL(`${LINKS.MATCHROOM}/${match?.matchId}`)
     .setFooter({
-      text: `Live match - ${match.matchQueue}`,
+      text: `🟢 LIVE MATCH: ${match.matchQueue}`,
     })
     .setTimestamp()
     .setColor(`#${EMBED_COLOURS.LIVE_SCORE}`);
