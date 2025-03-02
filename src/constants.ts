@@ -89,8 +89,8 @@ export const LINKS = {
 };
 
 export const EMBED_COLOURS = {
-  MAP_WIN: "00FF00",
-  MAP_LOSS: "FF0000",
+  MAP_WIN: "67C436",
+  MAP_LOSS: "D33030",
   LIVE_SCORE: "E5794C",
   ANALYSIS: "FF5733",
 };
