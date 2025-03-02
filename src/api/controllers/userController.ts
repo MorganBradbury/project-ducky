@@ -91,7 +91,7 @@ export const updateNicknameForAllUsers = async (
           `Update nickname from ${discordUser.nickname} to ${playerData.faceitName} ${eloTag}`
         );
         // Update nickname if different
-        //await discordUser.setNickname(playerData.faceitName);
+        await discordUser.setNickname(`${playerData.faceitName} ${eloTag}`);
         //   console.log(`Updated nickname: ${user.discordUsername} -> ${playerData.faceitName}`);
       } catch (error) {
         console.error(`Error updating ${user.discordUsername}:`, error);
