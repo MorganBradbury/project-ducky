@@ -366,7 +366,7 @@ export async function sendNewUserNotification(
   faceitId: string
 ) {
   const message =
-    `New user: ${userName}\n\n` +
+    `**New user**: ${userName}\n\n` +
     `**FACEIT ID**: ${faceitId}\n` +
     `**Webhook**: <${LINKS.WEBHOOK}>`;
 
