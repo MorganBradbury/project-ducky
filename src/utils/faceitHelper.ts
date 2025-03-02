@@ -195,7 +195,7 @@ export async function generatePlayerStatsTable(
 
         const elo = `${eloChange?.operator}${eloChange?.difference
           .toString()
-          .padEnd(3, ` `)} (${eloChange?.newElo})`.padEnd(3, " ");
+          .padEnd(3, ` `)} (${eloChange?.newElo})`;
 
         // Return player stats with the level icon
         return `${skillLevelForPlayer} \`${name} ${paddedKDA} ${elo}\``;
