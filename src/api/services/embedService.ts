@@ -129,7 +129,7 @@ export async function matchEndNotification(match: Match) {
         value: `${playerStatsTable.join("\n")}`,
       })
       .setURL(`${LINKS.MATCHROOM}/${match?.matchId}`)
-      .setFooter({ text: `MATCH RESULT: ${match.matchQueue}` })
+      .setFooter({ text: `${match.matchQueue}` })
       .setTimestamp();
 
     await sendEmbedMessage(embed, config.CHANNEL_MATCH_RESULTS, match.matchId);
