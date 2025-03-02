@@ -288,7 +288,7 @@ export async function createLiveScoreCard(match: Match) {
     )
     .setURL(`${LINKS.MATCHROOM}/${match?.matchId}`)
     .setFooter({
-      text: `${match.matchQueue}`,
+      text: `FACEIT ${match.matchQueue}`,
     })
     .setTimestamp()
     .setColor(`#${EMBED_COLOURS.LIVE_SCORE}`);
