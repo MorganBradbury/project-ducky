@@ -84,8 +84,7 @@ export const ENDPOINTS = {
 } as const;
 
 export const LINKS = {
-  WEBHOOK:
-    "https://developers.faceit.com/apps/2205acb7-7fb4-4ce4-8a23-871375ee03fa/webhooks/af22807c-f17a-4947-8829-5757ef6a2e34/edit",
+  WEBHOOK: "https://webhook.api.duck-club.xyz",
   MATCHROOM: "https://www.faceit.com/en/cs2/room",
 };
 
