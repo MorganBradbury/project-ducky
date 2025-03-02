@@ -365,18 +365,14 @@ export async function sendNewUserNotification(
   userName: string,
   faceitId: string
 ) {
-  const embed = new EmbedBuilder()
-    .setTitle(`New user: ${userName}`)
-    .addFields(
-      { name: "FACEIT ID", value: faceitId },
-      {
-        name: "Webhook",
-        value: `[🔗 Link](${LINKS.WEBHOOK})`,
-      }
-    )
-    .setColor("#c2a042");
+  const message =
+    `New user: ${userName}\n\n` +
+    `**FACEIT ID**: ${faceitId}\n` +
+    `**Webhook**: [🔗 Link](${LINKS.WEBHOOK})`;
 
-  await sendEmbedMessage(embed, config.CHANNEL_JOIN_REQUESTS);
+  await client.channels.fetch(config.CHANNEL_JOIN_REQUESTS).then((channel) => {
+    (channel as TextChannel).send(message);
+  });
 }
 
 export async function updateLeaderboardEmbed() {
