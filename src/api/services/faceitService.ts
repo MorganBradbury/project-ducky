@@ -114,7 +114,7 @@ class FaceitApiClient {
           trackedPlayers: trackedTeamPlayers,
         },
         voiceChannelId,
-        matchQueue: response.data.competition_name,
+        matchQueue: response.data.competition_name.toUpperCase(),
       };
     } catch (error) {
       console.error(`Error fetching match details for ${matchId}:`, error);
