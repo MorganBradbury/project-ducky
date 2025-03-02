@@ -113,7 +113,7 @@ export const getMatchDataFromDb = async (
         trackedPlayers, // Ensure it's treated as a string for parsing
       },
       voiceChannelId: match.voiceChannelId || "",
-      matchQueue: match.matchQueue,
+      matchQueue: match.matchQueue || "",
     };
   }
   return null;

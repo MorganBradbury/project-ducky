@@ -17,7 +17,7 @@ model matches {
   voiceChannelName    String?  @db.VarChar(255)
   liveScoresChannelId String?  @db.VarChar(255)
   processed           Boolean? @default(false)
-  matchQueue          String   @db.VarChar(255)
+  matchQueue          String?   @db.VarChar(255)
 }
 
 model users {
