@@ -16,7 +16,7 @@ export const eloNumbers: any = {
   "6": "⁶",
   "7": "⁷",
   "8": "⁸",
-  "9": "⁹"
+  "9": "⁹",
 };
 
 export const activeMapPool = [
@@ -39,7 +39,7 @@ export enum AcceptedEventTypes {
 export const getMapEmoji = async (mapName: string): Promise<string> => {
   const serverBoostLevel = await getServerBoostLevel();
   const canShowEmojis = serverBoostLevel >= 2;
-  
+
   const mapEmojis: { [key: string]: string } = {
     de_ancient: "<:de_ancient:1324386141981507656>",
     de_anubis: "<:de_anubis:1324386143462227990>",
@@ -54,10 +54,12 @@ export const getMapEmoji = async (mapName: string): Promise<string> => {
   return canShowEmojis ? mapEmojis[mapName.toLowerCase()] || "" : "";
 };
 
-export const getSkillLevelEmoji = async (faceitLevel: number): Promise<string> => {
+export const getSkillLevelEmoji = async (
+  faceitLevel: number
+): Promise<string> => {
   const serverBoostLevel = await getServerBoostLevel();
   const canShowEmojis = serverBoostLevel >= 2;
-  
+
   const skillLevelEmojis: { [key: number]: string } = {
     1: "<:level_1:1313100283273936896>",
     2: "<:level_2:1313100284301545522>",
@@ -90,8 +92,7 @@ export const LINKS = {
 export const EMBED_COLOURS = {
   MAP_WIN: "00FF00",
   MAP_LOSS: "FF0000",
-  // LIVE_SCORE: "464DD4",
-  LIVE_SCORE: "5541D1",
+  LIVE_SCORE: "E5794C",
   ANALYSIS: "FF5733",
 };
 
