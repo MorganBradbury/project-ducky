@@ -1,5 +1,5 @@
 import { ChannelType, ThreadChannel, Message } from "discord.js";
-import client from "../../bot/client";
+import client from "../client";
 import { config } from "../../config";
 
 export async function processEmbedsToThreads() {
@@ -36,7 +36,9 @@ export async function processEmbedsToThreads() {
   }
 
   // Sort messages based on their created timestamp (oldest first)
-  messagesWithEmbeds.sort((a, b) => a.message.createdTimestamp - b.message.createdTimestamp);
+  messagesWithEmbeds.sort(
+    (a, b) => a.message.createdTimestamp - b.message.createdTimestamp
+  );
 
   // Extract ordered embeds
   const sortedEmbeds = messagesWithEmbeds.flatMap((entry) => entry.embeds);
@@ -62,5 +64,7 @@ export async function processEmbedsToThreads() {
     remainingMessages = await channel.messages.fetch({ limit: 100 });
   }
 
-  console.log("Process completed: All embeds moved, and channel fully cleared.");
+  console.log(
+    "Process completed: All embeds moved, and channel fully cleared."
+  );
 }
