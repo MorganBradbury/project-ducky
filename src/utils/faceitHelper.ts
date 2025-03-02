@@ -137,7 +137,9 @@ export const formatMapData = (
     mapName,
     totalPlayedTimes: stats.totalPlayedTimes,
     totalWins: stats.totalWins,
-    winPercentage: ((stats.totalWins / stats.totalPlayedTimes) * 100).toFixed(2),
+    winPercentage: ((stats.totalWins / stats.totalPlayedTimes) * 100).toFixed(
+      2
+    ),
   }));
 };
 
@@ -173,7 +175,7 @@ export async function generatePlayerStatsTable(
           player?.gamePlayerId || ""
         );
 
-        const skillLevelForPlayer =  await getSkillLevelEmoji(
+        const skillLevelForPlayer = await getSkillLevelEmoji(
           playerLevel?.skillLevel || 1
         );
 
@@ -191,11 +193,9 @@ export async function generatePlayerStatsTable(
         const kda = `${stat.kills}/${stat.deaths}/${stat.assists}`;
         const paddedKDA = kda.padEnd(8, " ");
 
-        const elo =
-          `${eloChange?.operator}${eloChange?.difference} (${eloChange?.newElo})`.padEnd(
-            3,
-            " "
-          );
+        const elo = `${eloChange?.operator}${eloChange?.difference
+          .toString()
+          .padEnd(3, ` `)} (${eloChange?.newElo})`.padEnd(3, " ");
 
         // Return player stats with the level icon
         return `${skillLevelForPlayer} \`${name} ${paddedKDA} ${elo}\``;
