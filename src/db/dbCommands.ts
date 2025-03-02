@@ -67,7 +67,7 @@ export const insertMatch = async (match: Match): Promise<void> => {
         teamId: match.trackedTeam.teamId,
         faction: match.trackedTeam.faction,
         voiceChannelId: match.voiceChannelId,
-        matchQueue: match.matchQueue,
+        matchQueue: match.matchQueue.toUpperCase(),
       },
     });
     console.log(`Match ${match.matchId} inserted successfully.`);
