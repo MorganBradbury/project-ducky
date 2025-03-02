@@ -9,4 +9,5 @@ export type Match = {
     trackedPlayers: SystemUser[];
   };
   voiceChannelId?: string;
+  matchQueue: string;
 };

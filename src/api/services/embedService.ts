@@ -125,10 +125,11 @@ export async function matchEndNotification(match: Match) {
         })`
       )
       .addFields({
-        name: "Scoreboard (K/D/A)",
+        name: "Scoreboard (𝖪/𝖣/𝖠)",
         value: `${playerStatsTable.join("\n")}`,
       })
       .setURL(`${LINKS.MATCHROOM}/${match?.matchId}`)
+      .setFooter({ text: `Match result - ${match.matchQueue}` })
       .setTimestamp();
 
     await sendEmbedMessage(embed, config.CHANNEL_MATCH_RESULTS, match.matchId);
@@ -287,7 +288,7 @@ export async function createLiveScoreCard(match: Match) {
     )
     .setURL(`${LINKS.MATCHROOM}/${match?.matchId}`)
     .setFooter({
-      text: "Live match | EUROPE 5V5 QUEUE",
+      text: `Live match - ${match.matchQueue}`,
     })
     .setTimestamp()
     .setColor(`#${EMBED_COLOURS.LIVE_SCORE}`);

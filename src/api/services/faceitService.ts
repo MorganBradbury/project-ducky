@@ -114,6 +114,7 @@ class FaceitApiClient {
           trackedPlayers: trackedTeamPlayers,
         },
         voiceChannelId,
+        matchQueue: response.data.competition_name,
       };
     } catch (error) {
       console.error(`Error fetching match details for ${matchId}:`, error);
@@ -223,7 +224,10 @@ class FaceitApiClient {
           await new Promise((resolve) => setTimeout(resolve, retryDelay));
         }
       } catch (error: any) {
-        console.warn(`Attempt ${attempt} failed with status:`, error?.response?.status || 'Unknown status');
+        console.warn(
+          `Attempt ${attempt} failed with status:`,
+          error?.response?.status || "Unknown status"
+        );
         if (attempt < maxAttempts) {
           await new Promise((resolve) => setTimeout(resolve, retryDelay));
         } else {
