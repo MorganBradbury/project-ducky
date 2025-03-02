@@ -186,16 +186,16 @@ export async function generatePlayerStatsTable(
 
         const playerName = player?.faceitUsername || "Unknown";
         const name =
-          playerName.length > 14
-            ? `${playerName.substring(0, 12)}..`
-            : playerName.padEnd(14, " ");
+          playerName.length > 13
+            ? `${playerName.substring(0, 11)}..`
+            : playerName.padEnd(13, " ");
 
         const kda = `${stat.kills}/${stat.deaths}/${stat.assists}`;
         const paddedKDA = kda.padEnd(8, " ");
 
         const elo = `${eloChange?.operator}${eloChange?.difference
           .toString()
-          .padEnd(3, ` `)} (${eloChange?.newElo})`;
+          .padEnd(3, ` `)}(${eloChange?.newElo})`;
 
         // Return player stats with the level icon
         return `${skillLevelForPlayer} \`${name} ${paddedKDA} ${elo}\``;
