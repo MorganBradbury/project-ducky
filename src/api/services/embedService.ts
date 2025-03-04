@@ -178,54 +178,33 @@ export const createMatchAnalysisEmbed = async (
       permissionOverwrites: [
         {
           id: guild.roles.everyone.id,
-          allow: ["ViewChannel", "SendMessages", "ReadMessageHistory"], // ✅ FIXED PERMISSIONS
+          allow: ["ViewChannel", "SendMessages", "ReadMessageHistory"],
         },
       ],
     })) as TextChannel;
   }
 
+  // Sort map data
   const sortedMapData = gameData.sort((a: any, b: any) =>
     b.totalPlayedTimes === a.totalPlayedTimes
       ? parseFloat(b.winPercentage) - parseFloat(a.winPercentage)
       : b.totalPlayedTimes - a.totalPlayedTimes
   );
 
+  // Format player list (no splitting, no asterisks for captains)
   const formatPlayers = async (players: any[]) => {
-    const formatted = await Promise.all(
+    return (await Promise.all(
       players.map(async (player) => {
         const emoji = await getSkillLevelEmoji(player.faceitLevel);
-        return `${emoji} ${player.nickname.replace(/[*_`~]/g, "\\$&")}${
-          player.captain ? "*" : ""
-        }`;
+        return `${emoji} ${player.nickname.replace(/[*_`~]/g, "\\$&")}`;
       })
-    );
-    return [formatted.slice(0, 3).join("\n"), formatted.slice(3).join("\n")];
+    )).join("\n");
   };
 
-  const formatMapData = async (
-    maps: any[],
-    sortFn = (a: any, b: any) => 0,
-    limit = maps.length
-  ) => {
-    const sortedMaps = maps.slice().sort(sortFn).slice(0, limit);
-    const formattedMaps = await Promise.all(
-      sortedMaps.map(async (map) => {
-        const emoji = await getMapEmoji(map.mapName);
-        return `${emoji} ${formattedMapName(map.mapName)}`;
-      })
-    );
-    return formattedMaps.join("\n");
-  };
+  const homePlayers = await formatPlayers(playersData.homeFaction);
+  const enemyPlayers = await formatPlayers(playersData.enemyFaction);
 
-  const [homePlayers, enemyPlayers] = await Promise.all(
-    [playersData.homeFaction, playersData.enemyFaction].map(
-      async (faction) => ({
-        captain: faction.find((player: any) => player.captain),
-        columns: await formatPlayers(faction),
-      })
-    )
-  );
-
+  // Format map stats table
   const mapDataTable = sortedMapData
     .map((map: any) => {
       const winPercent =
@@ -240,25 +219,31 @@ export const createMatchAnalysisEmbed = async (
     })
     .join("\n");
 
+  // Format commonly played and banned maps
+  const formatMapData = async (
+    maps: any[],
+    sortFn = (a: any, b: any) => 0,
+    limit = maps.length
+  ) => {
+    const sortedMaps = maps.slice().sort(sortFn).slice(0, limit);
+    return (await Promise.all(
+      sortedMaps.map(async (map) => {
+        const emoji = await getMapEmoji(map.mapName);
+        return `${emoji} ${formattedMapName(map.mapName)}`;
+      })
+    )).join("\n");
+  };
+
+  // Construct the embed
   const embed = new EmbedBuilder()
     .setTitle("Matchroom Analysis")
     .addFields(
+      { name: "Home Team", value: homePlayers, inline: true },
+      EMPTY_FIELD,
+      { name: "Enemy Team", value: enemyPlayers, inline: true },
+      { name: "\u200b", value: "\u200b", inline: false },
       {
-        name: `Team ${homePlayers.captain.nickname}`,
-        value: homePlayers.columns[0],
-        inline: true,
-      },
-      { name: "\u200b", value: homePlayers.columns[1], inline: true },
-      { name: "\u200b", value: "\u200b", inline: true },
-      {
-        name: `Team ${enemyPlayers.captain.nickname}`,
-        value: enemyPlayers.columns[0],
-        inline: true,
-      },
-      { name: "\u200b", value: enemyPlayers.columns[1], inline: true },
-      { name: "\u200b", value: "\u200b", inline: true },
-      {
-        name: `Map stats for Team ${enemyPlayers.captain.nickname}`,
+        name: "Map Stats",
         value: "`Map name            | Played | Win % `\n" + mapDataTable,
       },
       {
@@ -266,6 +251,7 @@ export const createMatchAnalysisEmbed = async (
         value: await formatMapData(sortedMapData, undefined, 4),
         inline: true,
       },
+      EMPTY_FIELD,
       {
         name: "They will ban:",
         value: await formatMapData(
@@ -274,19 +260,14 @@ export const createMatchAnalysisEmbed = async (
           3
         ),
         inline: true,
-      },
-      {
-        name: "Matchroom page",
-        value: `[🔗 Link](${LINKS.MATCHROOM}/${matchId})`,
-        inline: false,
       }
     )
-    .setFooter({ text: matchId })
     .setColor("#ff5733")
-    .setTimestamp();
+    .setTimestamp().setURL(`${LINKS.MATCHROOM}/${matchId}`);
 
   sendEmbedMessage(embed, textChannel.id, matchId);
 };
+
 
 
 
