@@ -177,8 +177,12 @@ export const createMatchAnalysisEmbed = async (
       topic: `Analysis for match ${matchId}`,
       permissionOverwrites: [
         {
-          id: guild.roles.everyone.id,
-          allow: ["ViewChannel", "SendMessages", "ReadMessageHistory"],
+          id: guild.roles.everyone.id, // Deny viewing permissions for everyone
+          deny: ["ViewChannel", "SendMessages"],
+        },
+        {
+          id: "1327302146814775369", // Allow specific role to view the channel
+          allow: ["ViewChannel", "ReadMessageHistory"],
         },
       ],
     })) as TextChannel;
@@ -240,7 +244,7 @@ export const createMatchAnalysisEmbed = async (
     .addFields(
       { name: "Home Team", value: homePlayers, inline: true },
       EMPTY_FIELD,
-      { name: "Enemy Team", value: enemyPlayers, inline: true },      
+      { name: "Enemy Team", value: enemyPlayers, inline: true },
       {
         name: "Map Stats",
         value: "`Map name            | Played | Win % `\n" + mapDataTable,
@@ -262,10 +266,12 @@ export const createMatchAnalysisEmbed = async (
       }
     )
     .setColor("#ff5733")
-    .setTimestamp().setURL(`${LINKS.MATCHROOM}/${matchId}`);
+    .setTimestamp()
+    .setURL(`${LINKS.MATCHROOM}/${matchId}`);
 
   sendEmbedMessage(embed, textChannel.id, matchId);
 };
+
 
 
 
