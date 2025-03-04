@@ -1,6 +1,6 @@
 // embedService.ts
 
-import { EmbedBuilder, Message, TextChannel } from "discord.js";
+import { ChannelType, EmbedBuilder, Message, TextChannel } from "discord.js";
 import { config } from "../../config";
 import {
   EMBED_COLOURS,
@@ -141,8 +141,37 @@ export async function matchEndNotification(match: Match) {
 export const createMatchAnalysisEmbed = async (
   matchId: string,
   playersData: any,
-  gameData: any
+  gameData: any,
+  voiceChannelId: string
 ) => {
+  const guild = client.guilds.cache.first();
+  if (!guild) return console.error("Guild not found");
+
+  const voiceChannel = guild.channels.cache.get(voiceChannelId);
+  if (!voiceChannel || voiceChannel.type !== ChannelType.GuildVoice) {
+    return console.error("Invalid or non-existent voice channel");
+  }
+
+  const category = voiceChannel.parent;
+  const textChannelName = `📈┃Room #1 [Analysis]`;
+
+  let textChannel = guild.channels.cache.find(
+    (ch) =>
+      ch.type === ChannelType.GuildText &&
+      ch.parentId === category?.id &&
+      ch.name === textChannelName
+  ) as TextChannel;
+
+  if (!textChannel) {
+    textChannel = (await guild.channels.create({
+      name: textChannelName,
+      type: ChannelType.GuildText,
+      parent: category?.id,
+      topic: `Analysis for match ${matchId}`,
+      permissionOverwrites: category?.permissionOverwrites.cache.map((p) => p),
+    })) as TextChannel;
+  }
+
   const sortedMapData = gameData.sort((a: any, b: any) =>
     b.totalPlayedTimes === a.totalPlayedTimes
       ? parseFloat(b.winPercentage) - parseFloat(a.winPercentage)
@@ -244,8 +273,8 @@ export const createMatchAnalysisEmbed = async (
     .setColor("#ff5733")
     .setTimestamp();
 
-  sendEmbedMessage(embed, config.CHANNEL_MAP_ANALYSIS, matchId);
-};
+    sendEmbedMessage(embed, textChannel.id, matchId);};
+
 
 export async function createLiveScoreCard(match: Match) {
   const homePlayers = (

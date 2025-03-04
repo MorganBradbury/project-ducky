@@ -14,7 +14,7 @@ import {
   formatMapData,
   getScoreStatusText,
 } from "../../utils/faceitHelper";
-import { updateVoiceChannelStatus } from "./channelService";
+import { getMatchVoiceChannelId, updateVoiceChannelStatus } from "./channelService";
 import {
   createLiveScoreCard,
   createMatchAnalysisEmbed,
@@ -142,6 +142,20 @@ export const getMatchAnalysis = async (matchId: string): Promise<any> => {
   if (!matchroomPlayers?.homeFaction) return;
 
   const allTrackedUsers = await getAllUsers();
+
+  const trackedUsersInGame = allTrackedUsers.filter(user =>
+    matchroomPlayers.homeFaction.some(player => player.playerId === user.faceitId)
+  );
+
+  const voiceChannelId =
+    (await getMatchVoiceChannelId(trackedUsersInGame)) || undefined;
+
+    if(!voiceChannelId){
+      console.log("Users are not in voice channel.", matchId);
+      return;
+    }
+
+
   const trackedFaceitIds = new Set(
     allTrackedUsers.map((user) => user.faceitId)
   );
@@ -175,5 +189,5 @@ export const getMatchAnalysis = async (matchId: string): Promise<any> => {
     matchroomPlayers.enemyFaction.length
   );
 
-  createMatchAnalysisEmbed(matchId, matchroomPlayers, formattedMapData);
+  createMatchAnalysisEmbed(matchId, matchroomPlayers, formattedMapData, voiceChannelId);
 };
