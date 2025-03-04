@@ -158,13 +158,13 @@ export const createMatchAnalysisEmbed = async (
 
   // Define text channel name based on room number
   const textChannelName = `📊┃map-analysis-room-${roomNumber}`;
-  const category = voiceChannel.parent;
+  const analysisCategoryId = "1346453963154784267";
 
-  // Check if text channel already exists
+  // Check if text channel already exists under the fixed category
   let textChannel = guild.channels.cache.find(
     (ch) =>
       ch.type === ChannelType.GuildText &&
-      ch.parentId === category?.id &&
+      ch.parentId === analysisCategoryId &&
       ch.name === textChannelName
   ) as TextChannel;
 
@@ -173,9 +173,14 @@ export const createMatchAnalysisEmbed = async (
     textChannel = (await guild.channels.create({
       name: textChannelName,
       type: ChannelType.GuildText,
-      parent: category?.id,
+      parent: analysisCategoryId,
       topic: `Analysis for match ${matchId}`,
-      permissionOverwrites: category?.permissionOverwrites.cache.map((p) => p),
+      permissionOverwrites: [
+        {
+          id: guild.roles.everyone.id,
+          allow: ["VIEW_CHANNEL", "SEND_MESSAGES", "READ_MESSAGE_HISTORY"],
+        },
+      ],
     })) as TextChannel;
   }
 
@@ -282,6 +287,7 @@ export const createMatchAnalysisEmbed = async (
 
   sendEmbedMessage(embed, textChannel.id, matchId);
 };
+
 
 
 
