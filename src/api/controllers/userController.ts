@@ -34,12 +34,12 @@ export const deleteSingleUser = async (
   res: Response
 ): Promise<void> => {
   try {
-    const { username } = req?.body;
-    const userDeleted = await deleteUser(username);
+    const { userName } = req?.body;
+    const userDeleted = await deleteUser(userName);
 
     if (!userDeleted) {
       res.status(400).json({
-        message: "Something went wrong deleting user: " + username,
+        message: "Something went wrong deleting user: " + userName,
       });
     }
 
