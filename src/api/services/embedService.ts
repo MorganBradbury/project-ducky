@@ -233,7 +233,7 @@ export const createMatchAnalysisEmbed = async (
           ? "N/A"
           : Math.round(parseFloat(map.winPercentage)) + "%";
       return `\`${formattedMapName(map.mapName).padEnd(
-        12
+        19
       )} | ${map.totalPlayedTimes.toString().padEnd(6)} | ${winPercent.padEnd(
         6
       )}\``;
@@ -259,7 +259,7 @@ export const createMatchAnalysisEmbed = async (
       { name: "\u200b", value: "\u200b", inline: true },
       {
         name: `Map stats for Team ${enemyPlayers.captain.nickname}`,
-        value: "`Map name     | Played | Win % `\n" + mapDataTable,
+        value: "`Map name            | Played | Win % `\n" + mapDataTable,
       },
       {
         name: "They mostly play:",
