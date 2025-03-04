@@ -240,8 +240,7 @@ export const createMatchAnalysisEmbed = async (
     .addFields(
       { name: "Home Team", value: homePlayers, inline: true },
       EMPTY_FIELD,
-      { name: "Enemy Team", value: enemyPlayers, inline: true },
-      { name: "\u200b", value: "\u200b", inline: false },
+      { name: "Enemy Team", value: enemyPlayers, inline: true },      
       {
         name: "Map Stats",
         value: "`Map name            | Played | Win % `\n" + mapDataTable,
