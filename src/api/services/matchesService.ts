@@ -49,7 +49,7 @@ export const startMatch = async (matchId: string) => {
   if (match?.voiceChannelId) {
     const scoreStatus = await getScoreStatusText(match.mapName);
     await updateVoiceChannelStatus(match.voiceChannelId, scoreStatus);
-    deleteMapAnalysisChannels(match.voiceChannelId);
+    await deleteMapAnalysisChannels(match.voiceChannelId);
   }
 
   await createLiveScoreCard(match);
@@ -100,7 +100,7 @@ export const endMatch = async (matchId: string) => {
 
     if (match?.voiceChannelId) {
       await updateVoiceChannelStatus(match.voiceChannelId, "");
-      deleteMapAnalysisChannels(match.voiceChannelId)
+      await deleteMapAnalysisChannels(match.voiceChannelId)
     }
 
     await updateLeaderboardEmbed();
@@ -120,7 +120,7 @@ export const cancelMatch = async (matchId: string) => {
 
   if (match?.voiceChannelId) {
     await updateVoiceChannelStatus(match.voiceChannelId, "");
-    deleteMapAnalysisChannels(match.voiceChannelId)
+    await deleteMapAnalysisChannels(match.voiceChannelId)
   }
 
   // Mark match as complete in the database
@@ -162,6 +162,8 @@ export const getMatchAnalysis = async (matchId: string): Promise<any> => {
       return;
     }
 
+  // delete any current analysis for the channel
+  await deleteMapAnalysisChannels(voiceChannelId);
 
   const trackedFaceitIds = new Set(
     allTrackedUsers.map((user) => user.faceitId)
@@ -201,8 +203,16 @@ export const getMatchAnalysis = async (matchId: string): Promise<any> => {
 
 
 
+
+
+// Helper function to check if a channel is older than 6 minutes
+const isOlderThanSixMinutes = (channel: any) => {
+  const sixMinutesInMs = 6 * 60 * 1000; // 6 minutes in milliseconds
+  return Date.now() - channel.createdTimestamp > sixMinutesInMs;
+};
+
 export const deleteMapAnalysisChannels = async (voiceChannelId: string) => {
-  const ANALYSIS_CATEGORY_ID = "1346453963154784267";
+  const ANALYSIS_CATEGORY_ID = "1346453963154784267"; // Fixed category ID
   const guild = client.guilds.cache.first();
   if (!guild) {
     console.error("Guild not found");
@@ -231,7 +241,7 @@ export const deleteMapAnalysisChannels = async (voiceChannelId: string) => {
     (ch) =>
       ch.type === ChannelType.GuildText &&
       ch.parentId === ANALYSIS_CATEGORY_ID &&
-      ch.name.includes(`map-analysis-room-${roomNumber}`)
+      (ch.name.includes(`map-analysis-room-${roomNumber}`) || isOlderThanSixMinutes(ch))
   );
 
   for (const channel of channelsToDelete.values()) {
@@ -243,5 +253,6 @@ export const deleteMapAnalysisChannels = async (voiceChannelId: string) => {
     }
   }
 };
+
 
 
