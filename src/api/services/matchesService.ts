@@ -241,7 +241,7 @@ export const deleteMapAnalysisChannels = async (voiceChannelId: string) => {
     (ch) =>
       ch.type === ChannelType.GuildText &&
       ch.parentId === ANALYSIS_CATEGORY_ID &&
-      (ch.name.includes(`map-analysis-room-${roomNumber}`) || isOlderThanSixMinutes(ch))
+      (ch.name.includes(`map-analysis_room-${roomNumber}`) || isOlderThanSixMinutes(ch))
   );
 
   for (const channel of channelsToDelete.values()) {
