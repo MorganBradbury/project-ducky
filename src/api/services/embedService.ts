@@ -152,9 +152,15 @@ export const createMatchAnalysisEmbed = async (
     return console.error("Invalid or non-existent voice channel");
   }
 
-  const category = voiceChannel.parent;
-  const textChannelName = `📈┃Room #1 [Analysis]`;
+  // Extract room number from voice channel name
+  const roomMatch = voiceChannel.name.match(/#(\d+)/);
+  const roomNumber = roomMatch ? roomMatch[1] : "unknown";
 
+  // Define text channel name based on room number
+  const textChannelName = `📊┃map-analysis-room-${roomNumber}`;
+  const category = voiceChannel.parent;
+
+  // Check if text channel already exists
   let textChannel = guild.channels.cache.find(
     (ch) =>
       ch.type === ChannelType.GuildText &&
@@ -162,6 +168,7 @@ export const createMatchAnalysisEmbed = async (
       ch.name === textChannelName
   ) as TextChannel;
 
+  // Create text channel if not found
   if (!textChannel) {
     textChannel = (await guild.channels.create({
       name: textChannelName,
@@ -273,7 +280,9 @@ export const createMatchAnalysisEmbed = async (
     .setColor("#ff5733")
     .setTimestamp();
 
-    sendEmbedMessage(embed, textChannel.id, matchId);};
+  sendEmbedMessage(embed, textChannel.id, matchId);
+};
+
 
 
 export async function createLiveScoreCard(match: Match) {
