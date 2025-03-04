@@ -157,7 +157,7 @@ export const createMatchAnalysisEmbed = async (
   const roomNumber = roomMatch ? roomMatch[1] : "unknown";
 
   // Define text channel name based on room number
-  const textChannelName = `📊┃map-analysis-room-${roomNumber}`;
+  const textChannelName = `📊┃map-analysis_room-${roomNumber}`;
   const analysisCategoryId = "1346453963154784267";
 
   // Check if text channel already exists under the fixed category

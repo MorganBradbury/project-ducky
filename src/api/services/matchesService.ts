@@ -23,6 +23,10 @@ import {
 } from "./embedService";
 import { runEloUpdate } from "./userService";
 import axios from "axios";
+import { ChannelType, Guild } from "discord.js";
+import client from "../client";
+
+
 
 export const startMatch = async (matchId: string) => {
   console.log("Processing startMatch()", matchId);
@@ -45,6 +49,7 @@ export const startMatch = async (matchId: string) => {
   if (match?.voiceChannelId) {
     const scoreStatus = await getScoreStatusText(match.mapName);
     await updateVoiceChannelStatus(match.voiceChannelId, scoreStatus);
+    deleteMapAnalysisChannels(match.voiceChannelId);
   }
 
   await createLiveScoreCard(match);
@@ -95,6 +100,7 @@ export const endMatch = async (matchId: string) => {
 
     if (match?.voiceChannelId) {
       await updateVoiceChannelStatus(match.voiceChannelId, "");
+      deleteMapAnalysisChannels(match.voiceChannelId)
     }
 
     await updateLeaderboardEmbed();
@@ -114,6 +120,7 @@ export const cancelMatch = async (matchId: string) => {
 
   if (match?.voiceChannelId) {
     await updateVoiceChannelStatus(match.voiceChannelId, "");
+    deleteMapAnalysisChannels(match.voiceChannelId)
   }
 
   // Mark match as complete in the database
@@ -191,3 +198,50 @@ export const getMatchAnalysis = async (matchId: string): Promise<any> => {
 
   createMatchAnalysisEmbed(matchId, matchroomPlayers, formattedMapData, voiceChannelId);
 };
+
+
+
+export const deleteMapAnalysisChannels = async (voiceChannelId: string) => {
+  const ANALYSIS_CATEGORY_ID = "1346453963154784267";
+  const guild = client.guilds.cache.first();
+  if (!guild) {
+    console.error("Guild not found");
+    return;
+  }
+
+  const voiceChannel = guild.channels.cache.get(voiceChannelId);
+  if (!voiceChannel || voiceChannel.type !== ChannelType.GuildVoice) {
+    console.error(`Voice channel ${voiceChannelId} not found or invalid.`);
+    return;
+  }
+
+  // Extract room number from voice channel name
+  const roomMatch = voiceChannel.name.match(/#(\d+)/);
+  const roomNumber = roomMatch ? roomMatch[1] : null;
+
+  if (!roomNumber) {
+    console.log(`No room number found in voice channel ${voiceChannel.name}`);
+    return;
+  }
+
+  console.log(`Looking for map analysis channels for room #${roomNumber} to delete.`);
+
+  // Find all matching text channels in the analysis category
+  const channelsToDelete = guild.channels.cache.filter(
+    (ch) =>
+      ch.type === ChannelType.GuildText &&
+      ch.parentId === ANALYSIS_CATEGORY_ID &&
+      ch.name.includes(`map-analysis-room-${roomNumber}`)
+  );
+
+  for (const channel of channelsToDelete.values()) {
+    try {
+      await channel.delete();
+      console.log(`Deleted map analysis channel: ${channel.name}`);
+    } catch (err) {
+      console.error(`Failed to delete channel ${channel.name}:`, err);
+    }
+  }
+};
+
+
