@@ -27,13 +27,7 @@ export const updateServerRoles = async (
       return;
     }
 
-    // Check if the user already has the correct role
-    if (member.roles.cache.has(targetRole.id)) {
-      console.log(
-        `Member ${member.user.tag} already has the correct role (${skillLevelRoleName}), skipping update.`
-      );
-      return;
-    }
+
 
     // Remove all "Level" roles except the correct one
     const levelRoles = member.roles.cache.filter(
