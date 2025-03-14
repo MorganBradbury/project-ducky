@@ -501,7 +501,7 @@ function formatLeaderboardTable(
 
 
 export async function updatePlayerStatsEmbed() {
-
+  console.log('leaderboardText');
   const leaderboardText = await formatPlayerStatsTable(); // Get the formatted leaderboard table
   console.log(leaderboardText);
   return;
