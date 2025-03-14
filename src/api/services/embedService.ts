@@ -547,8 +547,8 @@ async function formatPlayerStatsTable(): Promise<string[]> {
 
   // Group rows into arrays of 10 players
   const chunkedData: string[][] = [];
-  for (let i = 0; i < rows.length; i += 10) {
-    chunkedData.push(rows.slice(i, i + 10));
+  for (let i = 0; i < rows.length; i += 5) {
+    chunkedData.push(rows.slice(i, i + 5));
   }
 
   // Create the table layout for each chunk
