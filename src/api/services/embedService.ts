@@ -501,27 +501,52 @@ function formatLeaderboardTable(
 
 
 export async function updatePlayerStatsEmbed() {
-  const leaderboardText = await formatPlayerStatsTable(); // Assuming this returns an array of table data
+  const leaderboardText = await formatPlayerStatsTable(); // Get the formatted leaderboard table
 
-  // Create embed
-  const embed = new EmbedBuilder()
+  const maxEmbedSize = 6000; // Discord's maximum embed size
+  const maxFieldsPerEmbed = 25; // Maximum number of fields per embed
+
+  // Split leaderboardText into multiple parts if necessary
+  let currentEmbed = new EmbedBuilder()
     .setTitle(`Player stats for last 30`)
     .setColor(`#${EMBED_COLOURS.ANALYSIS}`)
     .setTimestamp();
 
-  // Add each part of the table data as a field in the embed
-  leaderboardText.forEach((chunk, index) => {
-    embed.addFields({
-      name: '...', // First chunk will have the name, others will be empty
-      value: chunk, // Each chunk of the table will be the value of the field
+  let currentFieldCount = 0;
+  let currentEmbedSize = 0;
+  
+  for (const chunk of leaderboardText) {
+    // Check if adding this chunk would exceed the embed size or field limit
+    if (currentFieldCount >= maxFieldsPerEmbed || currentEmbedSize + chunk.length > maxEmbedSize) {
+      // Send the current embed and start a new one
+      await sendEmbedMessage(currentEmbed, '1350120783233548338');
+      
+      // Reset the embed for the next part
+      currentEmbed = new EmbedBuilder()
+        .setTitle(`Player stats for last 30`)
+        .setColor(`#${EMBED_COLOURS.ANALYSIS}`)
+        .setTimestamp();
+      
+      currentFieldCount = 0;
+      currentEmbedSize = 0;
+    }
+
+    // Add the current chunk as a field
+    currentEmbed.addFields({
+      name: '\u200b', // Empty name for subsequent chunks
+      value: chunk,
       inline: false,
     });
-  });
+    
+    currentFieldCount++;
+    currentEmbedSize += chunk.length;
+  }
 
-  // Send the embed
-  await sendEmbedMessage(embed, '1350120783233548338');
+  // Send any remaining embed content
+  if (currentFieldCount > 0) {
+    await sendEmbedMessage(currentEmbed, '1350120783233548338');
+  }
 }
-
 
 async function formatPlayerStatsTable(): Promise<string[]> {
   const users = await getAllUsers();
@@ -545,7 +570,7 @@ async function formatPlayerStatsTable(): Promise<string[]> {
     return `\`${user.faceitUsername.padEnd(12)}| ${formatValue(stat.avgKills, columnWidths.stat)}| ${formatValue(stat.avgDeaths, columnWidths.stat)}| ${formatValue(stat.avgAssists, columnWidths.stat)}| ${formatValue(stat.avgHs, columnWidths.stat)}| ${formatValue(stat.KD, columnWidths.largeStat)}| ${formatValue(stat.KR, columnWidths.largeStat)}| ${formatValue(stat.winPercentage, columnWidths.stat)}| ${formatValue(stat.avgADR, columnWidths.largeStat)}| ${formatValue(stat.roundsPlayed, columnWidths.largeStat)}| ${formatValue(stat.aces, columnWidths.stat)}| ${formatValue(stat.quadKills, columnWidths.stat)}| ${formatValue(stat.tripleKills, columnWidths.stat)}| ${formatValue(stat.doubleKills, columnWidths.stat)}| ${formatValue(stat.MVPs, columnWidths.stat)}\``;
   });
 
-  // Group rows into arrays of 10 players
+  // Group rows into arrays of 5 players (adjust based on size limits)
   const chunkedData: string[][] = [];
   for (let i = 0; i < rows.length; i += 5) {
     chunkedData.push(rows.slice(i, i + 5));
@@ -565,5 +590,4 @@ async function formatPlayerStatsTable(): Promise<string[]> {
 
   return tableData;
 }
-
 
