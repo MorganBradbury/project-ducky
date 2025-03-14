@@ -501,6 +501,7 @@ function formatLeaderboardTable(
 
 
 export async function updatePlayerStatsEmbed() {
+  return;
   const leaderboardText = await formatPlayerStatsTable(); // Get the formatted leaderboard table
 
   const maxEmbedSize = 6000; // Discord's maximum embed size
@@ -569,50 +570,25 @@ async function formatPlayerStatsTable(): Promise<string[]> {
     tripleKills: 5,    // 3K column
   };
 
-  // Function to format a value to a specific column width
-  function formatValue(value: string, width: number): string {
-    return value.padStart(Math.floor((width - value.length) / 2) + value.length).padEnd(width);
-  }
-
   // Define the headers with appropriate column widths
   const headers = `\`Player     | K | D | HS | KD | KR | W% | ADR | 5K | 4K | 3K \`\n`;
 
   // Map each user's stats into a formatted row
   const rows = users.map((user, index) => {
     const stat = stats[index];
-    return `\`${user.faceitUsername.padEnd(columnWidths.player)} | 
-    ${formatValue(stat.avgKills, columnWidths.avgKills)} | 
-    ${formatValue(stat.avgDeaths, columnWidths.avgDeaths)} | 
-    ${formatValue(stat.avgHs, columnWidths.hsPercentage)}| 
-    ${formatValue(stat.KD, columnWidths.kd)}| 
-    ${formatValue(stat.KR, columnWidths.kr)}| 
-    ${formatValue(stat.winPercentage, columnWidths.winPercentage)}| 
-    ${formatValue(stat.avgADR, columnWidths.adr)}| 
-    ${formatValue(stat.aces, columnWidths.aces)}| 
-    ${formatValue(stat.quadKills, columnWidths.quadKills)}| 
-    ${formatValue(stat.tripleKills, columnWidths.tripleKills)}
+    return `\`${user.faceitUsername.padEnd(columnWidths.player)}| 
+    ${stat.avgKills.padEnd(columnWidths.avgKills)}| 
+    ${stat.avgDeaths.padEnd(columnWidths.avgDeaths)}| 
+    ${stat.avgHs.padEnd(columnWidths.hsPercentage)}| 
+    ${stat.KD.padEnd(columnWidths.kd)}| 
+    ${stat.KR.padEnd(columnWidths.kr)}| 
+    ${stat.winPercentage.padEnd(columnWidths.winPercentage)}| 
+    ${stat.avgADR.padEnd(columnWidths.adr)}| 
+    ${stat.aces.padEnd(columnWidths.aces)}| 
+    ${stat.quadKills.padEnd(columnWidths.quadKills)}| 
+    ${stat.tripleKills.padEnd(columnWidths.tripleKills)}
     \``;
   });
-
-  // // Group rows into arrays of 5 players (adjust based on size limits)
-  // const chunkedData: string[][] = [];
-  // for (let i = 0; i < rows.length; i += 5) {
-  //   chunkedData.push(rows.slice(i, i + 5));
-  // }
-
-  // // Create the table layout for each chunk
-  // const tableData: string[] = [];
-  // chunkedData.forEach((chunk, index) => {
-  //   if (index === 0) {
-  //     // Add headers for the first chunk
-  //     tableData.push(headers + chunk.join("\n"));
-  //   } else {
-  //     // No headers for subsequent chunks
-  //     tableData.push(chunk.join("\n"));
-  //   }
-  // });
-
-  // console.log(tableData);
 
   console.log(rows)
 
