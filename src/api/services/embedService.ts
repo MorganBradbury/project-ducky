@@ -557,16 +557,16 @@ async function formatPlayerStatsTable(): Promise<string[]> {
   // Define specific column widths for each field in the table
   const columnWidths = {
     player: 12,        // Player name column
-    avgKills: 11,      // Avg kills column
-    avgDeaths: 11,     // Avg Deaths column
-    hsPercentage: 6,   // HS% column
+    avgKills: 6,       // Kills column
+    avgDeaths: 6,      // Deaths column
+    hsPercentage: 5,   // HS% column
     kd: 6,             // KD column
     kr: 6,             // KR column
-    winPercentage: 6,  // Win% column
+    winPercentage: 5,  // Win% column
     adr: 6,            // ADR column
-    aces: 6,           // 5K column
-    quadKills: 6,      // 4K column
-    tripleKills: 6,    // 3K column
+    aces: 5,           // 5K column
+    quadKills: 5,      // 4K column
+    tripleKills: 5,    // 3K column
   };
 
   // Function to format a value to a specific column width
@@ -575,7 +575,7 @@ async function formatPlayerStatsTable(): Promise<string[]> {
   }
 
   // Define the headers with appropriate column widths
-  const headers = `\`Player       | Avg kills | Avg Deaths | HS%  | KD  | KR  | Win% | ADR | 5K  | 4K  | 3K  \`\n`;
+  const headers = `\`Player     | K | D | HS | KD | KR | W% | ADR | 5K | 4K | 3K \`\n`;
 
   // Map each user's stats into a formatted row
   const rows = users.map((user, index) => {
@@ -614,5 +614,6 @@ async function formatPlayerStatsTable(): Promise<string[]> {
 
   return tableData;
 }
+
 
 
