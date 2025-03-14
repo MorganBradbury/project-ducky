@@ -503,6 +503,7 @@ function formatLeaderboardTable(
 export async function updatePlayerStatsEmbed() {
 
   const leaderboardText = await formatPlayerStatsTable(); // Get the formatted leaderboard table
+  console.log(leaderboardText);
   return;
 
   const maxEmbedSize = 6000; // Discord's maximum embed size
@@ -556,44 +557,17 @@ async function formatPlayerStatsTable(): Promise<string[]> {
     users.map((user) => FaceitService.getPlayerStatsLast20Games(user.faceitId || ''))
   );
 
-  // Define specific column widths for each field in the table
-  const columnWidths = {
-    player: 12,        // Player name column
-    avgKills: 6,       // Kills column
-    avgDeaths: 6,      // Deaths column
-    hsPercentage: 5,   // HS% column
-    kd: 6,             // KD column
-    kr: 6,             // KR column
-    winPercentage: 5,  // Win% column
-    adr: 6,            // ADR column
-    aces: 5,           // 5K column
-    quadKills: 5,      // 4K column
-    tripleKills: 5,    // 3K column
-  };
-
-  // Define the headers with appropriate column widths
-  const headers = `\`Player     | K | D | HS | KD | KR | W% | ADR | 5K | 4K | 3K\`\n`;
-
-  // Map each user's stats into a formatted row
-  const rows = users.map((user, index) => {
+  return users.map((user, index) => {
     const stat = stats[index];
-    return `${user.faceitUsername.padEnd(columnWidths.player)}| 
-    ${stat.avgKills.padEnd(columnWidths.avgKills)}| 
-    ${stat.avgDeaths.padEnd(columnWidths.avgDeaths)}| 
-    ${stat.avgHs.padEnd(columnWidths.hsPercentage)}| 
-    ${stat.KD.padEnd(columnWidths.kd)}| 
-    ${stat.KR.padEnd(columnWidths.kr)}| 
-    ${stat.winPercentage.padEnd(columnWidths.winPercentage)}| 
-    ${stat.avgADR.padEnd(columnWidths.adr)}| 
-    ${stat.aces.padEnd(columnWidths.aces)}| 
-    ${stat.quadKills.padEnd(columnWidths.quadKills)}| 
-    ${stat.tripleKills.padEnd(columnWidths.tripleKills)}`;
+    return `\`${user.faceitUsername.padEnd(12)}| ${stat.avgKills.toString().padEnd(6)}| 
+            ${stat.avgDeaths.toString().padEnd(6)}| ${stat.avgHs.toString().padEnd(5)}| 
+            ${stat.KD.toString().padEnd(6)}| ${stat.KR.toString().padEnd(6)}| 
+            ${stat.winPercentage.toString().padEnd(5)}| ${stat.avgADR.toString().padEnd(6)}| 
+            ${stat.aces.toString().padEnd(5)}| ${stat.quadKills.toString().padEnd(5)}| 
+            ${stat.tripleKills.toString().padEnd(5)}\``;
   });
-
-  console.log(rows)
-
-  return rows;
 }
+
 
 
 
