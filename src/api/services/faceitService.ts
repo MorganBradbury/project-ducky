@@ -415,9 +415,9 @@ class FaceitApiClient {
     const totalGames = games.length || 1;
   
     const sumStat = (key: string) =>
-      games.reduce((sum:any, game:any) => sum + +(game.stats[key] || "0"), 0);
+      games.reduce((sum:any, match:any) => sum + +(match.stats[key] || "0"), 0);
     
-    const avgStat = (key: string) => (sumStat(key) / totalGames).toFixed(2);
+    const avgStat = (key: string) => Math.round(sumStat(key) / totalGames).toString();
   
     return {
       avgKills: avgStat("Kills"),
@@ -426,7 +426,7 @@ class FaceitApiClient {
       avgHs: avgStat("Headshots %"),
       KD: avgStat("K/D Ratio"),
       KR: avgStat("K/R Ratio"),
-      winPercentage: ((sumStat("Result") / totalGames) * 100).toFixed(2),
+      winPercentage: Math.round((sumStat("Result") / totalGames) * 100).toString(),
       avgADR: avgStat("ADR"),
       roundsPlayed: sumStat("Rounds").toString(),
       aces: sumStat("Penta Kills").toString(),
@@ -436,6 +436,7 @@ class FaceitApiClient {
       MVPs: sumStat("MVPs").toString(),
     };
   }
+  
 }
 
 export const FaceitService = new FaceitApiClient();
