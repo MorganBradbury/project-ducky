@@ -536,7 +536,7 @@ export async function updatePlayerStatsEmbed() {
           .setDisabled(page === pages - 1)
       );
 
-    const message = await sendMultiEmbedMessage(embed, '1350070898207756341', row);
+    const message = await sendMultiEmbedMessage(embed, '1350113348510814269', row);
 
     if (!message) {
       return;
