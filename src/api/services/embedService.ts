@@ -612,6 +612,8 @@ async function formatPlayerStatsTable(): Promise<string[]> {
     }
   });
 
+  console.log(tableData);
+
   return tableData;
 }
 
