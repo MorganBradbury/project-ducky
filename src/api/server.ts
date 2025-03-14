@@ -19,5 +19,5 @@ app.use("/api", apiRoutes);
 // Start the server
 app.listen(port, async () => {
   console.log(`API server is running on port ${port}`);
-  await updatePlayerStatsEmbed();
+  // await updatePlayerStatsEmbed();
 });

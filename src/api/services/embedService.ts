@@ -1,6 +1,8 @@
 // embedService.ts
 
-import { ChannelType, EmbedBuilder, Message, TextChannel } from "discord.js";
+import { ChannelType, EmbedBuilder, TextChannel, ActionRowBuilder, ButtonBuilder, ButtonStyle  } from "discord.js";
+
+
 import { config } from "../../config";
 import {
   EMBED_COLOURS,
@@ -499,46 +501,108 @@ function formatLeaderboardTable(
   return output;
 }
 
-export async function updatePlayerStatsEmbed() {
 
+export async function updatePlayerStatsEmbed() {
   const tableData = await formatPlayerStatsTable();
 
-  // Create embed
-  const embed = new EmbedBuilder()
-    .setTitle(`Player stats for last 30 games`)
-    .setColor(`#${EMBED_COLOURS.ANALYSIS}`)
-    .setTimestamp()
-    .setDescription(tableData);
+  const playersPerPage = 20;
+  const pages = Math.ceil(tableData.length / playersPerPage);
 
-  // Send the embed
-  await sendEmbedMessage(embed, '1350070898207756341');
+  let currentPage = 0;
+
+  async function sendEmbedPage(page: number) {
+    const start = page * playersPerPage;
+    const end = start + playersPerPage;
+    const pageData = tableData.slice(start, end);
+
+    const embed = new EmbedBuilder()
+      .setTitle('Player stats for last 30 games')
+      .setColor(`#${EMBED_COLOURS.ANALYSIS}`)
+      .setTimestamp()
+      .setDescription(pageData.join('\n'));
+
+    // Use ActionRowBuilder and ButtonBuilder from discord.js v14
+    const row = new ActionRowBuilder()
+      .addComponents(
+        new ButtonBuilder()
+          .setCustomId('prev')
+          .setLabel('Previous')
+          .setStyle(ButtonStyle.Primary)
+          .setDisabled(page === 0),
+        new ButtonBuilder()
+          .setCustomId('next')
+          .setLabel('Next')
+          .setStyle(ButtonStyle.Primary)
+          .setDisabled(page === pages - 1)
+      );
+
+    const message = await sendMultiEmbedMessage(embed, '1350070898207756341', row);
+
+    if (!message) {
+      return;
+    }
+
+    const collector = message.createMessageComponentCollector({ time: 60000 });
+
+    collector.on('collect', async (interaction: any) => {
+      if (interaction.user.id !== message.author.id) {
+        return interaction.reply({ content: 'You are not allowed to interact with these buttons.', ephemeral: true });
+      }
+
+      if (interaction.customId === 'next') {
+        currentPage++;
+      } else if (interaction.customId === 'prev') {
+        currentPage--;
+      }
+
+      await sendEmbedPage(currentPage);
+      await interaction.update({ embeds: [embed], components: [row.toJSON()] }); // Convert row to JSON
+    });
+  }
+
+  await sendEmbedPage(currentPage);
 }
 
-
-async function formatPlayerStatsTable(): Promise<string> {
+async function formatPlayerStatsTable(): Promise<string[]> {
   const users = await getAllUsers();
   const stats = await Promise.all(
     users.map((user) => FaceitService.getPlayerStatsLast20Games(user.faceitId || ''))
   );
 
   const columnWidths = {
-    stat: 5, // Standard stats column width (includes spacing)
-    largeStat: 7, // Larger columns (KD, ADR, KR, Rounds)
+    stat: 5,
+    largeStat: 7,
   };
 
   function formatValue(value: string, width: number): string {
     return value.padStart(Math.floor((width - value.length) / 2) + value.length).padEnd(width);
   }
 
-  let output = "`Player        | Kills | Death | Assis | HS%  | KD     | KR     | Win%  | ADR    | Rounds  | Aces  | 4K    | 3K    | 2K    | MVPs  `\n";
+  let output = "Player        | Kills | Death | Assis | HS%  | KD     | KR     | Win%  | ADR    | Rounds  | Aces  | 4K    | 3K    | 2K    | MVPs  \n";
 
   output += users
     .map((user, index) => {
       const stat = stats[index];
-      return `\`${user.faceitUsername.padEnd(12)}| ${formatValue(stat.avgKills, columnWidths.stat)}| ${formatValue(stat.avgDeaths, columnWidths.stat)}| ${formatValue(stat.avgAssists, columnWidths.stat)}| ${formatValue(stat.avgHs, columnWidths.stat)}| ${formatValue(stat.KD, columnWidths.largeStat)}| ${formatValue(stat.KR, columnWidths.largeStat)}| ${formatValue(stat.winPercentage, columnWidths.stat)}| ${formatValue(stat.avgADR, columnWidths.largeStat)}| ${formatValue(stat.roundsPlayed, columnWidths.largeStat)}| ${formatValue(stat.aces, columnWidths.stat)}| ${formatValue(stat.quadKills, columnWidths.stat)}| ${formatValue(stat.tripleKills, columnWidths.stat)}| ${formatValue(stat.doubleKills, columnWidths.stat)}| ${formatValue(stat.MVPs, columnWidths.stat)}\``;
+      return `${user.faceitUsername.padEnd(12)}| ${formatValue(stat.avgKills, columnWidths.stat)}| ${formatValue(stat.avgDeaths, columnWidths.stat)}| ${formatValue(stat.avgAssists, columnWidths.stat)}| ${formatValue(stat.avgHs, columnWidths.stat)}| ${formatValue(stat.KD, columnWidths.largeStat)}| ${formatValue(stat.KR, columnWidths.largeStat)}| ${formatValue(stat.winPercentage, columnWidths.stat)}| ${formatValue(stat.avgADR, columnWidths.largeStat)}| ${formatValue(stat.roundsPlayed, columnWidths.largeStat)}| ${formatValue(stat.aces, columnWidths.stat)}| ${formatValue(stat.quadKills, columnWidths.stat)}| ${formatValue(stat.tripleKills, columnWidths.stat)}| ${formatValue(stat.doubleKills, columnWidths.stat)}| ${formatValue(stat.MVPs, columnWidths.stat)}`;
     })
     .join("\n");
 
-  return output;
+  const pages = [];
+  const playersPerPage = 20;
+  for (let i = 0; i < output.length; i += playersPerPage) {
+    pages.push(output.slice(i, i + playersPerPage));
+  }
+
+  return pages;
 }
+
+async function sendMultiEmbedMessage(embed: EmbedBuilder, channelId: string, row: ActionRowBuilder) {
+  const channel = await client.channels.fetch(channelId);
+  if (channel instanceof TextChannel) {
+    return channel.send({ embeds: [embed], components: [row as any] }); // Convert row to JSON
+  }
+  return null;
+}
+
+
 
