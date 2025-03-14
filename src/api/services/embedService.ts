@@ -519,7 +519,7 @@ export async function updatePlayerStatsEmbed() {
   });
 
   // Send the embed
-  await sendEmbedMessage(embed, config.CHANNEL_LEADERBOARD);
+  await sendEmbedMessage(embed, '1350120783233548338');
 }
 
 
