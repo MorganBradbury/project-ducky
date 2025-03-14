@@ -1,7 +1,6 @@
 import express from "express";
 import { apiRoutes } from "./routes/routes";
 import { PrismaClient } from "@prisma/client";
-import { FaceitService } from "./services/faceitService";
 import { updatePlayerStatsEmbed } from "./services/embedService";
 
 const app = express();

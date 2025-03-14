@@ -1,8 +1,6 @@
 // embedService.ts
 
-import { ChannelType, EmbedBuilder, TextChannel, ActionRowBuilder, ButtonBuilder, ButtonStyle  } from "discord.js";
-
-
+import { ChannelType, EmbedBuilder, Message, TextChannel } from "discord.js";
 import { config } from "../../config";
 import {
   EMBED_COLOURS,
@@ -503,62 +501,27 @@ function formatLeaderboardTable(
 
 
 export async function updatePlayerStatsEmbed() {
-  const tableData = await formatPlayerStatsTable();
+  const leaderboardText = await formatPlayerStatsTable(); // Assuming this returns an array of table data
 
-  const playersPerPage = 20;
-  const pages = Math.ceil(tableData.length / playersPerPage);
+  // Create embed
+  const embed = new EmbedBuilder()
+    .setTitle(`Player stats for last 30`)
+    .setColor(`#${EMBED_COLOURS.ANALYSIS}`)
+    .setTimestamp();
 
-  let currentPage = 0;
-
-  async function sendEmbedPage(page: number) {
-    const start = page * playersPerPage;
-    const end = start + playersPerPage;
-    const pageData = tableData.slice(start, end);
-
-    const embed = new EmbedBuilder()
-      .setTitle('Player stats for last 30 games')
-      .setColor(`#${EMBED_COLOURS.ANALYSIS}`)
-      .setTimestamp()
-      .setDescription(pageData.join('\n'));
-
-    // Use ActionRowBuilder and ButtonBuilder from discord.js v14
-    const row = new ActionRowBuilder()
-      .addComponents(
-        new ButtonBuilder()
-          .setCustomId('prev')
-          .setLabel('Previous')
-          .setStyle(ButtonStyle.Primary)
-          .setDisabled(page === 0),
-        new ButtonBuilder()
-          .setCustomId('next')
-          .setLabel('Next')
-          .setStyle(ButtonStyle.Primary)
-          .setDisabled(page === pages - 1)
-      );
-
-    const message = await sendMultiEmbedMessage(embed, '1350113348510814269', row);
-
-    if (!message) {
-      return;
-    }
-
-    const collector = message.createMessageComponentCollector({ time: 60000 });
-
-    collector.on('collect', async (interaction: any) => {
-
-      if (interaction.customId === 'next') {
-        currentPage++;
-      } else if (interaction.customId === 'prev') {
-        currentPage--;
-      }
-
-      await sendEmbedPage(currentPage);
-      await interaction.update({ embeds: [embed], components: [row.toJSON()] }); // Convert row to JSON
+  // Add each part of the table data as a field in the embed
+  leaderboardText.forEach((chunk, index) => {
+    embed.addFields({
+      name: '\u200b', // First chunk will have the name, others will be empty
+      value: chunk, // Each chunk of the table will be the value of the field
+      inline: false,
     });
-  }
+  });
 
-  await sendEmbedPage(currentPage);
+  // Send the embed
+  await sendEmbedMessage(embed, config.CHANNEL_LEADERBOARD);
 }
+
 
 async function formatPlayerStatsTable(): Promise<string[]> {
   const users = await getAllUsers();
@@ -567,39 +530,40 @@ async function formatPlayerStatsTable(): Promise<string[]> {
   );
 
   const columnWidths = {
-    stat: 5,
-    largeStat: 7,
+    stat: 5, // Standard stats column width (includes spacing)
+    largeStat: 7, // Larger columns (KD, ADR, KR, Rounds)
   };
 
   function formatValue(value: string, width: number): string {
     return value.padStart(Math.floor((width - value.length) / 2) + value.length).padEnd(width);
   }
 
-  let output = "Player        | Kills | Death | Assis | HS%  | KD     | KR     | Win%  | ADR    | Rounds  | Aces  | 4K    | 3K    | 2K    | MVPs  \n";
+  const headers = "`Player        | Kills | Death | Assis | HS%  | KD     | KR     | Win%  | ADR    | Rounds  | Aces  | 4K    | 3K    | 2K    | MVPs  `\n";
 
-  output += users
-    .map((user, index) => {
-      const stat = stats[index];
-      return `${user.faceitUsername.padEnd(12)}| ${formatValue(stat.avgKills, columnWidths.stat)}| ${formatValue(stat.avgDeaths, columnWidths.stat)}| ${formatValue(stat.avgAssists, columnWidths.stat)}| ${formatValue(stat.avgHs, columnWidths.stat)}| ${formatValue(stat.KD, columnWidths.largeStat)}| ${formatValue(stat.KR, columnWidths.largeStat)}| ${formatValue(stat.winPercentage, columnWidths.stat)}| ${formatValue(stat.avgADR, columnWidths.largeStat)}| ${formatValue(stat.roundsPlayed, columnWidths.largeStat)}| ${formatValue(stat.aces, columnWidths.stat)}| ${formatValue(stat.quadKills, columnWidths.stat)}| ${formatValue(stat.tripleKills, columnWidths.stat)}| ${formatValue(stat.doubleKills, columnWidths.stat)}| ${formatValue(stat.MVPs, columnWidths.stat)}`;
-    })
-    .join("\n");
+  const rows = users.map((user, index) => {
+    const stat = stats[index];
+    return `\`${user.faceitUsername.padEnd(12)}| ${formatValue(stat.avgKills, columnWidths.stat)}| ${formatValue(stat.avgDeaths, columnWidths.stat)}| ${formatValue(stat.avgAssists, columnWidths.stat)}| ${formatValue(stat.avgHs, columnWidths.stat)}| ${formatValue(stat.KD, columnWidths.largeStat)}| ${formatValue(stat.KR, columnWidths.largeStat)}| ${formatValue(stat.winPercentage, columnWidths.stat)}| ${formatValue(stat.avgADR, columnWidths.largeStat)}| ${formatValue(stat.roundsPlayed, columnWidths.largeStat)}| ${formatValue(stat.aces, columnWidths.stat)}| ${formatValue(stat.quadKills, columnWidths.stat)}| ${formatValue(stat.tripleKills, columnWidths.stat)}| ${formatValue(stat.doubleKills, columnWidths.stat)}| ${formatValue(stat.MVPs, columnWidths.stat)}\``;
+  });
 
-  const pages = [];
-  const playersPerPage = 20;
-  for (let i = 0; i < output.length; i += playersPerPage) {
-    pages.push(output.slice(i, i + playersPerPage));
+  // Group rows into arrays of 10 players
+  const chunkedData: string[][] = [];
+  for (let i = 0; i < rows.length; i += 10) {
+    chunkedData.push(rows.slice(i, i + 10));
   }
 
-  return pages;
-}
+  // Create the table layout for each chunk
+  const tableData: string[] = [];
+  chunkedData.forEach((chunk, index) => {
+    if (index === 0) {
+      // Add headers for the first chunk
+      tableData.push(headers + chunk.join("\n"));
+    } else {
+      // No headers for subsequent chunks
+      tableData.push(chunk.join("\n"));
+    }
+  });
 
-async function sendMultiEmbedMessage(embed: EmbedBuilder, channelId: string, row: ActionRowBuilder) {
-  const channel = await client.channels.fetch(channelId);
-  if (channel instanceof TextChannel) {
-    return channel.send({ embeds: [embed], components: [row as any] }); // Convert row to JSON
-  }
-  return null;
+  return tableData;
 }
-
 
 
