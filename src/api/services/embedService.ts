@@ -594,27 +594,29 @@ async function formatPlayerStatsTable(): Promise<string[]> {
     \``;
   });
 
-  // Group rows into arrays of 5 players (adjust based on size limits)
-  const chunkedData: string[][] = [];
-  for (let i = 0; i < rows.length; i += 5) {
-    chunkedData.push(rows.slice(i, i + 5));
-  }
+  // // Group rows into arrays of 5 players (adjust based on size limits)
+  // const chunkedData: string[][] = [];
+  // for (let i = 0; i < rows.length; i += 5) {
+  //   chunkedData.push(rows.slice(i, i + 5));
+  // }
 
-  // Create the table layout for each chunk
-  const tableData: string[] = [];
-  chunkedData.forEach((chunk, index) => {
-    if (index === 0) {
-      // Add headers for the first chunk
-      tableData.push(headers + chunk.join("\n"));
-    } else {
-      // No headers for subsequent chunks
-      tableData.push(chunk.join("\n"));
-    }
-  });
+  // // Create the table layout for each chunk
+  // const tableData: string[] = [];
+  // chunkedData.forEach((chunk, index) => {
+  //   if (index === 0) {
+  //     // Add headers for the first chunk
+  //     tableData.push(headers + chunk.join("\n"));
+  //   } else {
+  //     // No headers for subsequent chunks
+  //     tableData.push(chunk.join("\n"));
+  //   }
+  // });
 
-  console.log(tableData);
+  // console.log(tableData);
 
-  return tableData;
+  console.log(rows)
+
+  return rows;
 }
 
 
