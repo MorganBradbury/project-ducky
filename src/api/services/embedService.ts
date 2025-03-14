@@ -554,20 +554,44 @@ async function formatPlayerStatsTable(): Promise<string[]> {
     users.map((user) => FaceitService.getPlayerStatsLast20Games(user.faceitId || ''))
   );
 
+  // Define specific column widths for each field in the table
   const columnWidths = {
-    stat: 5, // Standard stats column width (includes spacing)
-    largeStat: 7, // Larger columns (KD, ADR, KR, Rounds)
+    player: 12,        // Player name column
+    avgKills: 11,      // Avg kills column
+    avgDeaths: 11,     // Avg Deaths column
+    hsPercentage: 6,   // HS% column
+    kd: 6,             // KD column
+    kr: 6,             // KR column
+    winPercentage: 6,  // Win% column
+    adr: 6,            // ADR column
+    aces: 6,           // 5K column
+    quadKills: 6,      // 4K column
+    tripleKills: 6,    // 3K column
   };
 
+  // Function to format a value to a specific column width
   function formatValue(value: string, width: number): string {
     return value.padStart(Math.floor((width - value.length) / 2) + value.length).padEnd(width);
   }
 
-  const headers = "`Player        | Kills | Death | Assis | HS%  | KD     | KR     | Win%  | ADR    | Rounds  | Aces  | 4K    | 3K    | 2K    | MVPs  `\n";
+  // Define the headers with appropriate column widths
+  const headers = `\`Player       | Avg kills | Avg Deaths | HS%  | KD  | KR  | Win% | ADR | 5K  | 4K  | 3K  \`\n`;
 
+  // Map each user's stats into a formatted row
   const rows = users.map((user, index) => {
     const stat = stats[index];
-    return `\`${user.faceitUsername.padEnd(12)}| ${formatValue(stat.avgKills, columnWidths.stat)}| ${formatValue(stat.avgDeaths, columnWidths.stat)}| ${formatValue(stat.avgAssists, columnWidths.stat)}| ${formatValue(stat.avgHs, columnWidths.stat)}| ${formatValue(stat.KD, columnWidths.largeStat)}| ${formatValue(stat.KR, columnWidths.largeStat)}| ${formatValue(stat.winPercentage, columnWidths.stat)}| ${formatValue(stat.avgADR, columnWidths.largeStat)}| ${formatValue(stat.roundsPlayed, columnWidths.largeStat)}| ${formatValue(stat.aces, columnWidths.stat)}| ${formatValue(stat.quadKills, columnWidths.stat)}| ${formatValue(stat.tripleKills, columnWidths.stat)}| ${formatValue(stat.doubleKills, columnWidths.stat)}| ${formatValue(stat.MVPs, columnWidths.stat)}\``;
+    return `\`${user.faceitUsername.padEnd(columnWidths.player)} | 
+    ${formatValue(stat.avgKills, columnWidths.avgKills)} | 
+    ${formatValue(stat.avgDeaths, columnWidths.avgDeaths)} | 
+    ${formatValue(stat.avgHs, columnWidths.hsPercentage)}| 
+    ${formatValue(stat.KD, columnWidths.kd)}| 
+    ${formatValue(stat.KR, columnWidths.kr)}| 
+    ${formatValue(stat.winPercentage, columnWidths.winPercentage)}| 
+    ${formatValue(stat.avgADR, columnWidths.adr)}| 
+    ${formatValue(stat.aces, columnWidths.aces)}| 
+    ${formatValue(stat.quadKills, columnWidths.quadKills)}| 
+    ${formatValue(stat.tripleKills, columnWidths.tripleKills)}
+    \``;
   });
 
   // Group rows into arrays of 5 players (adjust based on size limits)
@@ -590,4 +614,5 @@ async function formatPlayerStatsTable(): Promise<string[]> {
 
   return tableData;
 }
+
 
