@@ -501,8 +501,9 @@ function formatLeaderboardTable(
 
 
 export async function updatePlayerStatsEmbed() {
-  return;
+
   const leaderboardText = await formatPlayerStatsTable(); // Get the formatted leaderboard table
+  return;
 
   const maxEmbedSize = 6000; // Discord's maximum embed size
   const maxFieldsPerEmbed = 25; // Maximum number of fields per embed
