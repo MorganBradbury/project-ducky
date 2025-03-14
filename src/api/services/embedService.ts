@@ -512,7 +512,7 @@ export async function updatePlayerStatsEmbed() {
   // Add each part of the table data as a field in the embed
   leaderboardText.forEach((chunk, index) => {
     embed.addFields({
-      name: '\u200b', // First chunk will have the name, others will be empty
+      name: '...', // First chunk will have the name, others will be empty
       value: chunk, // Each chunk of the table will be the value of the field
       inline: false,
     });
