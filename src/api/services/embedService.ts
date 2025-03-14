@@ -577,7 +577,7 @@ async function formatPlayerStatsTable(): Promise<string[]> {
   // Map each user's stats into a formatted row
   const rows = users.map((user, index) => {
     const stat = stats[index];
-    return `\`${user.faceitUsername.padEnd(columnWidths.player)}| 
+    return `${user.faceitUsername.padEnd(columnWidths.player)}| 
     ${stat.avgKills.padEnd(columnWidths.avgKills)}| 
     ${stat.avgDeaths.padEnd(columnWidths.avgDeaths)}| 
     ${stat.avgHs.padEnd(columnWidths.hsPercentage)}| 
@@ -587,7 +587,7 @@ async function formatPlayerStatsTable(): Promise<string[]> {
     ${stat.avgADR.padEnd(columnWidths.adr)}| 
     ${stat.aces.padEnd(columnWidths.aces)}| 
     ${stat.quadKills.padEnd(columnWidths.quadKills)}| 
-    ${stat.tripleKills.padEnd(columnWidths.tripleKills)}\``;
+    ${stat.tripleKills.padEnd(columnWidths.tripleKills)}`;
   });
 
   console.log(rows)
