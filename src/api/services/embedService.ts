@@ -499,9 +499,46 @@ function formatLeaderboardTable(
   return output;
 }
 
-export const updatePlayerStatsTable = async () => {
-  // const users = await getAllUsers();
+export async function updatePlayerStatsEmbed() {
 
+  const tableData = await formatPlayerStatsTable();
 
+  // Create embed
+  const embed = new EmbedBuilder()
+    .setTitle(`Player stats for last 30 games`)
+    .setColor(`#${EMBED_COLOURS.ANALYSIS}`)
+    .setTimestamp()
+    .setDescription(tableData);
 
+  // Send the embed
+  await sendEmbedMessage(embed, '1350070898207756341');
 }
+
+
+async function formatPlayerStatsTable(): Promise<string> {
+  const users = await getAllUsers();
+  const stats = await Promise.all(
+    users.map((user) => FaceitService.getPlayerStatsLast20Games(user.faceitId || ''))
+  );
+
+  const columnWidths = {
+    stat: 5, // Standard stats column width (includes spacing)
+    largeStat: 7, // Larger columns (KD, ADR, KR, Rounds)
+  };
+
+  function formatValue(value: string, width: number): string {
+    return value.padStart(Math.floor((width - value.length) / 2) + value.length).padEnd(width);
+  }
+
+  let output = "`Player        | Kills | Death | Assis | HS%  | KD     | KR     | Win%  | ADR    | Rounds  | Aces  | 4K    | 3K    | 2K    | MVPs  `\n";
+
+  output += users
+    .map((user, index) => {
+      const stat = stats[index];
+      return `\`${user.faceitUsername.padEnd(12)}| ${formatValue(stat.avgKills, columnWidths.stat)}| ${formatValue(stat.avgDeaths, columnWidths.stat)}| ${formatValue(stat.avgAssists, columnWidths.stat)}| ${formatValue(stat.avgHs, columnWidths.stat)}| ${formatValue(stat.KD, columnWidths.largeStat)}| ${formatValue(stat.KR, columnWidths.largeStat)}| ${formatValue(stat.winPercentage, columnWidths.stat)}| ${formatValue(stat.avgADR, columnWidths.largeStat)}| ${formatValue(stat.roundsPlayed, columnWidths.largeStat)}| ${formatValue(stat.aces, columnWidths.stat)}| ${formatValue(stat.quadKills, columnWidths.stat)}| ${formatValue(stat.tripleKills, columnWidths.stat)}| ${formatValue(stat.doubleKills, columnWidths.stat)}| ${formatValue(stat.MVPs, columnWidths.stat)}\``;
+    })
+    .join("\n");
+
+  return output;
+}
+
