@@ -20,6 +20,7 @@ import {
   createMatchAnalysisEmbed,
   matchEndNotification,
   updateLeaderboardEmbed,
+  updatePlayerStatsTable,
 } from "./embedService";
 import { runEloUpdate } from "./userService";
 import axios from "axios";
@@ -104,6 +105,7 @@ export const endMatch = async (matchId: string) => {
     }
 
     await updateLeaderboardEmbed();
+    await updatePlayerStatsTable();
   } catch (error) {
     console.log(error);
   }

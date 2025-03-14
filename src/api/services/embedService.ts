@@ -498,3 +498,10 @@ function formatLeaderboardTable(
 
   return output;
 }
+
+export const updatePlayerStatsTable = async () => {
+  // const users = await getAllUsers();
+
+
+
+}

@@ -9,6 +9,7 @@ import { Player } from "../../types/Faceit/player";
 import { Match } from "../../types/Faceit/match";
 import { activeMapPool } from "../../constants";
 import { getMatchVoiceChannelId } from "./channelService";
+import { PlayerStatsOverview } from "../../types/Faceit/PlayerStatsLast20";
 
 class FaceitApiClient {
   private client: AxiosInstance;
@@ -398,6 +399,42 @@ class FaceitApiClient {
       console.error("Error fetching map stats:", error);
       throw new Error("Failed to fetch map stats");
     }
+  }
+
+  async getPlayerStatsLast20Games(
+    playerId: string
+  ): Promise<PlayerStatsOverview> {
+    const queryUrl = `/players/${playerId}/games/cs2/stats`;
+    const response = await this.client.get(queryUrl);
+  
+    if (response.status !== 200 || !response.data) {
+      throw new Error("Failed to fetch player stats");
+    }
+  
+    const games = response.data.items;
+    const totalGames = games.length || 1;
+  
+    const sumStat = (key: string) =>
+      games.reduce((sum:any, game:any) => sum + +(game.stats[key] || "0"), 0);
+    
+    const avgStat = (key: string) => (sumStat(key) / totalGames).toFixed(2);
+  
+    return {
+      avgKills: avgStat("Kills"),
+      avgDeaths: avgStat("Deaths"),
+      avgAssists: avgStat("Assists"),
+      avgHs: avgStat("Headshots %"),
+      KD: avgStat("K/D Ratio"),
+      KR: avgStat("K/R Ratio"),
+      winPercentage: ((sumStat("Result") / totalGames) * 100).toFixed(2),
+      avgADR: avgStat("ADR"),
+      roundsPlayed: sumStat("Rounds").toString(),
+      aces: sumStat("Penta Kills").toString(),
+      quadKills: sumStat("Quadro Kills").toString(),
+      tripleKills: sumStat("Triple Kills").toString(),
+      doubleKills: sumStat("Double Kills").toString(),
+      MVPs: sumStat("MVPs").toString(),
+    };
   }
 }
 
