@@ -557,16 +557,48 @@ async function formatPlayerStatsTable(): Promise<string[]> {
     users.map((user) => FaceitService.getPlayerStatsLast20Games(user.faceitId || ''))
   );
 
-  return users.map((user, index) => {
+  // Define specific column widths for each field in the table
+  const columnWidths = {
+    player: 12,        // Player name column
+    avgKills: 6,       // Kills column
+    avgDeaths: 6,      // Deaths column
+    hsPercentage: 5,   // HS% column
+    kd: 6,             // KD column
+    kr: 6,             // KR column
+    winPercentage: 5,  // Win% column
+    adr: 6,            // ADR column
+    aces: 5,           // 5K column
+    quadKills: 5,      // 4K column
+    tripleKills: 5,    // 3K column
+  };
+
+  // Define the headers with appropriate column widths
+  const headers = `\`Player     | K | D | HS | KD | KR | W% | ADR | 5K | 4K | 3K \`\n`;
+
+  // Map each user's stats into a formatted row
+  const rows = users.map((user, index) => {
     const stat = stats[index];
-    return `\`${user.faceitUsername.padEnd(12)}| ${stat.avgKills.toString().padEnd(6)}| 
-            ${stat.avgDeaths.toString().padEnd(6)}| ${stat.avgHs.toString().padEnd(5)}| 
-            ${stat.KD.toString().padEnd(6)}| ${stat.KR.toString().padEnd(6)}| 
-            ${stat.winPercentage.toString().padEnd(5)}| ${stat.avgADR.toString().padEnd(6)}| 
-            ${stat.aces.toString().padEnd(5)}| ${stat.quadKills.toString().padEnd(5)}| 
-            ${stat.tripleKills.toString().padEnd(5)}\``;
+    return `\`${user.faceitUsername.padEnd(columnWidths.player)}| 
+    ${stat.avgKills.toString().padEnd(columnWidths.avgKills)}| 
+    ${stat.avgDeaths.toString().padEnd(columnWidths.avgDeaths)}| 
+    ${stat.avgHs.toString().padEnd(columnWidths.hsPercentage)}| 
+    ${stat.KD.toString().padEnd(columnWidths.kd)}| 
+    ${stat.KR.toString().padEnd(columnWidths.kr)}| 
+    ${stat.winPercentage.toString().padEnd(columnWidths.winPercentage)}| 
+    ${stat.avgADR.toString().padEnd(columnWidths.adr)}| 
+    ${stat.aces.toString().padEnd(columnWidths.aces)}| 
+    ${stat.quadKills.toString().padEnd(columnWidths.quadKills)}| 
+    ${stat.tripleKills.toString().padEnd(columnWidths.tripleKills)}\``;
   });
+
+  // Combine headers and rows into a single table
+  const table = [headers, ...rows].join('\n');
+
+  // Return the entire table as a single string
+  console.log(table);
+  return [table];
 }
+
 
 
 
