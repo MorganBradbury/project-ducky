@@ -501,35 +501,36 @@ function formatLeaderboardTable(
 
 
 export async function updatePlayerStatsEmbed() {
-  console.log('leaderboardText');
   const leaderboardText = await formatPlayerStatsTable(); // Get the formatted leaderboard table
-  console.log(leaderboardText);
-  return;
 
   const maxEmbedSize = 6000; // Discord's maximum embed size
   const maxFieldsPerEmbed = 25; // Maximum number of fields per embed
 
-  // Split leaderboardText into multiple parts if necessary
   let currentEmbed = new EmbedBuilder()
-    .setTitle(`Player stats for last 30`)
+    .setTitle(`Player stats for last 30 games`)
     .setColor(`#${EMBED_COLOURS.ANALYSIS}`)
     .setTimestamp();
 
   let currentFieldCount = 0;
   let currentEmbedSize = 0;
-  
-  for (const chunk of leaderboardText) {
+
+  // Split leaderboardText into chunks of 5 users per field
+  const chunks = chunkArray(leaderboardText, 5);
+
+  for (const chunk of chunks) {
+    const chunkText = chunk.join('\n');
+
     // Check if adding this chunk would exceed the embed size or field limit
-    if (currentFieldCount >= maxFieldsPerEmbed || currentEmbedSize + chunk.length > maxEmbedSize) {
+    if (currentFieldCount >= maxFieldsPerEmbed || currentEmbedSize + chunkText.length > maxEmbedSize) {
       // Send the current embed and start a new one
       await sendEmbedMessage(currentEmbed, '1350120783233548338');
-      
+
       // Reset the embed for the next part
       currentEmbed = new EmbedBuilder()
-        .setTitle(`Player stats for last 30`)
+        .setTitle(`Player stats for last 30 games`)
         .setColor(`#${EMBED_COLOURS.ANALYSIS}`)
         .setTimestamp();
-      
+
       currentFieldCount = 0;
       currentEmbedSize = 0;
     }
@@ -537,12 +538,12 @@ export async function updatePlayerStatsEmbed() {
     // Add the current chunk as a field
     currentEmbed.addFields({
       name: '\u200b', // Empty name for subsequent chunks
-      value: chunk,
+      value: chunkText,
       inline: false,
     });
-    
+
     currentFieldCount++;
-    currentEmbedSize += chunk.length;
+    currentEmbedSize += chunkText.length;
   }
 
   // Send any remaining embed content
@@ -550,6 +551,15 @@ export async function updatePlayerStatsEmbed() {
     await sendEmbedMessage(currentEmbed, '1350120783233548338');
   }
 }
+
+function chunkArray(array: string[], chunkSize: number): string[][] {
+  const result = [];
+  for (let i = 0; i < array.length; i += chunkSize) {
+    result.push(array.slice(i, i + chunkSize));
+  }
+  return result;
+}
+
 
 async function formatPlayerStatsTable(): Promise<string[]> {
   const users = await getAllUsers();
@@ -559,17 +569,17 @@ async function formatPlayerStatsTable(): Promise<string[]> {
 
   // Define specific column widths for each field in the table
   const columnWidths = {
-    player: 12,        // Player name column
-    avgKills: 6,       // Kills column
-    avgDeaths: 6,      // Deaths column
-    hsPercentage: 5,   // HS% column
-    kd: 6,             // KD column
-    kr: 6,             // KR column
-    winPercentage: 5,  // Win% column
-    adr: 6,            // ADR column
-    aces: 5,           // 5K column
-    quadKills: 5,      // 4K column
-    tripleKills: 5,    // 3K column
+    player: 11,        // Player name column
+    avgKills: 3,       // Kills column
+    avgDeaths: 3,      // Deaths column
+    hsPercentage: 4,   // HS% column
+    kd: 4,             // KD column
+    kr: 4,             // KR column
+    winPercentage: 4,  // Win% column
+    adr: 5,            // ADR column
+    aces: 4,           // 5K column
+    quadKills: 4,      // 4K column
+    tripleKills: 4,    // 3K column
   };
 
   // Define the headers with appropriate column widths
