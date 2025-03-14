@@ -572,7 +572,7 @@ async function formatPlayerStatsTable(): Promise<string[]> {
   };
 
   // Define the headers with appropriate column widths
-  const headers = `\`Player     | K | D | HS | KD | KR | W% | ADR | 5K | 4K | 3K \`\n`;
+  const headers = `\`Player     | K | D | HS | KD | KR | W% | ADR | 5K | 4K | 3K\`\n`;
 
   // Map each user's stats into a formatted row
   const rows = users.map((user, index) => {
@@ -587,14 +587,14 @@ async function formatPlayerStatsTable(): Promise<string[]> {
     ${stat.avgADR.padEnd(columnWidths.adr)}| 
     ${stat.aces.padEnd(columnWidths.aces)}| 
     ${stat.quadKills.padEnd(columnWidths.quadKills)}| 
-    ${stat.tripleKills.padEnd(columnWidths.tripleKills)}
-    \``;
+    ${stat.tripleKills.padEnd(columnWidths.tripleKills)}\``;
   });
 
   console.log(rows)
 
   return rows;
 }
+
 
 
 
