@@ -545,9 +545,6 @@ export async function updatePlayerStatsEmbed() {
     const collector = message.createMessageComponentCollector({ time: 60000 });
 
     collector.on('collect', async (interaction: any) => {
-      if (interaction.user.id !== message.author.id) {
-        return interaction.reply({ content: 'You are not allowed to interact with these buttons.', ephemeral: true });
-      }
 
       if (interaction.customId === 'next') {
         currentPage++;
