@@ -404,7 +404,7 @@ class FaceitApiClient {
   async getPlayerStatsLast20Games(
     playerId: string
   ): Promise<PlayerStatsOverview> {
-    const queryUrl = `/players/${playerId}/games/cs2/stats`;
+    const queryUrl = `/players/${playerId}/games/cs2/stats?limit=30`;
     const response = await this.client.get(queryUrl);
   
     if (response.status !== 200 || !response.data) {
