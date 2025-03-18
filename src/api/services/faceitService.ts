@@ -417,17 +417,21 @@ class FaceitApiClient {
     const totalGames = games.length || 1;
   
     const sumStat = (key: string) =>
-      games.reduce((sum:any, match:any) => sum + +(match.stats[key] || "0"), 0);
-    
-    const avgStat = (key: string) => Math.round(sumStat(key) / totalGames).toString();
+      games.reduce((sum: any, match: any) => sum + +(match.stats[key] || "0"), 0);
+
+    // Updated avgStat function to return floating point for KD and KR without rounding
+    const avgStat = (key: string, isInteger: boolean = true) => {
+      const value = sumStat(key) / totalGames;
+      return isInteger ? Math.round(value).toString() : value.toFixed(2).toString();
+    };
   
     return {
       avgKills: avgStat("Kills"),
       avgDeaths: avgStat("Deaths"),
       avgAssists: avgStat("Assists"),
       avgHs: avgStat("Headshots %"),
-      KD: avgStat("K/D Ratio"),
-      KR: avgStat("K/R Ratio"),
+      KD: avgStat("K/D Ratio", false), // Don't round KD
+      KR: avgStat("K/R Ratio", false), // Don't round KR
       winPercentage: Math.round((sumStat("Result") / totalGames) * 100).toString(),
       avgADR: avgStat("ADR")
     };
