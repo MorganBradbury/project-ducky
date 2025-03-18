@@ -97,7 +97,7 @@ export const getPlayerStats = async (
   const singleUser = allUsers.find(user => user.discordUsername === userTag);
   console.log('singleUser', singleUser)
 
-  const player = await FaceitService?.getPlayer(singleUser?.faceitId || '');
+  const player = await FaceitService?.getPlayer(singleUser?.gamePlayerId || '');
   console.log('player', player)
 
   if (!player) return null;
