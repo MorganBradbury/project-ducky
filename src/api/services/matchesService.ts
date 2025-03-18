@@ -214,31 +214,21 @@ export const deleteMapAnalysisMessages = async (voiceChannelId: string) => {
     return;
   }
 
-  // Find the text channel associated with the voice channel
-  const textChannel = guild.channels.cache.find(
-                        (ch) => ch.type === ChannelType.GuildText && ch.name.includes(voiceChannel.name)
-                      ) as TextChannel;
-
-  if (!textChannel) {
-    console.log(`No associated text channel found for voice channel: ${voiceChannel.name}`);
-    return;
-  }
-
-  console.log(`Deleting messages in text channel: ${textChannel.name}`);
+  console.log(`Deleting messages in voice channel chat: ${voiceChannel.name}`);
 
   try {
     let fetchedMessages;
     do {
-      fetchedMessages = await textChannel.messages.fetch({ limit: 100 });
+      fetchedMessages = await voiceChannel.messages.fetch({ limit: 100 });
       if (fetchedMessages.size > 0) {
-        await textChannel.bulkDelete(fetchedMessages, true);
+        await voiceChannel.bulkDelete(fetchedMessages, true);
         console.log(`Deleted ${fetchedMessages.size} messages.`);
       }
     } while (fetchedMessages.size > 0);
-    
-    console.log(`All messages deleted in ${textChannel.name}`);
+
+    console.log(`All messages deleted in voice channel chat: ${voiceChannel.name}`);
   } catch (err) {
-    console.error(`Failed to delete messages in ${textChannel.name}:`, err);
+    console.error(`Failed to delete messages in voice channel chat:`, err);
   }
 };
 
