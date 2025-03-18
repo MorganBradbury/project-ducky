@@ -49,7 +49,10 @@ export const deleteSingleUser = async (
   }
 };
 
-export const getPlayerStatsLast30 = async (req: Request, res: Response): Promise<void> => {
+export const getPlayerStatsLast30 = async (
+  req: Request,
+  res: Response
+): Promise<void> => {
   try {
     const { userTag } = req.params; // Get userTag from params, not body
 
@@ -66,8 +69,10 @@ export const getPlayerStatsLast30 = async (req: Request, res: Response): Promise
     }
 
     res.status(200).json({ playerStats });
-  } catch (error:any) {
-    console.error("Error fetching player stats:", error);
-    res.status(500).json({ message: "Something went wrong", error: error.message });
+  } catch (error: any) {
+    console.error("Error fetching player stats: ", error);
+    res
+      .status(500)
+      .json({ message: "Something went wrong", error: error.message });
   }
 };
