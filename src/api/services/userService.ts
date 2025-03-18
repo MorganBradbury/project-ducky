@@ -112,7 +112,7 @@ export const getPlayerStats = async (userTag: string): Promise<any> => {
   return resp;
 };
 
-const TARGET_CHANNEL_ID = "1309222763994808370"; // Replace with your channel ID
+const TARGET_CHANNEL_ID = "1351566785974894663"; // Replace with your channel ID
 
 export const sendRetakeJoinMessage = async (
   retakeNumber: string,
