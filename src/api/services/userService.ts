@@ -114,6 +114,8 @@ export const getPlayerStats = async (userTag: string): Promise<any> => {
 
 const TARGET_CHANNEL_ID = "1351566785974894663"; // Replace with your channel ID
 
+let lastMessageSent: string | null = null;
+
 export const sendRetakeJoinMessage = async (
   retakeNumber: string,
   requestUrl: string
@@ -128,8 +130,17 @@ export const sendRetakeJoinMessage = async (
     // Construct the message with a clickable link
     const messageContent = `Someone has joined Retake server #${retakeNumber}. [Click here to join](${requestUrl})`;
 
+    // Check if the message is the same as the last one sent
+    if (lastMessageSent === messageContent) {
+      console.log("Message already sent. Skipping...");
+      return; // Skip sending the message if it's the same
+    }
+
     // Send the message with the clickable link
     await channel.send(messageContent);
+
+    // Update the last sent message to avoid duplicates
+    lastMessageSent = messageContent;
   } catch (error) {
     console.error("Error sending retake join message:", error);
   }
