@@ -25,6 +25,6 @@ apiRoutes.get("/getplayerstats/:userTag", getPlayerStatsLast30);
 apiRoutes.get("/join/:ip/:port/:retakeNumber", async (req, res) => {
   const { ip, port, retakeNumber } = req.params;
   const steamConnectLink = `steam://connect/${ip}:${port}`;
-  await sendRetakeJoinMessage(retakeNumber);
+  await sendRetakeJoinMessage(retakeNumber, steamConnectLink);
   res.redirect(steamConnectLink);
 });
