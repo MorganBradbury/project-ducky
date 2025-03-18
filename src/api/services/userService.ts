@@ -92,12 +92,18 @@ export const getPlayerStats = async (
 ): Promise<any> => {
 
   const allUsers = await getAllUsers();
+  console.log('allUsers', allUsers)
+
   const singleUser = allUsers.find(user => user.discordUsername === userTag);
+  console.log('singleUser', singleUser)
 
   const player = await FaceitService?.getPlayer(singleUser?.faceitId || '');
+  console.log('player', player)
+
   if (!player) return null;
 
   const playerStats = await FaceitService.getPlayerStatsLast20Games(singleUser?.faceitId || '')
+  console.log('playerStats', playerStats)
 
   const resp = {
     ...player,
