@@ -116,7 +116,7 @@ const TARGET_CHANNEL_ID = "1309222763994808370"; // Replace with your channel ID
 
 export const sendRetakeJoinMessage = async (
   retakeNumber: string,
-  steamConnectLink: string
+  requestUrl: string
 ) => {
   try {
     const channel = client.channels.cache.get(TARGET_CHANNEL_ID) as TextChannel;
@@ -126,7 +126,7 @@ export const sendRetakeJoinMessage = async (
     }
 
     // Construct the message with a clickable link
-    const messageContent = `Someone has joined Retake server #${retakeNumber}. [Click here to join](${steamConnectLink})`;
+    const messageContent = `Someone has joined Retake server #${retakeNumber}. [Click here to join](${requestUrl})`;
 
     // Send the message with the clickable link
     await channel.send(messageContent);

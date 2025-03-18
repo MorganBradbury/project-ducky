@@ -25,6 +25,7 @@ apiRoutes.get("/getplayerstats/:userTag", getPlayerStatsLast30);
 apiRoutes.get("/join/:ip/:port/:retakeNumber", async (req, res) => {
   const { ip, port, retakeNumber } = req.params;
   const steamConnectLink = `steam://connect/${ip}:${port}`;
-  await sendRetakeJoinMessage(retakeNumber, steamConnectLink);
+  const requestUrl = `https://api.duck-club.xyz/api/join/${ip}/${port}/${retakeNumber}`;
+  await sendRetakeJoinMessage(retakeNumber, requestUrl);
   res.redirect(steamConnectLink);
 });
