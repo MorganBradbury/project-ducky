@@ -1,6 +1,11 @@
 import client from "../client";
 import { config } from "../../config";
-import { addUser, deleteUser, getAllUsers, updateUserElo } from "../../db/dbCommands";
+import {
+  addUser,
+  deleteUser,
+  getAllUsers,
+  updateUserElo,
+} from "../../db/dbCommands";
 import { Player } from "../../types/Faceit/player";
 import { SystemUser } from "../../types/systemUser";
 import { updateNickname } from "../../utils/nicknameUtils";
@@ -85,30 +90,23 @@ export const createVerifiedUser = async (
   };
 };
 
-
-
-export const getPlayerStats = async (
-  userTag: string,
-): Promise<any> => {
-
+export const getPlayerStats = async (userTag: string): Promise<any> => {
   const allUsers = await getAllUsers();
-  console.log('allUsers', allUsers)
 
-  const singleUser = allUsers.find(user => user.discordUsername === userTag);
-  console.log('singleUser', singleUser)
+  const singleUser = allUsers.find((user) => user.discordUsername === userTag);
 
-  const player = await FaceitService?.getPlayer(singleUser?.gamePlayerId || '');
-  console.log('player', player)
+  const player = await FaceitService?.getPlayer(singleUser?.gamePlayerId || "");
 
   if (!player) return null;
 
-  const playerStats = await FaceitService.getPlayerStatsLast20Games(singleUser?.faceitId || '')
-  console.log('playerStats', playerStats)
+  const playerStats = await FaceitService.getPlayerStatsLast20Games(
+    singleUser?.faceitId || ""
+  );
 
   const resp = {
     ...player,
-    ...playerStats
-  }
+    ...playerStats,
+  };
 
   return resp;
 };
