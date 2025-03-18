@@ -152,15 +152,6 @@ export const createMatchAnalysisEmbed = async (
     return console.error("Invalid or non-existent voice channel");
   }
 
-  // Get the voice channel's associated text chat (for newer Discord versions)
-  const textChannel = guild.channels.cache.find(
-                        (ch) => ch.type === ChannelType.GuildText && ch.name.includes(voiceChannel.name)
-                      ) as TextChannel;
-
-  if (!textChannel) {
-    return console.error("No associated text channel found for the voice channel");
-  }
-
   // Sort map data
   const sortedMapData = gameData.sort((a: any, b: any) =>
     b.totalPlayedTimes === a.totalPlayedTimes
@@ -242,9 +233,15 @@ export const createMatchAnalysisEmbed = async (
     .setTimestamp()
     .setURL(`${LINKS.MATCHROOM}/${matchId}`);
 
-  // Send the message in the voice channel's associated text chat
-  await textChannel.send({ embeds: [embed] });
+  try {
+    // Send the message directly in the voice channel's chat
+    await voiceChannel.send({ embeds: [embed] });
+    console.log(`Sent match analysis to voice channel chat: ${voiceChannel.name}`);
+  } catch (err) {
+    console.error(`Failed to send message in voice channel chat: ${err}`);
+  }
 };
+
 
 
 
