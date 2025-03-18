@@ -5,7 +5,12 @@ import {
   updateAllLiveMatchScores,
   updateLeaderboard,
 } from "../controllers/matchesController";
-import { createUser, deleteSingleUser, getPlayerStatsLast30 } from "../controllers/userController";
+import {
+  createUser,
+  deleteSingleUser,
+  getPlayerStatsLast30,
+} from "../controllers/userController";
+import { sendRetakeJoinMessage } from "../services/userService";
 
 export const apiRoutes = express.Router();
 
@@ -17,9 +22,9 @@ apiRoutes.post("/createverifieduser", createUser);
 apiRoutes.delete("/deleteuser", deleteSingleUser);
 apiRoutes.get("/getplayerstats/:userTag", getPlayerStatsLast30);
 
-apiRoutes.get("/join/:ip/:port", (req, res) => {
-  const { ip, port } = req.params;
+apiRoutes.get("/join/:ip/:port/:user/:retakeNumber", async (req, res) => {
+  const { ip, port, user, retakeNumber } = req.params;
   const steamConnectLink = `steam://connect/${ip}:${port}`;
-
+  await sendRetakeJoinMessage(user, retakeNumber);
   res.redirect(steamConnectLink);
 });

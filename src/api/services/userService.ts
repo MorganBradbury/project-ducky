@@ -12,6 +12,7 @@ import { updateNickname } from "../../utils/nicknameUtils";
 import { updateLeaderboardEmbed } from "./embedService";
 import { FaceitService } from "./faceitService";
 import { updateServerRoles } from "./rolesService";
+import { TextChannel } from "discord.js";
 
 export const runEloUpdate = async (users: SystemUser[]) => {
   try {
@@ -109,4 +110,25 @@ export const getPlayerStats = async (userTag: string): Promise<any> => {
   };
 
   return resp;
+};
+
+const TARGET_CHANNEL_ID = "1309222763994808370"; // Replace with your channel ID
+
+export const sendRetakeJoinMessage = async (
+  user: string,
+  retakeNumber: string
+) => {
+  try {
+    const channel = client.channels.cache.get(TARGET_CHANNEL_ID) as TextChannel;
+    if (!channel) {
+      console.error(`Channel with ID ${TARGET_CHANNEL_ID} not found.`);
+      return;
+    }
+
+    const messageContent = `@${user} has joined Retake server #${retakeNumber}. [Click here to join]`;
+
+    await channel.send(messageContent);
+  } catch (error) {
+    console.error("Error sending retake join message:", error);
+  }
 };
