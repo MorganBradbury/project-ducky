@@ -152,40 +152,13 @@ export const createMatchAnalysisEmbed = async (
     return console.error("Invalid or non-existent voice channel");
   }
 
-  // Extract room number from voice channel name
-  const roomMatch = voiceChannel.name.match(/#(\d+)/);
-  const roomNumber = roomMatch ? roomMatch[1] : "unknown";
+  // Get the voice channel's associated text chat (for newer Discord versions)
+  const textChannel = guild.channels.cache.find(
+                        (ch) => ch.type === ChannelType.GuildText && ch.name.includes(voiceChannel.name)
+                      ) as TextChannel;
 
-  // Define text channel name based on room number
-  const textChannelName = `📊┃map-analysis_room-${roomNumber}`;
-  const analysisCategoryId = "1346453963154784267";
-
-  // Check if text channel already exists under the fixed category
-  let textChannel = guild.channels.cache.find(
-    (ch) =>
-      ch.type === ChannelType.GuildText &&
-      ch.parentId === analysisCategoryId &&
-      ch.name === textChannelName
-  ) as TextChannel;
-
-  // Create text channel if not found
   if (!textChannel) {
-    textChannel = (await guild.channels.create({
-      name: textChannelName,
-      type: ChannelType.GuildText,
-      parent: analysisCategoryId,
-      topic: `Analysis for match ${matchId}`,
-      permissionOverwrites: [
-        {
-          id: guild.roles.everyone.id, // Deny viewing permissions for everyone
-          deny: ["ViewChannel", "SendMessages"],
-        },
-        {
-          id: "1327302146814775369", // Allow specific role to view the channel
-          allow: ["ViewChannel", "ReadMessageHistory"],
-        },
-      ],
-    })) as TextChannel;
+    return console.error("No associated text channel found for the voice channel");
   }
 
   // Sort map data
@@ -195,7 +168,7 @@ export const createMatchAnalysisEmbed = async (
       : b.totalPlayedTimes - a.totalPlayedTimes
   );
 
-  // Format player list (no splitting, no asterisks for captains)
+  // Format player list
   const formatPlayers = async (players: any[]) => {
     return (await Promise.all(
       players.map(async (player) => {
@@ -269,7 +242,8 @@ export const createMatchAnalysisEmbed = async (
     .setTimestamp()
     .setURL(`${LINKS.MATCHROOM}/${matchId}`);
 
-  sendEmbedMessage(embed, textChannel.id, matchId);
+  // Send the message in the voice channel's associated text chat
+  await textChannel.send({ embeds: [embed] });
 };
 
 

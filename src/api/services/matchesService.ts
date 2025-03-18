@@ -23,7 +23,7 @@ import {
 } from "./embedService";
 import { runEloUpdate } from "./userService";
 import axios from "axios";
-import { ChannelType, Guild } from "discord.js";
+import { ChannelType, Guild, TextChannel } from "discord.js";
 import client from "../client";
 
 
@@ -49,7 +49,7 @@ export const startMatch = async (matchId: string) => {
   if (match?.voiceChannelId) {
     const scoreStatus = await getScoreStatusText(match.mapName);
     await updateVoiceChannelStatus(match.voiceChannelId, scoreStatus);
-    await deleteMapAnalysisChannels(match.voiceChannelId);
+    await deleteMapAnalysisMessages(match.voiceChannelId);
   }
 
   await createLiveScoreCard(match);
@@ -100,7 +100,7 @@ export const endMatch = async (matchId: string) => {
 
     if (match?.voiceChannelId) {
       await updateVoiceChannelStatus(match.voiceChannelId, "");
-      await deleteMapAnalysisChannels(match.voiceChannelId)
+      await deleteMapAnalysisMessages(match.voiceChannelId)
     }
 
     await updateLeaderboardEmbed();
@@ -120,7 +120,7 @@ export const cancelMatch = async (matchId: string) => {
 
   if (match?.voiceChannelId) {
     await updateVoiceChannelStatus(match.voiceChannelId, "");
-    await deleteMapAnalysisChannels(match.voiceChannelId)
+    await deleteMapAnalysisMessages(match.voiceChannelId)
   }
 
   // Mark match as complete in the database
@@ -163,7 +163,7 @@ export const getMatchAnalysis = async (matchId: string): Promise<any> => {
     }
 
   // delete any current analysis for the channel
-  await deleteMapAnalysisChannels(voiceChannelId);
+  await deleteMapAnalysisMessages(voiceChannelId);
 
   const trackedFaceitIds = new Set(
     allTrackedUsers.map((user) => user.faceitId)
@@ -201,18 +201,7 @@ export const getMatchAnalysis = async (matchId: string): Promise<any> => {
   createMatchAnalysisEmbed(matchId, matchroomPlayers, formattedMapData, voiceChannelId);
 };
 
-
-
-
-
-// Helper function to check if a channel is older than 6 minutes
-const isOlderThanSixMinutes = (channel: any) => {
-  const sixMinutesInMs = 6 * 60 * 1000; // 6 minutes in milliseconds
-  return Date.now() - channel.createdTimestamp > sixMinutesInMs;
-};
-
-export const deleteMapAnalysisChannels = async (voiceChannelId: string) => {
-  const ANALYSIS_CATEGORY_ID = "1346453963154784267"; // Fixed category ID
+export const deleteMapAnalysisMessages = async (voiceChannelId: string) => {
   const guild = client.guilds.cache.first();
   if (!guild) {
     console.error("Guild not found");
@@ -225,34 +214,34 @@ export const deleteMapAnalysisChannels = async (voiceChannelId: string) => {
     return;
   }
 
-  // Extract room number from voice channel name
-  const roomMatch = voiceChannel.name.match(/#(\d+)/);
-  const roomNumber = roomMatch ? roomMatch[1] : null;
+  // Find the text channel associated with the voice channel
+  const textChannel = guild.channels.cache.find(
+                        (ch) => ch.type === ChannelType.GuildText && ch.name.includes(voiceChannel.name)
+                      ) as TextChannel;
 
-  if (!roomNumber) {
-    console.log(`No room number found in voice channel ${voiceChannel.name}`);
+  if (!textChannel) {
+    console.log(`No associated text channel found for voice channel: ${voiceChannel.name}`);
     return;
   }
 
-  console.log(`Looking for map analysis channels for room #${roomNumber} to delete.`);
+  console.log(`Deleting messages in text channel: ${textChannel.name}`);
 
-  // Find all matching text channels in the analysis category
-  const channelsToDelete = guild.channels.cache.filter(
-    (ch) =>
-      ch.type === ChannelType.GuildText &&
-      ch.parentId === ANALYSIS_CATEGORY_ID &&
-      (ch.name.includes(`map-analysis_room-${roomNumber}`) || isOlderThanSixMinutes(ch))
-  );
-
-  for (const channel of channelsToDelete.values()) {
-    try {
-      await channel.delete();
-      console.log(`Deleted map analysis channel: ${channel.name}`);
-    } catch (err) {
-      console.error(`Failed to delete channel ${channel.name}:`, err);
-    }
+  try {
+    let fetchedMessages;
+    do {
+      fetchedMessages = await textChannel.messages.fetch({ limit: 100 });
+      if (fetchedMessages.size > 0) {
+        await textChannel.bulkDelete(fetchedMessages, true);
+        console.log(`Deleted ${fetchedMessages.size} messages.`);
+      }
+    } while (fetchedMessages.size > 0);
+    
+    console.log(`All messages deleted in ${textChannel.name}`);
+  } catch (err) {
+    console.error(`Failed to delete messages in ${textChannel.name}:`, err);
   }
 };
+
 
 
 
