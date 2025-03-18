@@ -116,7 +116,6 @@ const TARGET_CHANNEL_ID = "1309222763994808370"; // Replace with your channel ID
 
 export const sendRetakeJoinMessage = async (
   userId: string,
-  username: string,
   retakeNumber: string
 ) => {
   try {
