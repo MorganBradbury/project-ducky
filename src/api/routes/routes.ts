@@ -22,9 +22,9 @@ apiRoutes.post("/createverifieduser", createUser);
 apiRoutes.delete("/deleteuser", deleteSingleUser);
 apiRoutes.get("/getplayerstats/:userTag", getPlayerStatsLast30);
 
-apiRoutes.get("/join/:ip/:port/:user/:retakeNumber", async (req, res) => {
-  const { ip, port, user, retakeNumber } = req.params;
+apiRoutes.get("/join/:ip/:port/:retakeNumber", async (req, res) => {
+  const { ip, port, retakeNumber } = req.params;
   const steamConnectLink = `steam://connect/${ip}:${port}`;
-  await sendRetakeJoinMessage(user, retakeNumber);
+  await sendRetakeJoinMessage(retakeNumber);
   res.redirect(steamConnectLink);
 });

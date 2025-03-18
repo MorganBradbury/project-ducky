@@ -114,10 +114,7 @@ export const getPlayerStats = async (userTag: string): Promise<any> => {
 
 const TARGET_CHANNEL_ID = "1309222763994808370"; // Replace with your channel ID
 
-export const sendRetakeJoinMessage = async (
-  userId: string,
-  retakeNumber: string
-) => {
+export const sendRetakeJoinMessage = async (retakeNumber: string) => {
   try {
     const channel = client.channels.cache.get(TARGET_CHANNEL_ID) as TextChannel;
     if (!channel) {
@@ -125,10 +122,7 @@ export const sendRetakeJoinMessage = async (
       return;
     }
 
-    // Proper user mention format: <@USER_ID>
-    const userMention = `<@${userId}>`;
-
-    const messageContent = `${userMention} has joined Retake server #${retakeNumber}. [Click here to join]`;
+    const messageContent = `Someone has has joined Retake server #${retakeNumber}. [Click here to join]`;
 
     await channel.send(messageContent);
   } catch (error) {
