@@ -7,10 +7,4 @@ export type PlayerStatsOverview = {
     KR: string;
     winPercentage: string;
     avgADR: string;
-    roundsPlayed: string;
-    aces: string;
-    quadKills: string;
-    tripleKills: string;
-    doubleKills: string;
-    MVPs: string;
 }

@@ -39,6 +39,8 @@ class FaceitApiClient {
             gamePlayerId: response.data.games.cs2.game_player_id,
             skillLevel: response.data.games.cs2.skill_level,
             id: response.data.player_id,
+            playerAvatar: response.data.avatar,
+            playerLink: response.data.faceit_url.replace('{lang}', 'en')
           };
         }
       } catch (error: any) {
@@ -427,13 +429,7 @@ class FaceitApiClient {
       KD: avgStat("K/D Ratio"),
       KR: avgStat("K/R Ratio"),
       winPercentage: Math.round((sumStat("Result") / totalGames) * 100).toString(),
-      avgADR: avgStat("ADR"),
-      roundsPlayed: sumStat("Rounds").toString(),
-      aces: sumStat("Penta Kills").toString(),
-      quadKills: sumStat("Quadro Kills").toString(),
-      tripleKills: sumStat("Triple Kills").toString(),
-      doubleKills: sumStat("Double Kills").toString(),
-      MVPs: sumStat("MVPs").toString(),
+      avgADR: avgStat("ADR")
     };
   }
   

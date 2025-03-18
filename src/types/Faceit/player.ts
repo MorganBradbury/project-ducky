@@ -4,4 +4,6 @@ export type Player = {
   faceitElo: number;
   skillLevel: number;
   id: string;
+  playerAvatar?: string;
+  playerLink?: string;
 };

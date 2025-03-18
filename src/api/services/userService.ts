@@ -1,6 +1,6 @@
 import client from "../client";
 import { config } from "../../config";
-import { addUser, deleteUser, updateUserElo } from "../../db/dbCommands";
+import { addUser, deleteUser, getAllUsers, updateUserElo } from "../../db/dbCommands";
 import { Player } from "../../types/Faceit/player";
 import { SystemUser } from "../../types/systemUser";
 import { updateNickname } from "../../utils/nicknameUtils";
@@ -83,4 +83,26 @@ export const createVerifiedUser = async (
     skillLevel: player.skillLevel.toString(),
     faceitId: player.id,
   };
+};
+
+
+
+export const getPlayerStats = async (
+  userTag: string,
+): Promise<any> => {
+
+  const allUsers = await getAllUsers();
+  const singleUser = allUsers.find(user => user.discordUsername === userTag);
+
+  const player = await FaceitService?.getPlayer(singleUser?.faceitId || '');
+  if (!player) return null;
+
+  const playerStats = await FaceitService.getPlayerStatsLast20Games(singleUser?.faceitId || '')
+
+  const resp = {
+    ...player,
+    ...playerStats
+  }
+
+  return resp;
 };
