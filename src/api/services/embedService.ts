@@ -260,7 +260,7 @@ export async function createLiveScoreCard(match: Match) {
         );
 
         // Ensure the Faceit username is exactly 32 characters long
-        const paddedUsername = player.faceitUsername.padEnd(30, " ");
+        const paddedUsername = player.faceitUsername.padEnd(32, " ");
 
         return `${skillEmoji} \` ${paddedUsername}\``;
       })
