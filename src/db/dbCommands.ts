@@ -1,6 +1,6 @@
 import { SystemUser } from "../types/systemUser";
 import { Match } from "../types/Faceit/match";
-import { prisma } from "../api/server";
+import prisma from "../prismaClient";
 
 // Add a new user
 export const addUser = async (
