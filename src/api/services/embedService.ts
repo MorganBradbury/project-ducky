@@ -260,7 +260,7 @@ export async function createLiveScoreCard(match: Match) {
         );
 
         // Ensure the Faceit username is exactly 32 characters long
-        const paddedUsername = player.faceitUsername.padEnd(28, " ");
+        const paddedUsername = player.faceitUsername.padEnd(30, " ");
 
         return `${skillEmoji} \` ${paddedUsername}\``;
       })
@@ -282,14 +282,11 @@ export async function createLiveScoreCard(match: Match) {
         ":"
       )})`
     )
-    .addFields(
-      {
-        name: `Player(s) in game...`,
-        value: homePlayers,
-        inline: true,
-      },
-      EMPTY_FIELD
-    )
+    .addFields({
+      name: `Player(s) in game...`,
+      value: homePlayers,
+      inline: true,
+    })
     .setURL(`${LINKS.MATCHROOM}/${match?.matchId}`)
     .setFooter({
       text: `FACEIT ${match.matchQueue}`,
