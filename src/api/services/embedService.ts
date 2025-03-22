@@ -161,12 +161,14 @@ export const createMatchAnalysisEmbed = async (
 
   // Format player list
   const formatPlayers = async (players: any[]) => {
-    return (await Promise.all(
-      players.map(async (player) => {
-        const emoji = await getSkillLevelEmoji(player.faceitLevel);
-        return `${emoji} ${player.nickname.replace(/[*_`~]/g, "\\$&")}`;
-      })
-    )).join("\n");
+    return (
+      await Promise.all(
+        players.map(async (player) => {
+          const emoji = await getSkillLevelEmoji(player.faceitLevel);
+          return `${emoji} ${player.nickname.replace(/[*_`~]/g, "\\$&")}`;
+        })
+      )
+    ).join("\n");
   };
 
   const homePlayers = await formatPlayers(playersData.homeFaction);
@@ -194,12 +196,14 @@ export const createMatchAnalysisEmbed = async (
     limit = maps.length
   ) => {
     const sortedMaps = maps.slice().sort(sortFn).slice(0, limit);
-    return (await Promise.all(
-      sortedMaps.map(async (map) => {
-        const emoji = await getMapEmoji(map.mapName);
-        return `${emoji} ${formattedMapName(map.mapName)}`;
-      })
-    )).join("\n");
+    return (
+      await Promise.all(
+        sortedMaps.map(async (map) => {
+          const emoji = await getMapEmoji(map.mapName);
+          return `${emoji} ${formattedMapName(map.mapName)}`;
+        })
+      )
+    ).join("\n");
   };
 
   // Construct the embed
@@ -236,17 +240,13 @@ export const createMatchAnalysisEmbed = async (
   try {
     // Send the message directly in the voice channel's chat
     await voiceChannel.send({ embeds: [embed] });
-    console.log(`Sent match analysis to voice channel chat: ${voiceChannel.name}`);
+    console.log(
+      `Sent match analysis to voice channel chat: ${voiceChannel.name}`
+    );
   } catch (err) {
     console.error(`Failed to send message in voice channel chat: ${err}`);
   }
 };
-
-
-
-
-
-
 
 export async function createLiveScoreCard(match: Match) {
   const homePlayers = (
@@ -255,11 +255,14 @@ export async function createLiveScoreCard(match: Match) {
         const playerLevel = await FaceitService.getPlayer(
           player.gamePlayerId || ""
         );
-        console.log(playerLevel);
         const skillEmoji = await getSkillLevelEmoji(
           playerLevel?.skillLevel || 1
         );
-        return `${skillEmoji} ${player.faceitUsername}`;
+
+        // Ensure the Faceit username is exactly 32 characters long
+        const paddedUsername = player.faceitUsername.padEnd(32, " ");
+
+        return `${skillEmoji} \` ${paddedUsername}\``;
       })
     )
   ).join("\n");
@@ -469,8 +472,3 @@ function formatLeaderboardTable(
 
   return output;
 }
-
-
-
-
-
