@@ -125,7 +125,7 @@ export async function matchEndNotification(match: Match) {
         })`
       )
       .addFields({
-        name: "Scoreboard (k/d/a)",
+        name: "Scoreboard",
         value: `${playerStatsTable.join("\n")}`,
       })
       .setURL(`${LINKS.MATCHROOM}/${match?.matchId}`)
