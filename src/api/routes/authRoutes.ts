@@ -9,37 +9,50 @@ const FACEIT_AUTH_URL = "https://accounts.faceit.com/oauth/authorize";
 const FACEIT_TOKEN_URL = "https://accounts.faceit.com/oauth/token";
 const FACEIT_USER_INFO_URL = "https://open.faceit.com/data/v4/players";
 
-// Temporary store for PKCE values (Use Redis or DB for production)
-const pkceStore = new Map<string, string>();
+// Temporary storage (Use Redis or a DB for production)
+const sessionStore = new Map<
+  string,
+  { discordId: string; codeVerifier: string }
+>();
 
-// Generate a secure random string (code_verifier)
-const generateCodeVerifier = (): string => {
-  return crypto.randomBytes(32).toString("base64url");
+// Function to handle user linking
+const handleUserLink = (discordId: string, faceitName: string) => {
+  console.log(`Linking Discord ID: ${discordId} with Faceit: ${faceitName}`);
+  // Call your function here (e.g., store in DB, send a message, etc.)
 };
 
-// Generate a SHA256 hash of the code_verifier (code_challenge)
-const generateCodeChallenge = (codeVerifier: string): string => {
-  return crypto.createHash("sha256").update(codeVerifier).digest("base64url");
-};
+// Function to generate a random string (code_verifier)
+const generateCodeVerifier = (): string =>
+  crypto.randomBytes(32).toString("base64url");
 
-// Redirect user to Faceit login with PKCE
+// Function to generate a SHA256 hash of code_verifier (code_challenge)
+const generateCodeChallenge = (codeVerifier: string): string =>
+  crypto.createHash("sha256").update(codeVerifier).digest("base64url");
+
+// 🔹 Step 1: Redirect user to Faceit login, storing Discord ID
 authRoutes.get("/", (req, res) => {
+  const discordId = req.query.discordId as string;
+  if (!discordId) {
+    res.status(400).json({ error: "Missing Discord ID" });
+    return;
+  }
+
   const codeVerifier = generateCodeVerifier();
   const codeChallenge = generateCodeChallenge(codeVerifier);
-
-  // Generate session ID and store code_verifier (Temporary storage)
   const sessionId = crypto.randomBytes(16).toString("hex");
-  pkceStore.set(sessionId, codeVerifier);
+
+  // Store the session data
+  sessionStore.set(sessionId, { discordId, codeVerifier });
 
   const authUrl = `${FACEIT_AUTH_URL}?client_id=${config.FACEIT_CLIENT_ID}&redirect_uri=${process.env.FACEIT_REDIRECT_URI}&response_type=code&scope=openid&code_challenge=${codeChallenge}&code_challenge_method=S256&state=${sessionId}`;
 
   res.redirect(authUrl);
 });
 
-// Handle Faceit OAuth callback
+// 🔹 Step 2: Handle Faceit OAuth callback, retrieve Discord ID & Faceit nickname
 authRoutes.get("/authorization", async (req, res) => {
   const code = req.query.code as string;
-  const sessionId = req.query.state as string; // Retrieve session ID
+  const sessionId = req.query.state as string;
 
   if (!code || !sessionId) {
     res
@@ -48,14 +61,17 @@ authRoutes.get("/authorization", async (req, res) => {
     return;
   }
 
-  const codeVerifier = pkceStore.get(sessionId);
-  if (!codeVerifier) {
-    res.status(400).json({ error: "Invalid session or expired code_verifier" });
+  // Retrieve session data
+  const sessionData = sessionStore.get(sessionId);
+  if (!sessionData) {
+    res.status(400).json({ error: "Invalid session or expired session" });
     return;
   }
 
+  const { discordId, codeVerifier } = sessionData;
+
   try {
-    // Exchange authorization code for access token with PKCE
+    // Exchange authorization code for access token using PKCE
     const tokenResponse = await axios.post(
       FACEIT_TOKEN_URL,
       new URLSearchParams({
@@ -64,7 +80,7 @@ authRoutes.get("/authorization", async (req, res) => {
         client_secret: process.env.FACEIT_CLIENT_SECRET!,
         redirect_uri: process.env.FACEIT_REDIRECT_URI!,
         code: code,
-        code_verifier: codeVerifier, // Send stored code_verifier
+        code_verifier: codeVerifier,
       }),
       { headers: { "Content-Type": "application/x-www-form-urlencoded" } }
     );
@@ -78,10 +94,13 @@ authRoutes.get("/authorization", async (req, res) => {
 
     const faceitName = userResponse.data.nickname;
 
-    // Cleanup session storage
-    pkceStore.delete(sessionId);
+    // Call your function to link the user
+    handleUserLink(discordId, faceitName);
 
-    res.json({ faceitName });
+    // Cleanup session storage
+    sessionStore.delete(sessionId);
+
+    res.json({ discordId, faceitName });
   } catch (error: any) {
     console.error(
       "Error fetching Faceit user:",
