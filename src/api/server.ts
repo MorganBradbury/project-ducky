@@ -1,6 +1,7 @@
 import express from "express";
 import { apiRoutes } from "./routes/routes";
 import prisma from "../prismaClient";
+import authRoutes from "./routes/authRoutes";
 
 const app = express();
 const port = process.env.PORT || 3000;
@@ -10,6 +11,7 @@ app.use(express.json());
 
 // Mount the API routes
 app.use("/api", apiRoutes);
+app.use("/auth", authRoutes);
 
 // Gracefully close Prisma on process termination
 process.on("SIGINT", async () => {
