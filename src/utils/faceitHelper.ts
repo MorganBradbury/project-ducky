@@ -190,7 +190,7 @@ export async function generatePlayerStatsTable(
             ? `${playerName.substring(0, 11)}..`
             : playerName.padEnd(13, " ");
 
-        const kda = `${stat.kills}/${stat.deaths}/${stat.assists}`;
+        const kda = `${stat.kills}/${stat.deaths}`;
         const paddedKDA = kda.padEnd(8, " ");
 
         const elo = `${eloChange?.operator}${eloChange?.difference
