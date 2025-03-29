@@ -19,7 +19,6 @@ import {
   updateVoiceChannelStatus,
 } from "./channelService";
 import {
-  createLiveScoreCard,
   createMatchAnalysisEmbed,
   matchEndNotification,
   updateLeaderboardEmbed,
@@ -48,17 +47,17 @@ export const startMatch = async (matchId: string) => {
 
   // If the players are in a voice channel. Create a JS Worker to update the live score in the status of the channel.
   if (match?.voiceChannelId) {
-    // const scoreStatus = await getScoreStatusText(match.mapName);
-    // await updateVoiceChannelStatus(match.voiceChannelId, scoreStatus);
+    const scoreStatus = await getScoreStatusText(match.mapName);
+    await updateVoiceChannelStatus(match.voiceChannelId, scoreStatus);
     await deleteMapAnalysisMessages(match.voiceChannelId);
   }
 
-  await createLiveScoreCard(match);
+  // await createLiveScoreCard(match);
 
-  const matchCount = await getMatchCount();
-  if (matchCount === 0) {
-    await axios.post("https://live.duck-club.xyz/api/start");
-  }
+  // const matchCount = await getMatchCount();
+  // if (matchCount === 0) {
+  //   await axios.post("https://live.duck-club.xyz/api/start");
+  // }
 
   await insertMatch(match);
 };
@@ -81,16 +80,16 @@ export const endMatch = async (matchId: string) => {
     await updateMatchProcessed(matchId);
     await markMatchComplete(matchId);
 
-    try {
-      const matchCount = await getMatchCount();
-      console.log("match count in endMatch", matchCount);
-      if (matchCount === 0) {
-        await axios.post("https://live.duck-club.xyz/api/end");
-      }
-      console.log("sent request to worker service to end", matchId);
-    } catch (error) {
-      console.log("Request failed to live game service for", matchId);
-    }
+    // try {
+    //   const matchCount = await getMatchCount();
+    //   console.log("match count in endMatch", matchCount);
+    //   if (matchCount === 0) {
+    //     await axios.post("https://live.duck-club.xyz/api/end");
+    //   }
+    //   console.log("sent request to worker service to end", matchId);
+    // } catch (error) {
+    //   console.log("Request failed to live game service for", matchId);
+    // }
 
     await matchEndNotification(match);
     await runEloUpdate(match.trackedTeam.trackedPlayers);
@@ -122,17 +121,6 @@ export const cancelMatch = async (matchId: string) => {
 
   // Mark match as complete in the database
   await markMatchComplete(matchId);
-  // Stop the worker associated with this matchId
-  try {
-    const matchCount = await getMatchCount();
-    console.log("match count in cancelMatch", matchCount);
-    if (matchCount === 0) {
-      await axios.post("https://live.duck-club.xyz/api/end");
-    }
-    console.log("sent request to worker service to end", matchId);
-  } catch (error) {
-    console.log("Request failed to live game service for", matchId);
-  }
 };
 
 export const getMatchAnalysis = async (matchId: string): Promise<any> => {
