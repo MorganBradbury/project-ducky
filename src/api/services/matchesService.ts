@@ -14,7 +14,10 @@ import {
   formatMapData,
   getScoreStatusText,
 } from "../../utils/faceitHelper";
-import { getMatchVoiceChannelId, updateVoiceChannelStatus } from "./channelService";
+import {
+  getMatchVoiceChannelId,
+  updateVoiceChannelStatus,
+} from "./channelService";
 import {
   createLiveScoreCard,
   createMatchAnalysisEmbed,
@@ -25,8 +28,6 @@ import { runEloUpdate } from "./userService";
 import axios from "axios";
 import { ChannelType, Guild, TextChannel } from "discord.js";
 import client from "../client";
-
-
 
 export const startMatch = async (matchId: string) => {
   console.log("Processing startMatch()", matchId);
@@ -47,8 +48,8 @@ export const startMatch = async (matchId: string) => {
 
   // If the players are in a voice channel. Create a JS Worker to update the live score in the status of the channel.
   if (match?.voiceChannelId) {
-    const scoreStatus = await getScoreStatusText(match.mapName);
-    await updateVoiceChannelStatus(match.voiceChannelId, scoreStatus);
+    // const scoreStatus = await getScoreStatusText(match.mapName);
+    // await updateVoiceChannelStatus(match.voiceChannelId, scoreStatus);
     await deleteMapAnalysisMessages(match.voiceChannelId);
   }
 
@@ -56,9 +57,7 @@ export const startMatch = async (matchId: string) => {
 
   const matchCount = await getMatchCount();
   if (matchCount === 0) {
-    await axios.post(
-      "https://live.duck-club.xyz/api/start"
-    );
+    await axios.post("https://live.duck-club.xyz/api/start");
   }
 
   await insertMatch(match);
@@ -86,9 +85,7 @@ export const endMatch = async (matchId: string) => {
       const matchCount = await getMatchCount();
       console.log("match count in endMatch", matchCount);
       if (matchCount === 0) {
-        await axios.post(
-          "https://live.duck-club.xyz/api/end"
-        );
+        await axios.post("https://live.duck-club.xyz/api/end");
       }
       console.log("sent request to worker service to end", matchId);
     } catch (error) {
@@ -100,7 +97,7 @@ export const endMatch = async (matchId: string) => {
 
     if (match?.voiceChannelId) {
       await updateVoiceChannelStatus(match.voiceChannelId, "");
-      await deleteMapAnalysisMessages(match.voiceChannelId)
+      await deleteMapAnalysisMessages(match.voiceChannelId);
     }
 
     await updateLeaderboardEmbed();
@@ -120,7 +117,7 @@ export const cancelMatch = async (matchId: string) => {
 
   if (match?.voiceChannelId) {
     await updateVoiceChannelStatus(match.voiceChannelId, "");
-    await deleteMapAnalysisMessages(match.voiceChannelId)
+    await deleteMapAnalysisMessages(match.voiceChannelId);
   }
 
   // Mark match as complete in the database
@@ -130,9 +127,7 @@ export const cancelMatch = async (matchId: string) => {
     const matchCount = await getMatchCount();
     console.log("match count in cancelMatch", matchCount);
     if (matchCount === 0) {
-      await axios.post(
-        "https://live.duck-club.xyz/api/end"
-      );
+      await axios.post("https://live.duck-club.xyz/api/end");
     }
     console.log("sent request to worker service to end", matchId);
   } catch (error) {
@@ -150,17 +145,19 @@ export const getMatchAnalysis = async (matchId: string): Promise<any> => {
 
   const allTrackedUsers = await getAllUsers();
 
-  const trackedUsersInGame = allTrackedUsers.filter(user =>
-    matchroomPlayers.homeFaction.some(player => player.playerId === user.faceitId)
+  const trackedUsersInGame = allTrackedUsers.filter((user) =>
+    matchroomPlayers.homeFaction.some(
+      (player) => player.playerId === user.faceitId
+    )
   );
 
   const voiceChannelId =
     (await getMatchVoiceChannelId(trackedUsersInGame)) || undefined;
 
-    if(!voiceChannelId){
-      console.log("Users are not in voice channel.", matchId);
-      return;
-    }
+  if (!voiceChannelId) {
+    console.log("Users are not in voice channel.", matchId);
+    return;
+  }
 
   // delete any current analysis for the channel
   await deleteMapAnalysisMessages(voiceChannelId);
@@ -198,7 +195,12 @@ export const getMatchAnalysis = async (matchId: string): Promise<any> => {
     matchroomPlayers.enemyFaction.length
   );
 
-  createMatchAnalysisEmbed(matchId, matchroomPlayers, formattedMapData, voiceChannelId);
+  createMatchAnalysisEmbed(
+    matchId,
+    matchroomPlayers,
+    formattedMapData,
+    voiceChannelId
+  );
 };
 
 export const deleteMapAnalysisMessages = async (voiceChannelId: string) => {
@@ -226,12 +228,10 @@ export const deleteMapAnalysisMessages = async (voiceChannelId: string) => {
       }
     } while (fetchedMessages.size > 0);
 
-    console.log(`All messages deleted in voice channel chat: ${voiceChannel.name}`);
+    console.log(
+      `All messages deleted in voice channel chat: ${voiceChannel.name}`
+    );
   } catch (err) {
     console.error(`Failed to delete messages in voice channel chat:`, err);
   }
 };
-
-
-
-
