@@ -124,10 +124,7 @@ export async function matchEndNotification(match: Match) {
           finalScore.join(":") || "N/A"
         })`
       )
-      .addFields({
-        name: "Scoreboard",
-        value: `${playerStatsTable.join("\n")}`,
-      })
+      .setDescription(playerStatsTable.join("\n"))
       .setURL(`${LINKS.MATCHROOM}/${match?.matchId}`)
       .setFooter({ text: `${match.matchQueue}` })
       .setTimestamp();
@@ -282,11 +279,7 @@ export async function createLiveScoreCard(match: Match) {
         ":"
       )})`
     )
-    .addFields({
-      name: `Player(s) in game...`,
-      value: homePlayers,
-      inline: true,
-    })
+    .setDescription(homePlayers)
     .setURL(`${LINKS.MATCHROOM}/${match?.matchId}`)
     .setFooter({
       text: `FACEIT ${match.matchQueue}`,
