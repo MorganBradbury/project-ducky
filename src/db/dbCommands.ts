@@ -75,9 +75,7 @@ export const insertMatch = async (match: Match): Promise<void> => {
     });
     console.log(`Match ${match.matchId} inserted successfully.`);
     // Publish just the matchId to Redis queue
-    await redisService.publishJSON("match-events", {
-      matchId: match.matchId,
-    });
+    await redisService.publish("MATCH_INSERTED", match.matchId);
 
     console.log(`Match ${match.matchId} published to Redis.`);
   } catch (error) {
