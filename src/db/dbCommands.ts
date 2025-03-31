@@ -1,9 +1,9 @@
 import { SystemUser } from "../types/systemUser";
 import { Match } from "../types/Faceit/match";
 import prisma from "../prismaClient";
+import RedisService from "../api/services/redisService";
 import Redis from "ioredis";
 import { config } from "../config";
-import { sendMessage } from "../api/services/redisService";
 
 // Add a new user
 export const addUser = async (
@@ -76,9 +76,14 @@ export const insertMatch = async (match: Match): Promise<void> => {
 
     console.log(`Match ${match.matchId} inserted successfully.`);
 
-    // Publish just the matchId to Redis queue
-    await sendMessage("matches_queue", `${match.matchId}`);
-    console.log(`Match ${match.matchId} published to Redis.`);
+    // Store match details in Redis
+    await RedisService.addMatch(match.matchId, {
+      players: JSON.stringify(
+        match.trackedTeam.trackedPlayers.map((player) => player.faceitUsername)
+      ),
+      faction: match.trackedTeam.faction.toString(),
+      voiceId: match.voiceChannelId || "",
+    });
   } catch (error) {
     console.error(`Error inserting match ${match.matchId}:`, error);
   }
