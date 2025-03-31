@@ -3,8 +3,8 @@ import { Match } from "../types/Faceit/match";
 import prisma from "../prismaClient";
 import Redis from "ioredis";
 import { config } from "../config";
+import { redisService } from "../api/server";
 
-const redis = new Redis(config.REDIS_MATCH_MESSAGING_QUEUE);
 // Add a new user
 export const addUser = async (
   discordUsername: string,
@@ -74,7 +74,12 @@ export const insertMatch = async (match: Match): Promise<void> => {
       },
     });
     console.log(`Match ${match.matchId} inserted successfully.`);
-    await redis.publish("MATCHES:NEW", JSON.stringify(match.matchId));
+    // Publish just the matchId to Redis queue
+    await redisService.publishJSON("match-events", {
+      matchId: match.matchId,
+    });
+
+    console.log(`Match ${match.matchId} published to Redis.`);
   } catch (error) {
     console.error(`Error inserting match ${match.matchId}:`, error);
   }
