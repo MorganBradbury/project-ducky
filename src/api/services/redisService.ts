@@ -31,7 +31,7 @@ class RedisService {
   // Store match as a Redis hash
   public async addMatch(matchId: string, matchData: Record<string, string>) {
     try {
-      await this.client.hSet(`match:${matchId}`, matchData);
+      await this.client.hSet(`${matchId}`, matchData);
       console.log(`Match ${matchId} added to Redis.`);
 
       // Publish an event to notify workers
