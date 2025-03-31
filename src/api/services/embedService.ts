@@ -126,7 +126,7 @@ export async function matchEndNotification(match: Match) {
       )
       .setDescription(playerStatsTable.join("\n"))
       .setURL(`${LINKS.MATCHROOM}/${match?.matchId}`)
-      .setFooter({ text: `${match.matchQueue}` })
+      .setFooter({ text: mapWin ? "✅ WIN" : "❌ LOSS" })
       .setTimestamp();
 
     await sendEmbedMessage(embed, config.CHANNEL_MATCH_RESULTS, match.matchId);
