@@ -1,7 +1,10 @@
 import { SystemUser } from "../types/systemUser";
 import { Match } from "../types/Faceit/match";
 import prisma from "../prismaClient";
+import Redis from "ioredis";
+import { config } from "../config";
 
+const redis = new Redis(config.REDIS_MATCH_MESSAGING_QUEUE);
 // Add a new user
 export const addUser = async (
   discordUsername: string,
@@ -71,6 +74,7 @@ export const insertMatch = async (match: Match): Promise<void> => {
       },
     });
     console.log(`Match ${match.matchId} inserted successfully.`);
+    await redis.publish("MATCHES:NEW", JSON.stringify(match.matchId));
   } catch (error) {
     console.error(`Error inserting match ${match.matchId}:`, error);
   }

@@ -22,4 +22,6 @@ export const config = {
   CHANNEL_UPDATES: process.env.CHANNEL_UPDATES || "",
 
   BOT_ID_PATCHBOT: process.env.BOT_ID_PATCHBOT || "",
+
+  REDIS_MATCH_MESSAGING_QUEUE: process.env.REDIS_MATCH_MESSAGING_QUEUE || "",
 };
