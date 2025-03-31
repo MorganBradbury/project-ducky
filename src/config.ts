@@ -23,5 +23,5 @@ export const config = {
 
   BOT_ID_PATCHBOT: process.env.BOT_ID_PATCHBOT || "",
 
-  REDIS_MATCH_MESSAGING_QUEUE: process.env.REDIS_URL || "",
+  REDIS_MATCH_MESSAGING_QUEUE: process.env.REDIS_PUBLIC_URL || "",
 };
