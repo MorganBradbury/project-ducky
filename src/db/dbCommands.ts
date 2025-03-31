@@ -3,7 +3,7 @@ import { Match } from "../types/Faceit/match";
 import prisma from "../prismaClient";
 import Redis from "ioredis";
 import { config } from "../config";
-import { redisService } from "../api/server";
+import { sendMessage } from "../api/services/redisService";
 
 // Add a new user
 export const addUser = async (
@@ -73,10 +73,11 @@ export const insertMatch = async (match: Match): Promise<void> => {
         matchQueue: match.matchQueue.toUpperCase(),
       },
     });
-    console.log(`Match ${match.matchId} inserted successfully.`);
-    // Publish just the matchId to Redis queue
-    await redisService.publish("MATCH_INSERTED", match.matchId);
 
+    console.log(`Match ${match.matchId} inserted successfully.`);
+
+    // Publish just the matchId to Redis queue
+    await sendMessage("matches_queue", `${match.matchId}`);
     console.log(`Match ${match.matchId} published to Redis.`);
   } catch (error) {
     console.error(`Error inserting match ${match.matchId}:`, error);
