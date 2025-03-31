@@ -4,6 +4,7 @@ import prisma from "../prismaClient";
 import RedisService from "../api/services/redisService";
 import Redis from "ioredis";
 import { config } from "../config";
+import redisService from "../api/services/redisService";
 
 // Add a new user
 export const addUser = async (
@@ -94,6 +95,7 @@ export const markMatchComplete = async (matchId: string): Promise<void> => {
   await prisma.matches.delete({
     where: { matchId },
   });
+  redisService.endMatch(matchId); // Notify Redis about match end
 };
 
 // Check if match exists

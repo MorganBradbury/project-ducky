@@ -41,6 +41,16 @@ class RedisService {
       console.error("Error adding match to Redis:", error);
     }
   }
+
+  public async endMatch(matchId: string) {
+    try {
+      // Publish an event to notify workers
+      await this.client.publish("match_end", matchId);
+      console.log(`Published event: match_end for ${matchId}`);
+    } catch (error) {
+      console.error("Error ending match in Redis:", error);
+    }
+  }
 }
 
 // Export the singleton instance
