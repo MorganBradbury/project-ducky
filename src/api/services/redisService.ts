@@ -44,6 +44,8 @@ class RedisService {
 
   public async endMatch(matchId: string) {
     try {
+      await this.client.del(`match:${matchId}`); // Delete the hash record in Redis using the matchId
+      console.log(`Match ${matchId} deleted from Redis.`);
       // Publish an event to notify workers
       await this.client.publish("match_end", matchId);
       console.log(`Published event: match_end for ${matchId}`);
