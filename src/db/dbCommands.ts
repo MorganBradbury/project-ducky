@@ -184,6 +184,7 @@ export const updatePlayerEloAndPosition = async (
     data: {
       startOfMonthElo,
       startOfMonthPosition,
+      previousElo: parseInt(startOfMonthElo, 10) || 0, // Convert string to number
     },
   });
   return result !== null;
