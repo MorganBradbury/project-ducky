@@ -1,23 +1,41 @@
-// src/services/redis.service.ts
 import { createClient, RedisClientType } from "redis";
 
 export class RedisService {
-  private client: RedisClientType;
-  private isConnected: boolean = false;
+  private publishClient: RedisClientType;
+  private subscribeClient: RedisClientType;
+  private isPublishConnected: boolean = false;
+  private isSubscribeConnected: boolean = false;
 
   constructor(redisUrl: string) {
-    this.client = createClient({
+    // Create separate clients for publishing and subscribing
+    this.publishClient = createClient({
       url: redisUrl,
     });
 
-    this.client.on("error", (err: any) => {
-      console.error("Redis Client Error:", err);
-      this.isConnected = false;
+    this.subscribeClient = createClient({
+      url: redisUrl,
     });
 
-    this.client.on("connect", () => {
-      console.log("Successfully connected to Redis");
-      this.isConnected = true;
+    // Set up event handlers for publish client
+    this.publishClient.on("error", (err) => {
+      console.error("Redis Publish Client Error:", err);
+      this.isPublishConnected = false;
+    });
+
+    this.publishClient.on("connect", () => {
+      console.log("Successfully connected to Redis (publish client)");
+      this.isPublishConnected = true;
+    });
+
+    // Set up event handlers for subscribe client
+    this.subscribeClient.on("error", (err) => {
+      console.error("Redis Subscribe Client Error:", err);
+      this.isSubscribeConnected = false;
+    });
+
+    this.subscribeClient.on("connect", () => {
+      console.log("Successfully connected to Redis (subscribe client)");
+      this.isSubscribeConnected = true;
     });
   }
 
@@ -25,8 +43,11 @@ export class RedisService {
    * Connect to Redis server
    */
   async connect(): Promise<void> {
-    if (!this.isConnected) {
-      await this.client.connect();
+    if (!this.isPublishConnected) {
+      await this.publishClient.connect();
+    }
+    if (!this.isSubscribeConnected) {
+      await this.subscribeClient.connect();
     }
   }
 
@@ -34,17 +55,14 @@ export class RedisService {
    * Disconnect from Redis server
    */
   async disconnect(): Promise<void> {
-    if (this.isConnected) {
-      await this.client.quit();
-      this.isConnected = false;
+    if (this.isPublishConnected) {
+      await this.publishClient.quit();
+      this.isPublishConnected = false;
     }
-  }
-
-  /**
-   * Check if Redis client is connected
-   */
-  isClientConnected(): boolean {
-    return this.isConnected;
+    if (this.isSubscribeConnected) {
+      await this.subscribeClient.quit();
+      this.isSubscribeConnected = false;
+    }
   }
 
   /**
@@ -54,10 +72,10 @@ export class RedisService {
    * @returns Number of clients that received the message
    */
   async publish(channel: string, message: string): Promise<number> {
-    if (!this.isConnected) {
-      await this.connect();
+    if (!this.isPublishConnected) {
+      await this.publishClient.connect();
     }
-    const result = await this.client.publish(channel, message);
+    const result = await this.publishClient.publish(channel, message);
     return result;
   }
 
@@ -80,11 +98,11 @@ export class RedisService {
     channel: string,
     callback: (message: string) => void
   ): Promise<void> {
-    if (!this.isConnected) {
-      await this.connect();
+    if (!this.isSubscribeConnected) {
+      await this.subscribeClient.connect();
     }
 
-    await this.client.subscribe(channel, (message: string) => {
+    await this.subscribeClient.subscribe(channel, (message) => {
       callback(message);
     });
 
@@ -98,14 +116,14 @@ export class RedisService {
    * @param ttl - Time to live in seconds (optional)
    */
   async set(key: string, value: string, ttl?: number): Promise<void> {
-    if (!this.isConnected) {
-      await this.connect();
+    if (!this.isPublishConnected) {
+      await this.publishClient.connect();
     }
 
     if (ttl) {
-      await this.client.set(key, value, { EX: ttl });
+      await this.publishClient.set(key, value, { EX: ttl });
     } else {
-      await this.client.set(key, value);
+      await this.publishClient.set(key, value);
     }
   }
 
@@ -115,10 +133,10 @@ export class RedisService {
    * @returns The stored value or null if not found
    */
   async get(key: string): Promise<string | null> {
-    if (!this.isConnected) {
-      await this.connect();
+    if (!this.isPublishConnected) {
+      await this.publishClient.connect();
     }
 
-    return await this.client.get(key);
+    return await this.publishClient.get(key);
   }
 }
