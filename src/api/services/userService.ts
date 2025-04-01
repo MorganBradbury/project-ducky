@@ -49,15 +49,14 @@ export const runEloUpdate = async (users: SystemUser[]) => {
 
           if (!member) return; // Skip if member not found
 
-          const gamesPlayedThisMonthTotal = gamesPlayedThisMonth
-            ? gamesPlayedThisMonth + 1
-            : 0;
+          const gamesPlayedThisMonthTotal = (gamesPlayedThisMonth ?? 0) + 1;
+
           await Promise.all([
             updateNickname(member, player),
             updateUserElo(user.userId, player.faceitElo),
             updateTotalGamesPlayedThisMonth(
               user.userId,
-              (gamesPlayedThisMonth && gamesPlayedThisMonth + 1) || 0
+              gamesPlayedThisMonthTotal
             ),
             updateServerRoles(member, player),
           ]);
