@@ -96,11 +96,7 @@ export const updateLeaderboard = async (
   for (let i = 0; i < validPlayerData.length; i++) {
     const { userId, faceitElo } = validPlayerData[i];
     const startOfMonthPosition = i + 1; // Position based on sorted order
-    await updatePlayerEloAndPosition(
-      userId,
-      String(faceitElo),
-      startOfMonthPosition
-    );
+    await updatePlayerEloAndPosition(userId, String(faceitElo));
   }
 
   updateLeaderboardEmbed();

@@ -187,14 +187,13 @@ export const isMatchProcessed = async (matchId: string): Promise<boolean> => {
 // Update player's Elo and start position
 export const updatePlayerEloAndPosition = async (
   userId: number,
-  startOfMonthElo: string,
-  startOfMonthPosition: number
+  startOfMonthElo: string
 ): Promise<boolean> => {
   const result = await prisma.users.update({
     where: { userId },
     data: {
       startOfMonthElo,
-      startOfMonthPosition,
+      gamesPlayedThisMonth: 0,
       previousElo: parseInt(startOfMonthElo, 10) || 0, // Convert string to number
     },
   });

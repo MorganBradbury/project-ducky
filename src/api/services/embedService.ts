@@ -126,7 +126,7 @@ export async function matchEndNotification(match: Match) {
       )
       .setDescription(playerStatsTable.join("\n"))
       .setURL(`${LINKS.MATCHROOM}/${match?.matchId}`)
-      .setFooter({ text: mapWin ? "✅ WIN" : "❌ LOSS" })
+      .setFooter({ text: `${match.matchQueue}` })
       .setTimestamp();
 
     await sendEmbedMessage(embed, config.CHANNEL_MATCH_RESULTS, match.matchId);
@@ -293,7 +293,7 @@ function formatLeaderboardTable(
   showHeaders: boolean
 ): string {
   const columnWidths = {
-    player: 15, // Player column width
+    player: 14, // Player column width
     elo: 4, // Elo column width
     change: 6,
     position: 4,
@@ -314,7 +314,7 @@ function formatLeaderboardTable(
   let output = "";
 
   if (showHeaders) {
-    output += "`Player          | Elo  | Diff  | Pos `" + "\n";
+    output += "`Player         | Elo  | Diff  | Pos `" + "\n";
   }
 
   output += users
@@ -330,23 +330,14 @@ function formatLeaderboardTable(
           ? `- ${Number(user.startOfMonthElo) - user.previousElo}`
           : `+ ${user.previousElo - Number(user.startOfMonthElo)}`;
 
-      const currentIndex = index + 1;
-      const startingPosition = user.startOfMonthPosition || 1;
-      const formattedPositionChange =
-        user.startOfMonthPosition === 0
-          ? "-"
-          : user.startOfMonthPosition === currentIndex
-          ? "" // No change in position
-          : startingPosition > currentIndex
-          ? `+${startingPosition - currentIndex}`
-          : `-${currentIndex - startingPosition}`;
-
       return `\`${formatPlayerName(
         startIndex + index,
         user.faceitUsername
       )} | ${formattedElo} | ${changeThisMonth.padEnd(
         columnWidths.change
-      )}| ${formattedPositionChange.padEnd(columnWidths.position)}\``;
+      )}| ${String(user.gamesPlayedThisMonth || "0").padEnd(
+        columnWidths.position
+      )}\``;
     })
     .join("\n");
 
