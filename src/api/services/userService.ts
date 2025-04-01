@@ -57,7 +57,7 @@ export const runEloUpdate = async (users: SystemUser[]) => {
             updateUserElo(user.userId, player.faceitElo),
             updateTotalGamesPlayedThisMonth(
               user.userId,
-              gamesPlayedThisMonthTotal
+              (gamesPlayedThisMonth && gamesPlayedThisMonth + 1) || 0
             ),
             updateServerRoles(member, player),
           ]);
