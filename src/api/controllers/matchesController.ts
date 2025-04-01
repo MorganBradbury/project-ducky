@@ -9,7 +9,6 @@ import { FaceitService } from "../services/faceitService";
 import { getAllUsers, updatePlayerEloAndPosition } from "../../db/dbCommands";
 import { AcceptedEventTypes } from "../../constants";
 import { updateLeaderboardEmbed } from "../services/embedService";
-import { processEmbedsToThreads } from "../services/threadService";
 
 // Main controller function to handle the webhook for match events
 export const handleMatchesHook = async (
@@ -64,15 +63,6 @@ export const handleMatchesHook = async (
       eventId: req?.body?.event,
     });
   }
-};
-
-export const archiveMatches = async (
-  req: Request,
-  res: Response
-): Promise<void> => {
-  await processEmbedsToThreads();
-
-  res.status(200).json({ message: "Threads archived" });
 };
 
 export const updateLeaderboard = async (
