@@ -4,6 +4,7 @@ import {
   addUser,
   deleteUser,
   getAllUsers,
+  updateTotalGamesPlayedThisMonth,
   updateUserElo,
 } from "../../db/dbCommands";
 import { Player } from "../../types/Faceit/player";
@@ -25,7 +26,12 @@ export const runEloUpdate = async (users: SystemUser[]) => {
 
     await Promise.all(
       users.map(async (user) => {
-        const { discordUsername, previousElo, gamePlayerId } = user;
+        const {
+          discordUsername,
+          previousElo,
+          gamePlayerId,
+          gamesPlayedThisMonth,
+        } = user;
 
         try {
           const player: Player | null = await FaceitService.getPlayer(
@@ -42,9 +48,16 @@ export const runEloUpdate = async (users: SystemUser[]) => {
 
           if (!member) return; // Skip if member not found
 
+          const gamesPlayedThisMonthTotal = gamesPlayedThisMonth
+            ? gamesPlayedThisMonth + 1
+            : 0;
           await Promise.all([
             updateNickname(member, player),
             updateUserElo(user.userId, player.faceitElo),
+            updateTotalGamesPlayedThisMonth(
+              user.userId,
+              gamesPlayedThisMonthTotal
+            ),
             updateServerRoles(member, player),
           ]);
         } catch (error) {

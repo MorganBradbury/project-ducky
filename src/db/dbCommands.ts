@@ -47,6 +47,17 @@ export const updateUserElo = async (
   return result !== null;
 };
 
+export const updateTotalGamesPlayedThisMonth = async (
+  userId: number,
+  gamesPlayedThisMonthTotal: number
+): Promise<boolean> => {
+  const result = await prisma.users.update({
+    where: { userId },
+    data: { gamesPlayedThisMonth: gamesPlayedThisMonthTotal },
+  });
+  return result !== null;
+};
+
 // Retrieve all users
 export const getAllUsers = async (): Promise<SystemUser[]> => {
   return await prisma.users.findMany();

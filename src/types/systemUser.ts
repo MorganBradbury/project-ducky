@@ -4,7 +4,8 @@ export interface SystemUser {
   faceitUsername: string;
   previousElo: number;
   gamePlayerId: string;
-  faceitId: string | null;  // Change here to allow null
+  faceitId: string | null; // Change here to allow null
   startOfMonthElo: string | null;
   startOfMonthPosition: number | null;
+  gamesPlayedThisMonth: number | null;
 }

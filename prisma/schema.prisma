@@ -17,7 +17,7 @@ model matches {
   voiceChannelName    String?  @db.VarChar(255)
   liveScoresChannelId String?  @db.VarChar(255)
   processed           Boolean? @default(false)
-  matchQueue          String?   @db.VarChar(255)
+  matchQueue          String?  @db.Text
 }
 
 model users {
@@ -29,4 +29,5 @@ model users {
   faceitId             String? @db.Text
   startOfMonthElo      String? @db.Text
   startOfMonthPosition Int?
+  gamesPlayedThisMonth Int?    @default(0)
 }

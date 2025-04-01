@@ -1,7 +1,6 @@
 import {
   checkMatchExists,
   getAllUsers,
-  getMatchCount,
   getMatchDataFromDb,
   insertMatch,
   isMatchProcessed,
@@ -24,8 +23,7 @@ import {
   updateLeaderboardEmbed,
 } from "./embedService";
 import { runEloUpdate } from "./userService";
-import axios from "axios";
-import { ChannelType, Guild, TextChannel } from "discord.js";
+import { ChannelType } from "discord.js";
 import client from "../client";
 
 export const startMatch = async (matchId: string) => {
