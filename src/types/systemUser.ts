@@ -7,5 +7,5 @@ export interface SystemUser {
   faceitId: string | null; // Change here to allow null
   startOfMonthElo: string | null;
   startOfMonthPosition: number | null;
-  gamesPlayedThisMonth: number | null;
+  gamesPlayedThisMonth?: number | null;
 }
