@@ -27,8 +27,6 @@ export const updateServerRoles = async (
       return;
     }
 
-
-
     // Remove all "Level" roles except the correct one
     const levelRoles = member.roles.cache.filter(
       (role: Role) => role.name.includes("Level") && role.id !== targetRole.id
@@ -47,52 +45,5 @@ export const updateServerRoles = async (
     );
   } catch (error) {
     console.error("Error updating server roles:", error);
-  }
-};
-
-export const updateLinkedRole = async (
-  member: GuildMember,
-  removeRoleId: string, // Role to remove
-  addRoleId: string // Role to add
-) => {
-  try {
-    if (!member) {
-      console.error("Member data is missing.");
-      return;
-    }
-
-    // Get the guild
-    const guild = await client.guilds.fetch(config.DISCORD_GUILD_ID);
-    if (!guild) {
-      console.error("Guild not found.");
-      return;
-    }
-
-    // Fetch the roles by their IDs
-    const removeRole = await guild.roles.fetch(removeRoleId);
-    const addRole = await guild.roles.fetch(addRoleId);
-
-    if (!removeRole || !addRole) {
-      console.error("One or both roles not found.");
-      return;
-    }
-
-    // Remove the role if the member has it
-    if (member.roles.cache.has(removeRole.id)) {
-      await member.roles.remove(removeRole);
-      console.log(
-        `Removed role ${removeRole.name} from member ${member.user.tag}.`
-      );
-    }
-
-    // Add the new role
-    if (!member.roles.cache.has(addRole.id)) {
-      await member.roles.add(addRole);
-      console.log(
-        `Assigned role ${addRole.name} to member ${member.user.tag}.`
-      );
-    }
-  } catch (error) {
-    console.error("Error updating roles:", error);
   }
 };

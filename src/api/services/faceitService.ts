@@ -40,7 +40,7 @@ class FaceitApiClient {
             skillLevel: response.data.games.cs2.skill_level,
             id: response.data.player_id,
             playerAvatar: response.data.avatar,
-            playerLink: response.data.faceit_url.replace('{lang}', 'en')
+            playerLink: response.data.faceit_url.replace("{lang}", "en"),
           };
         }
       } catch (error: any) {
@@ -321,50 +321,6 @@ class FaceitApiClient {
     return null; // Fallback if retries are exhausted
   }
 
-  async getMatchFactionLeader(matchId: string): Promise<string | null> {
-    const maxRetries = 30; // Retry for up to 1 minute (20 attempts, 3 seconds apart)
-    const retryDelay = 2000; // 3 seconds
-
-    for (let attempt = 1; attempt <= maxRetries; attempt++) {
-      try {
-        const queryUrl = `/matches/${matchId}`;
-        const response = await this.client.get(queryUrl);
-
-        if (
-          response.status !== 200 ||
-          !response.data ||
-          response.data.best_of !== 1
-        ) {
-          console.log("Could not find match by ID", matchId);
-          return null;
-        }
-
-        const trackedTeamFaction = await getTeamFaction(response.data.teams);
-        const correctFaction =
-          trackedTeamFaction.faction === "faction1" ? "faction2" : "faction1";
-        const factionLeader = response.data.teams[correctFaction].leader;
-        return factionLeader || null;
-      } catch (error) {
-        console.error(
-          `Attempt ${attempt}: Error fetching match details for ${matchId}:`,
-          error
-        );
-
-        // Stop retrying if max retries reached
-        if (attempt === maxRetries) {
-          console.error(`Max retries reached for matchId: ${matchId}`);
-          return null;
-        }
-
-        // Wait before the next retry
-        await new Promise((resolve) => setTimeout(resolve, retryDelay));
-      }
-    }
-
-    // If the loop somehow exits without returning, return null
-    return null;
-  }
-
   async getMapStatsByPlayer(
     playerId: string
   ): Promise<PlayerMapsData[] | null> {
@@ -408,23 +364,28 @@ class FaceitApiClient {
   ): Promise<PlayerStatsOverview> {
     const queryUrl = `/players/${playerId}/games/cs2/stats?limit=30`;
     const response = await this.client.get(queryUrl);
-  
+
     if (response.status !== 200 || !response.data) {
       throw new Error("Failed to fetch player stats");
     }
-  
+
     const games = response.data.items;
     const totalGames = games.length || 1;
-  
+
     const sumStat = (key: string) =>
-      games.reduce((sum: any, match: any) => sum + +(match.stats[key] || "0"), 0);
+      games.reduce(
+        (sum: any, match: any) => sum + +(match.stats[key] || "0"),
+        0
+      );
 
     // Updated avgStat function to return floating point for KD and KR without rounding
     const avgStat = (key: string, isInteger: boolean = true) => {
       const value = sumStat(key) / totalGames;
-      return isInteger ? Math.round(value).toString() : value.toFixed(2).toString();
+      return isInteger
+        ? Math.round(value).toString()
+        : value.toFixed(2).toString();
     };
-  
+
     return {
       avgKills: avgStat("Kills"),
       avgDeaths: avgStat("Deaths"),
@@ -432,11 +393,12 @@ class FaceitApiClient {
       avgHs: avgStat("Headshots %"),
       KD: avgStat("K/D Ratio", false), // Don't round KD
       KR: avgStat("K/R Ratio", false), // Don't round KR
-      winPercentage: Math.round((sumStat("Result") / totalGames) * 100).toString(),
-      avgADR: avgStat("ADR")
+      winPercentage: Math.round(
+        (sumStat("Result") / totalGames) * 100
+      ).toString(),
+      avgADR: avgStat("ADR"),
     };
   }
-  
 }
 
 export const FaceitService = new FaceitApiClient();

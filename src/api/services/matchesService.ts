@@ -52,13 +52,6 @@ export const startMatch = async (matchId: string) => {
     await deleteMapAnalysisMessages(match.voiceChannelId);
   }
 
-  // await createLiveScoreCard(match);
-
-  // const matchCount = await getMatchCount();
-  // if (matchCount === 0) {
-  //   await axios.post("https://live.duck-club.xyz/api/start");
-  // }
-
   await insertMatch(match);
 };
 
@@ -79,18 +72,6 @@ export const endMatch = async (matchId: string) => {
 
     await updateMatchProcessed(matchId);
     await markMatchComplete(matchId);
-
-    // try {
-    //   const matchCount = await getMatchCount();
-    //   console.log("match count in endMatch", matchCount);
-    //   if (matchCount === 0) {
-    //     await axios.post("https://live.duck-club.xyz/api/end");
-    //   }
-    //   console.log("sent request to worker service to end", matchId);
-    // } catch (error) {
-    //   console.log("Request failed to live game service for", matchId);
-    // }
-
     await matchEndNotification(match);
     await runEloUpdate(match.trackedTeam.trackedPlayers);
 

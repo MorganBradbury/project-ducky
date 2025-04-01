@@ -1,11 +1,9 @@
 import { SystemUser } from "../types/systemUser";
-import { checkMatchExists, getAllUsers } from "../db/dbCommands";
+import { getAllUsers } from "../db/dbCommands";
 import { FaceitService } from "../api/services/faceitService";
-import { EmbedBuilder, Message, TextChannel } from "discord.js";
-import client from "../api/client";
+import { Message, TextChannel } from "discord.js";
 import { Match } from "../types/Faceit/match";
 import { getMapEmoji, getSkillLevelEmoji } from "../constants";
-import { config } from "../config";
 
 export const getTrackedPlayers = async (teams: any): Promise<SystemUser[]> => {
   const allTrackedUsers = await getAllUsers();
