@@ -33,6 +33,7 @@ export const runEloUpdate = async (users: SystemUser[]) => {
           gamesPlayedThisMonth,
         } = user;
 
+        console.log("gamesPlayedThisMonth", user);
         try {
           const player: Player | null = await FaceitService.getPlayer(
             gamePlayerId
