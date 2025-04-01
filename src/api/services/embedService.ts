@@ -296,7 +296,7 @@ function formatLeaderboardTable(
     player: 14, // Player column width
     elo: 4, // Elo column width
     change: 6,
-    position: 4,
+    position: 5,
   };
 
   // Function to format player names
@@ -314,7 +314,7 @@ function formatLeaderboardTable(
   let output = "";
 
   if (showHeaders) {
-    output += "`Player         | Elo  | Diff  | Pos `" + "\n";
+    output += "`Player         | Elo  | Diff  | Total`" + "\n";
   }
 
   output += users
