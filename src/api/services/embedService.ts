@@ -314,7 +314,7 @@ function formatLeaderboardTable(
   let output = "";
 
   if (showHeaders) {
-    output += "`Player         | Elo  | Diff  |Total`" + "\n";
+    output += "`Player         | Elo  | Diff  |Total `" + "\n";
   }
 
   output += users
