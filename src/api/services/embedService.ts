@@ -335,7 +335,7 @@ function formatLeaderboardTable(
       const startingPosition = user.startOfMonthPosition || 1;
       const formattedPositionChange =
         user.startOfMonthPosition === 0
-          ? "-"
+          ? "🆕"
           : user.startOfMonthPosition === currentIndex
           ? " 💤" // No change in position
           : startingPosition > currentIndex
