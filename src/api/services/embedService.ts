@@ -315,7 +315,7 @@ function formatLeaderboardTable(
   let output = "";
 
   if (showHeaders) {
-    output += "`Player        |Elo |Diff |Totl |Pos`" + "\n";
+    output += "`Player        |Elo |Diff |Games|Pos`" + "\n";
   }
 
   output += users
@@ -348,7 +348,7 @@ function formatLeaderboardTable(
       )}|${formattedElo}|${changeThisMonth.padEnd(
         columnWidths.change
       )}|${String(user.gamesPlayedThisMonth || "0").padEnd(
-        columnWidths.position
+        columnWidths.total
       )} |${formattedPositionChange.padEnd(columnWidths.position)}\``;
     })
     .join("\n");
