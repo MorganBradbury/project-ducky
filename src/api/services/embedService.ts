@@ -296,7 +296,7 @@ function formatLeaderboardTable(
     player: 14, // Player column width
     elo: 4, // Elo column width
     change: 4,
-    total: 5,
+    total: 4,
     position: 3,
   };
 
@@ -347,7 +347,7 @@ function formatLeaderboardTable(
         user.faceitUsername
       )}|${formattedElo}| ${changeThisMonth.padEnd(
         columnWidths.change
-      )} |${String(user.gamesPlayedThisMonth || "0").padEnd(
+      )} | ${String(user.gamesPlayedThisMonth || "0").padEnd(
         columnWidths.total
       )}|${formattedPositionChange.padEnd(columnWidths.position)}\``;
     })
