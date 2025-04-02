@@ -295,7 +295,7 @@ function formatLeaderboardTable(
   const columnWidths = {
     player: 14, // Player column width
     elo: 4, // Elo column width
-    change: 5,
+    change: 6,
     total: 5,
     position: 3,
   };
@@ -315,7 +315,7 @@ function formatLeaderboardTable(
   let output = "";
 
   if (showHeaders) {
-    output += "`Player        |Elo |Diff |Games|Pos`" + "\n";
+    output += "`Player        |Elo |Elo+/-|Games|Pos`" + "\n";
   }
 
   output += users
@@ -328,8 +328,8 @@ function formatLeaderboardTable(
         Number(user.startOfMonthElo) === user.previousElo
           ? "" // Leave empty when no change
           : Number(user.startOfMonthElo) > user.previousElo
-          ? `- ${Number(user.startOfMonthElo) - user.previousElo}`
-          : `+ ${user.previousElo - Number(user.startOfMonthElo)}`;
+          ? `-${Number(user.startOfMonthElo) - user.previousElo}`
+          : `+${user.previousElo - Number(user.startOfMonthElo)}`;
 
       const currentIndex = index + 1;
       const startingPosition = user.startOfMonthPosition || 1;
@@ -339,8 +339,8 @@ function formatLeaderboardTable(
           : user.startOfMonthPosition === currentIndex
           ? "" // No change in position
           : startingPosition > currentIndex
-          ? `+${startingPosition - currentIndex}`
-          : `-${currentIndex - startingPosition}`;
+          ? `🔼${startingPosition - currentIndex}`
+          : `🔻${currentIndex - startingPosition}`;
 
       return `\`${formatPlayerName(
         startIndex + index,
@@ -349,7 +349,7 @@ function formatLeaderboardTable(
         columnWidths.change
       )}|${String(user.gamesPlayedThisMonth || "0").padEnd(
         columnWidths.total
-      )} |${formattedPositionChange.padEnd(columnWidths.position)}\``;
+      )}|${formattedPositionChange.padEnd(columnWidths.position)}\``;
     })
     .join("\n");
 
