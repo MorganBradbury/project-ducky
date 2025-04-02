@@ -315,7 +315,7 @@ function formatLeaderboardTable(
   let output = "";
 
   if (showHeaders) {
-    output += "`Player        |Elo |Elo+/-|Games|Pos`" + "\n";
+    output += "`Player        |Elo |Elo+/-|Games|🔺/🔻`" + "\n";
   }
 
   output += users
