@@ -347,9 +347,9 @@ function formatLeaderboardTable(
         user.faceitUsername
       )}|${formattedElo}|${changeThisMonth.padEnd(
         columnWidths.change
-      )}|${formattedPositionChange.padEnd(columnWidths.position)} |${String(
-        user.gamesPlayedThisMonth || "0"
-      ).padEnd(columnWidths.position)}\``;
+      )}|${String(user.gamesPlayedThisMonth || "0").padEnd(
+        columnWidths.position
+      )} |${formattedPositionChange.padEnd(columnWidths.position)}\``;
     })
     .join("\n");
 
