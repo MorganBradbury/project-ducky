@@ -345,7 +345,7 @@ function formatLeaderboardTable(
       return `\`${formatPlayerName(
         startIndex + index,
         user.faceitUsername
-      )} |${formattedElo} |${changeThisMonth.padEnd(
+      )} |${formattedElo}|${changeThisMonth.padEnd(
         columnWidths.change
       )}|${formattedPositionChange.padEnd(columnWidths.position)} |${String(
         user.gamesPlayedThisMonth || "0"
