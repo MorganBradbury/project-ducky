@@ -337,7 +337,7 @@ function formatLeaderboardTable(
         user.startOfMonthPosition === 0
           ? "-"
           : user.startOfMonthPosition === currentIndex
-          ? "" // No change in position
+          ? "💤" // No change in position
           : startingPosition > currentIndex
           ? `🔺${startingPosition - currentIndex}`
           : `🔻${currentIndex - startingPosition}`;
