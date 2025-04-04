@@ -1,6 +1,6 @@
 import { Request, Response } from "express";
 import { createVerifiedUser } from "../services/userService";
-import { deleteUser } from "../../db/dbCommands";
+import { deleteUser, getAllUsers } from "../../db/dbCommands";
 import { getPlayerStats } from "../services/userService";
 
 export const createUser = async (
@@ -74,5 +74,52 @@ export const getPlayerStatsLast30 = async (
     res
       .status(500)
       .json({ message: "Something went wrong", error: error.message });
+  }
+};
+
+export const transferUsers = async (
+  req: Request,
+  res: Response
+): Promise<void> => {
+  try {
+    const users = await getAllUsers();
+    const BATCH_SIZE = 5;
+
+    for (let i = 0; i < users.length; i += BATCH_SIZE) {
+      const batch = users.slice(i, i + BATCH_SIZE);
+
+      const promises = batch.map((user) => {
+        const newUserObject = {
+          discordUsername: user.discordUsername,
+          faceitUsername: user.faceitUsername,
+          currentElo: user.previousElo,
+          gamePlayerId: user.gamePlayerId,
+          faceitId: user.faceitId,
+          monthlyPosition: user.startOfMonthPosition,
+          monthlyGamesTotal: user.gamesPlayedThisMonth,
+          monthlyStartingElo: Number(user.startOfMonthElo),
+        };
+
+        return fetch(
+          "https://duckyusersservice-production.up.railway.app/users",
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify(newUserObject),
+          }
+        );
+      });
+
+      // Wait for the current batch to complete before continuing
+      await Promise.all(promises);
+    }
+
+    res.status(201).json({ message: "Users transferred in batches of 5" });
+  } catch (error) {
+    res
+      .status(500)
+      .json({ message: "Something went wrong transferring users", error });
   }
 };
